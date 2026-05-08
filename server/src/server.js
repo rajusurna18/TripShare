@@ -1,17 +1,13 @@
-import mongoose from "mongoose";
+import http from "http";
 import app from "./app.js";
+import { initSocket } from "./sockets/index.js";
 
 const PORT = 5000;
 
-mongoose
-  .connect("mongodb://127.0.0.1:27017/TripShare")
-  .then(() => {
-    console.log("MongoDB Connected");
+const server = http.createServer(app);
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+initSocket(server);
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
