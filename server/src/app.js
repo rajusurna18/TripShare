@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "./modules/auth/auth.routes.js";
 import { protect } from "./middleware/auth.middleware.js";
 import tripRoutes from "./modules/trip/trip.routes.js";
+import matchRoutes from "./modules/match/match.routes.js";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/trips", tripRoutes);
+app.use("/api/match", matchRoutes);
 
 app.get("/api/protected", protect, (req, res) => {
   res.json({
