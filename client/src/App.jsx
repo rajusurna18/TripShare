@@ -7,6 +7,8 @@ import Matches from "./pages/Matches";
 import Chat from "./pages/Chat";
 import AI from "./pages/AI";
 import Trips from "./pages/Trips";
+import Dashboard from "./pages/Dashboard";
+import CreateTrip from "./pages/CreateTrip";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -14,9 +16,11 @@ import ForgotPassword from "./pages/ForgotPassword";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
+
 function App() {
 
   return (
+
     <>
 
       <Navbar />
@@ -25,17 +29,45 @@ function App() {
 
         <Route path="/" element={<Home />} />
 
-        <Route path="/matches" element={<Matches />} />
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
 
-        <Route path="/chat" element={<Chat />} />
+        <Route
+          path="/matches"
+          element={<Matches />}
+        />
 
-        <Route path="/ai" element={<AI />} />
+        <Route
+          path="/chat"
+          element={<Chat />}
+        />
 
-        <Route path="/trips" element={<Trips />} />
+        <Route
+          path="/ai"
+          element={<AI />}
+        />
 
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/trips"
+          element={<Trips />}
+        />
 
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/create-trip"
+          element={<CreateTrip />}
+        />
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
         <Route
           path="/forgot-password"
@@ -50,6 +82,7 @@ function App() {
       </Routes>
 
     </>
+
   );
 }
 

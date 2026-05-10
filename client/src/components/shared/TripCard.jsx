@@ -1,31 +1,56 @@
 function TripCard({ trip }) {
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-5 border hover:scale-105 transition duration-300">
 
-      <h2 className="text-2xl font-bold mb-2">
-        {trip.title}
-      </h2>
+    <div className="trip-card">
 
-      <p className="text-gray-600">
-        📍 {trip.destination}
-      </p>
+      <div className="trip-card-top">
 
-      <p className="text-gray-600">
-        💰 ₹{trip.budget}
-      </p>
+        <h3>
+          {trip.title}
+        </h3>
 
-      <p className="text-gray-600">
-        📅 {new Date(trip.date).toDateString()}
-      </p>
+        <span className="trip-badge">
+          Active
+        </span>
 
-      <button className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+      </div>
 
-        Join Trip
+      <div className="trip-details">
 
-      </button>
+        <p>
+          📍 Destination:
+          <span>
+            {trip.destination}
+          </span>
+        </p>
+
+        <p>
+          💰 Budget:
+          <span>
+            ₹{trip.budget}
+          </span>
+        </p>
+
+        <p>
+          📅 Date:
+          <span>
+            {new Date(trip.date).toDateString()}
+          </span>
+        </p>
+
+      </div>
+
+      <div className="trip-buttons">
+
+        <button className="btn btn-custom">
+          Join Trip
+        </button>
+
+      </div>
 
     </div>
+
   );
 }
 

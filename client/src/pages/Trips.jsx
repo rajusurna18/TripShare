@@ -4,7 +4,7 @@ import { getTrips } from "../services/trip.api";
 
 import TripCard from "../components/shared/TripCard";
 
-import Navbar from "../components/shared/Navbar";
+import { Link } from "react-router-dom";
 
 function Trips() {
 
@@ -14,9 +14,18 @@ function Trips() {
 
     const fetchTrips = async () => {
 
-      const res = await getTrips();
+      try {
 
-      setTrips(res.data);
+        const res = await getTrips();
+
+        setTrips(res.data);
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
+
     };
 
     fetchTrips();
@@ -24,32 +33,82 @@ function Trips() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100">
 
-      <Navbar />
+    <div className="dashboard-page">
 
-      <div className="p-10">
+      <div className="container py-5">
 
-        <h1 className="text-4xl font-bold mb-8">
-          Explore Trips 🌍
-        </h1>
+        <div className="dashboard-header">
 
-        <div className="grid md:grid-cols-3 gap-6">
+          <h1>
+            Welcome To TripShare 🌍
+          </h1>
 
-          {
-            trips.map((trip) => (
-              <TripCard
-                key={trip._id}
-                trip={trip}
-              />
-            ))
-          }
+          <p>
+            Plan smarter. Travel better. Share memories.
+          </p>
+
+        </div>
+
+        <div className="dashboard-grid">
+
+          <Link to="/ai" className="dashboard-box">
+            <h3>🤖 AI Planner</h3>
+            <p>
+              Ask AI for trip suggestions,
+              budgets, and destinations.
+            </p>
+          </Link>
+
+          <Link to="/matches" className="dashboard-box">
+            <h3>🧭 Smart Matches</h3>
+            <p>
+              Find travelers with similar
+              interests and travel goals.
+            </p>
+          </Link>
+
+          <Link to="/chat" className="dashboard-box">
+            <h3>💬 Travel Chat</h3>
+            <p>
+              Connect and discuss plans
+              with your travel buddies.
+            </p>
+          </Link>
+
+        </div>
+
+        <div className="mt-5">
+
+          <h2 className="section-title">
+            Explore Trips ✈️
+          </h2>
+
+          <div className="row g-4">
+
+            {
+              trips.map((trip) => (
+
+                <div
+                  className="col-md-4"
+                  key={trip._id}
+                >
+
+                  <TripCard trip={trip} />
+
+                </div>
+
+              ))
+            }
+
+          </div>
 
         </div>
 
       </div>
 
     </div>
+
   );
 }
 

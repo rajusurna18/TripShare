@@ -8,7 +8,6 @@ function Chat() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
-  // TEMP trip id
   const tripId = "YOUR_TRIP_ID";
 
   useEffect(() => {
@@ -18,10 +17,13 @@ function Chat() {
     socket.on("receive_message", (data) => {
 
       setMessages((prev) => [...prev, data]);
+
     });
 
     return () => {
+
       socket.off("receive_message");
+
     };
 
   }, []);
@@ -30,55 +32,67 @@ function Chat() {
 
     if (!message.trim()) return;
 
-    const data = {
+    socket.emit("send_message", {
       tripId,
       text: message,
-    };
-
-    socket.emit("send_message", data);
+    });
 
     setMessage("");
+
   };
 
   return (
-    <div style={{ padding: "20px" }}>
 
-      <h1>Trip Chat 💬</h1>
+    <div className="dashboard-page">
 
-      <div
-        style={{
-          border: "1px solid gray",
-          height: "300px",
-          overflowY: "scroll",
-          padding: "10px",
-          marginBottom: "10px"
-        }}
-      >
+      <div className="container py-5">
 
-        {
-          messages.map((msg, index) => (
-            <p key={index}>
-              {msg.text}
-            </p>
-          ))
-        }
+        <h1 className="section-title">
+          Travel Chat 💬
+        </h1>
+
+        <div className="chat-box">
+
+          {
+            messages.map((msg, index) => (
+
+              <div
+                key={index}
+                className="message"
+              >
+                {msg.text}
+              </div>
+
+            ))
+          }
+
+        </div>
+
+        <div className="d-flex gap-3 mt-4">
+
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Type your message..."
+            value={message}
+            onChange={(e) =>
+              setMessage(e.target.value)
+            }
+          />
+
+          <button
+            className="btn btn-custom"
+            onClick={sendMessage}
+          >
+            Send
+          </button>
+
+        </div>
 
       </div>
 
-      <input
-        type="text"
-        placeholder="Type message..."
-        value={message}
-        onChange={(e) =>
-          setMessage(e.target.value)
-        }
-      />
-
-      <button onClick={sendMessage}>
-        Send
-      </button>
-
     </div>
+
   );
 }
 

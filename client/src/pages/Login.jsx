@@ -45,7 +45,7 @@ function Login() {
 
       alert("Login successful 🚀");
 
-      navigate("/trips");
+      navigate("/dashboard");
 
     } catch (err) {
 

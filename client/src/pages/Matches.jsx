@@ -5,13 +5,12 @@ function Matches() {
 
   const [matches, setMatches] = useState([]);
 
-  // TEMP trip id
-  // later this will come dynamically
   const tripId = "69fc8561761a0df82dc9e096";
 
   useEffect(() => {
 
     const fetchMatches = async () => {
+
       try {
 
         const res = await getMatches(tripId);
@@ -19,8 +18,11 @@ function Matches() {
         setMatches(res.data);
 
       } catch (err) {
+
         console.log(err);
+
       }
+
     };
 
     fetchMatches();
@@ -28,49 +30,57 @@ function Matches() {
   }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
 
-      <h1>Smart Trip Matches 🌍</h1>
+    <div className="dashboard-page">
 
-      {
-        matches.length === 0 ? (
-          <p>No matches found</p>
-        ) : (
-          matches.map((item) => (
+      <div className="container py-5">
 
-            <div
-              key={item.trip._id}
-              style={{
-                border: "1px solid gray",
-                padding: "15px",
-                marginBottom: "15px",
-                borderRadius: "10px"
-              }}
-            >
+        <h1 className="section-title">
+          Smart Travel Matches 🌍
+        </h1>
 
-              <h2>{item.trip.title}</h2>
+        <div className="row g-4">
 
-              <p>
-                Destination:
-                {item.trip.destination}
-              </p>
+          {
+            matches.map((item) => (
 
-              <p>
-                Budget:
-                ₹{item.trip.budget}
-              </p>
+              <div
+                className="col-md-4"
+                key={item.trip._id}
+              >
 
-              <p>
-                Match Score:
-                {item.score}%
-              </p>
+                <div className="special-card">
 
-            </div>
-          ))
-        )
-      }
+                  <h4 className="text-warning">
+                    {item.trip.title}
+                  </h4>
+
+                  <p>
+                    📍 {item.trip.destination}
+                  </p>
+
+                  <p>
+                    💰 ₹{item.trip.budget}
+                  </p>
+
+                  <p>
+                    🔥 Match Score:
+                    {item.score}%
+                  </p>
+
+                </div>
+
+              </div>
+
+            ))
+          }
+
+        </div>
+
+      </div>
 
     </div>
+
   );
 }
 
