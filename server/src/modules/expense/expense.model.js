@@ -1,50 +1,38 @@
 import mongoose from "mongoose";
 
-const tripSchema = new mongoose.Schema(
+const expenseSchema = new mongoose.Schema(
   {
+    trip: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Trip",
+    },
+
     title: {
       type: String,
       required: true,
     },
 
-    destination: {
-      type: String,
-      required: true,
-    },
-
-    budget: {
+    amount: {
       type: Number,
       required: true,
     },
 
-    image: {
-      type: String,
-    },
-
-    date: {
-      type: Date,
-      required: true,
-    },
-
-    description: String,
-
-    createdBy: {
+    paidBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
 
-    members: [
+    splitAmong: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
   },
-
   { timestamps: true }
 );
 
 export default mongoose.model(
-  "Trip",
-  tripSchema
+  "Expense",
+  expenseSchema
 );

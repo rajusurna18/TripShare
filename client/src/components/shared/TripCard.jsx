@@ -6,6 +6,12 @@ function TripCard({ trip }) {
 
       <div className="trip-card-top">
 
+        <img
+  src={trip.image}
+  alt={trip.title}
+  className="trip-image"
+/>
+
         <h3>
           {trip.title}
         </h3>

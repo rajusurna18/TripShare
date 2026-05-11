@@ -1,18 +1,22 @@
-import http from "http";
-import app from "./app.js";
-import { initSocket } from "./sockets/index.js";
+import express from "express";
 import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+import expenseRoutes from "./modules/expense/expense.routes.js";
 
 dotenv.config();
 
-console.log(process.env.OPENAI_API_KEY);
+const app = express();
 
-const PORT = 5000;
+app.use(express.json());
 
-const server = http.createServer(app);
+connectDB();
 
-initSocket(server);
+app.use("/api/expenses", expenseRoutes);
 
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.get("/", (req, res) => {
+  res.send("API Running");
+});
+
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
 });

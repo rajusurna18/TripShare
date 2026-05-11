@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import API from "../services/api";
+
 function CreateTrip() {
 
   const [tripData, setTripData] = useState({
@@ -9,9 +11,15 @@ function CreateTrip() {
     budget: "",
     date: "",
     travelers: "",
+    category: "",
+    transport: "",
+    visibility: "",
     description: "",
 
   });
+
+  const [image, setImage] =
+    useState(null);
 
   const handleChange = (e) => {
 
@@ -19,19 +27,78 @@ function CreateTrip() {
 
       ...tripData,
 
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.value,
 
     });
 
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    console.log(tripData);
+    try {
 
-    alert("Trip Created Successfully ✈️");
+      const formData =
+        new FormData();
+
+      Object.keys(tripData)
+        .forEach((key) => {
+
+          formData.append(
+            key,
+            tripData[key]
+          );
+
+        });
+
+      if (image) {
+
+        formData.append(
+          "image",
+          image
+        );
+
+      }
+
+      const token =
+        localStorage.getItem(
+          "token"
+        );
+
+      await API.post(
+
+        "/api/trips",
+
+        formData,
+
+        {
+          headers: {
+
+            Authorization: token,
+
+            "Content-Type":
+              "multipart/form-data",
+
+          },
+        }
+
+      );
+
+      alert(
+        "Trip Created Successfully ✈️"
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert(
+        "Trip Creation Failed"
+      );
+
+    }
 
   };
 
@@ -43,9 +110,20 @@ function CreateTrip() {
 
         <div className="create-trip-box">
 
-          <h1 className="section-title">
-            Create Your Dream Trip ✈️
-          </h1>
+          <div className="text-center mb-5">
+
+            <h1 className="section-title">
+              Create Your Dream Trip ✈️
+            </h1>
+
+            <p>
+              Plan adventures,
+              invite travelers,
+              and explore the
+              world smarter.
+            </p>
+
+          </div>
 
           <form onSubmit={handleSubmit}>
 
@@ -118,10 +196,10 @@ function CreateTrip() {
 
               </div>
 
-              <div className="col-md-12">
+              <div className="col-md-6">
 
                 <label className="form-label">
-                  Number of Travelers
+                  Travelers
                 </label>
 
                 <input
@@ -130,6 +208,133 @@ function CreateTrip() {
                   className="form-control trip-input"
                   placeholder="4"
                   onChange={handleChange}
+                />
+
+              </div>
+
+              <div className="col-md-6">
+
+                <label className="form-label">
+                  Trip Category
+                </label>
+
+                <select
+                  name="category"
+                  className="form-control trip-input"
+                  onChange={handleChange}
+                >
+
+                  <option value="">
+                    Select Category
+                  </option>
+
+                  <option>
+                    Adventure
+                  </option>
+
+                  <option>
+                    Family
+                  </option>
+
+                  <option>
+                    Solo
+                  </option>
+
+                  <option>
+                    Friends
+                  </option>
+
+                  <option>
+                    Nature
+                  </option>
+
+                </select>
+
+              </div>
+
+              <div className="col-md-6">
+
+                <label className="form-label">
+                  Transport Mode
+                </label>
+
+                <select
+                  name="transport"
+                  className="form-control trip-input"
+                  onChange={handleChange}
+                >
+
+                  <option value="">
+                    Select Transport
+                  </option>
+
+                  <option>
+                    Flight
+                  </option>
+
+                  <option>
+                    Train
+                  </option>
+
+                  <option>
+                    Bus
+                  </option>
+
+                  <option>
+                    Bike
+                  </option>
+
+                  <option>
+                    Car
+                  </option>
+
+                </select>
+
+              </div>
+
+              <div className="col-md-6">
+
+                <label className="form-label">
+                  Visibility
+                </label>
+
+                <select
+                  name="visibility"
+                  className="form-control trip-input"
+                  onChange={handleChange}
+                >
+
+                  <option value="">
+                    Select Visibility
+                  </option>
+
+                  <option>
+                    Public
+                  </option>
+
+                  <option>
+                    Private
+                  </option>
+
+                </select>
+
+              </div>
+
+              <div className="col-md-12">
+
+                <label className="form-label">
+                  Upload Trip Image
+                </label>
+
+                <input
+                  type="file"
+                  className="form-control trip-input"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setImage(
+                      e.target.files[0]
+                    )
+                  }
                 />
 
               </div>
@@ -144,7 +349,7 @@ function CreateTrip() {
                   rows="5"
                   name="description"
                   className="form-control trip-input"
-                  placeholder="Describe your trip..."
+                  placeholder="Describe your dream trip..."
                   onChange={handleChange}
                 />
 
@@ -172,6 +377,7 @@ function CreateTrip() {
     </div>
 
   );
+
 }
 
 export default CreateTrip;
