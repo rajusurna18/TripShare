@@ -1,38 +1,58 @@
 import openai from "../../config/openai.js";
 
-export const getTripSuggestions = async (req, res) => {
+export const generateItinerary =
+  async (req, res) => {
 
-  try {
+    try {
 
-    const { prompt } = req.body;
+      const {
+        destination,
+        budget,
+        days,
+      } = req.body;
 
-    const response =
-      await openai.chat.completions.create({
+      const prompt = `
+      Create a detailed ${days}-day
+      travel itinerary for ${destination}
+      under ₹${budget}.
 
-        model: "gpt-3.5-turbo",
+      Include:
+      - Day-wise plan
+      - Hotels
+      - Food suggestions
+      - Tourist attractions
+      - Transportation
+      - Budget breakdown
+      `;
 
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a travel assistant for TripShare.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
+      const response =
+        await openai.chat.completions.create({
+
+          model: "gpt-3.5-turbo",
+
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are an expert travel planner.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+        });
+
+      res.json({
+        itinerary:
+          response.choices[0]
+          .message.content,
       });
 
-    res.json({
-      reply:
-        response.choices[0].message.content,
-    });
+    } catch (err) {
 
-  } catch (err) {
-
-    res.status(500).json({
-      message: err.message,
-    });
-  }
+      res.status(500).json({
+        message: err.message,
+      });
+    }
 };

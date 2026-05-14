@@ -19,6 +19,7 @@ import Expenses from "./pages/Expenses";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 import Notifications from "./pages/Notifications";
+import Itinerary from "./pages/Itinerary";
 
 function App() {
 
@@ -94,6 +95,11 @@ function App() {
           path="/protected"
           element={<ProtectedRoute />}
         />
+
+        <Route
+  path="/itinerary"
+  element={<Itinerary />}
+/>
 
       </Routes>
 

@@ -313,6 +313,22 @@ function Dashboard() {
 
           </Link>
 
+         <Link
+               to="/itinerary"
+              className="dashboard-box"
+             >
+
+              <h3>
+               ✨ AI Itinerary
+             </h3>
+
+              <p>
+             Generate smart AI-powered
+             travel plans instantly.
+             </p>
+
+          </Link>
+
         </div>
 
         {/* TRIPS */}

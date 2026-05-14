@@ -1,8 +1,14 @@
 import express from "express";
-import { getTripSuggestions } from "./ai.controller.js";
+
+import {
+  generateItinerary,
+} from "./ai.controller.js";
 
 const router = express.Router();
 
-router.post("/suggest", getTripSuggestions);
+router.post(
+  "/itinerary",
+  generateItinerary
+);
 
 export default router;
