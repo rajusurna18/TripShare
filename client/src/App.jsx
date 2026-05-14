@@ -18,6 +18,8 @@ import Expenses from "./pages/Expenses";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
+import Notifications from "./pages/Notifications";
+
 function App() {
 
   return (
@@ -32,6 +34,11 @@ function App() {
           path="/"
           element={<Home />}
         />
+
+        <Route
+  path="/notifications"
+  element={<Notifications />}
+       />
 
         <Route
           path="/dashboard"

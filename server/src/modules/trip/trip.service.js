@@ -1,33 +1,30 @@
-import Trip from "./trip.model.js";
+export const joinTripService =
+  async (tripId, userId) => {
 
-export const createTripService = async (data, userId) => {
-  const trip = await Trip.create({
-    ...data,
-    createdBy: userId,
-    members: [userId],
-  });
+    const trip =
+      await Trip.findById(tripId);
 
-  return trip;
-};
+    if (!trip)
+      throw new Error("Trip not found");
 
-export const getTripsService = async () => {
-  return await Trip.find()
-    .populate("createdBy", "name email")
-    .populate("members", "name email");
-};
+    if (
+      trip.members.includes(userId)
+    ) {
+      throw new Error(
+        "Already joined"
+      );
+    }
 
-export const joinTripService = async (tripId, userId) => {
-  const trip = await Trip.findById(tripId);
+    trip.members.push(userId);
 
-  if (!trip) throw new Error("Trip not found");
+    await trip.save();
 
-  if (trip.members.includes(userId)) {
-    throw new Error("Already joined");
-  }
+    // 🔔 Notification
 
-  trip.members.push(userId);
+    await createNotificationService(
+      trip.createdBy,
+      "Someone joined your trip 🚀"
+    );
 
-  await trip.save();
-
-  return trip;
+    return trip;
 };

@@ -42,7 +42,7 @@ function Home() {
 
       {/* WHY TRIPSHARE */}
 
-      <section className="py-5 text-center">
+      <section className="why-tripshare">
 
         <div className="container">
 

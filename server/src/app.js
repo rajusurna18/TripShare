@@ -8,6 +8,9 @@ import matchRoutes from "./modules/match/match.routes.js";
 import aiRoutes from "./modules/ai/ai.routes.js";
 import expenseRoutes from "./modules/expense/expense.routes.js";
 
+import notificationRoutes
+from "./modules/notification/notification.routes.js";
+
 
 const app = express();
 
@@ -18,6 +21,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/match", matchRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use(
+  "/api/notifications",
+  notificationRoutes
+);
 
 app.use("/api/ai", aiRoutes);
 

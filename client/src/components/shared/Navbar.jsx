@@ -52,6 +52,17 @@ function Navbar() {
               </Link>
             </li>
 
+                <li className="nav-item">
+
+              <Link
+                className="nav-link"
+                to="/notifications"
+              >
+                🔔
+              </Link>
+
+            </li>
+
           </ul>
 
         </div>

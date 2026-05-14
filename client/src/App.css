@@ -170,6 +170,8 @@ body {
   color: #d1d5db;
 }
 
+
+
 /* =========================================
    BUTTONS
 ========================================= */
@@ -1305,4 +1307,186 @@ select option:hover {
   background: #1f2937 !important;
 
   color: #ffffff !important;
+}
+
+/* =========================================
+   WHY TRIPSHARE SECTION
+========================================= */
+
+.why-tripshare {
+
+  padding: 120px 20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #050816,
+      #0b1020
+    );
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+/* TITLE */
+
+.why-tripshare .section-title {
+
+  font-size: 4rem;
+
+  font-weight: 800;
+
+  color: #ffffff;
+
+  margin-bottom: 70px;
+
+  text-align: center;
+
+  text-shadow:
+    0 0 20px rgba(255,255,255,0.15);
+}
+
+/* GRID FIX */
+
+.why-tripshare .row {
+
+  justify-content: center;
+}
+
+/* CARD */
+
+.special-card {
+
+  height: 100%;
+
+  padding: 40px 30px;
+
+  border-radius: 28px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(17,25,40,0.92),
+      rgba(10,15,28,0.96)
+    );
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.35);
+
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+/* SHINE EFFECT */
+
+.special-card::before {
+
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+
+  left: -120%;
+
+  width: 100%;
+
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.08),
+      transparent
+    );
+
+  transition: 0.9s ease;
+}
+
+.special-card:hover::before {
+
+  left: 120%;
+}
+
+/* HOVER */
+
+.special-card:hover {
+
+  transform:
+    translateY(-12px)
+    scale(1.03);
+
+  border-color:
+    rgba(255,193,7,0.35);
+
+  box-shadow:
+    0 22px 45px rgba(255,193,7,0.12);
+}
+
+/* HEADING */
+
+.special-card h5 {
+
+  font-size: 1.5rem;
+
+  font-weight: 700;
+
+  color: #ffc107;
+
+  margin-bottom: 20px;
+
+  line-height: 1.5;
+}
+
+/* TEXT */
+
+.special-card p {
+
+  color: #d1d5db;
+
+  font-size: 1rem;
+
+  line-height: 1.9;
+
+  margin: 0;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+  .why-tripshare {
+
+    padding: 80px 20px;
+  }
+
+  .why-tripshare .section-title {
+
+    font-size: 2.5rem;
+
+    margin-bottom: 45px;
+  }
+
+  .special-card {
+
+    padding: 30px 24px;
+  }
+
+  .special-card h5 {
+
+    font-size: 1.2rem;
+  }
 }
