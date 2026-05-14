@@ -1,85 +1,251 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+import API from "../services/api";
 
 function Dashboard() {
 
+  const [trips, setTrips] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const user =
+    JSON.parse(
+      localStorage.getItem("user")
+    );
+
+  useEffect(() => {
+
+    fetchTrips();
+
+  }, []);
+
+  const fetchTrips = async () => {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const res = await API.get(
+        "/api/trips",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      setTrips(res.data);
+
+      setLoading(false);
+
+    } catch (err) {
+
+      console.log(err);
+
+      setLoading(false);
+    }
+  };
+
   return (
 
-    <div className="dashboard-page">
+    <div className="dashboard-page min-vh-100 text-light">
 
       <div className="container py-5">
 
-        <div className="dashboard-header">
+        {/* HERO */}
 
-          <h1>
-            Welcome Back Traveler 🌍
-          </h1>
+        <div className="dashboard-header mb-5">
 
-          <p>
-            Plan smarter trips,
-            connect with travelers,
-            and explore the world with AI.
-          </p>
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-4">
+
+            <div>
+
+              <h1 className="fw-bold display-5 text-white">
+
+                Welcome Back,
+                {" "}
+                <span className="text-warning">
+                  {user?.name || "Traveler"}
+                </span>
+                {" "}
+                🌍
+
+              </h1>
+
+              <p className="dashboard-subtitle">
+
+                Plan smarter trips,
+                connect with travelers,
+                and explore the world with AI.
+
+              </p>
+
+            </div>
+
+            {/* PROFILE */}
+
+            <div className="profile-card-modern">
+
+              <img
+                src={
+                  user?.profileImage ||
+                  "https://i.pravatar.cc/150"
+                }
+                alt="profile"
+              />
+
+              <div>
+
+                <h4>
+                  {user?.name || "Traveler"}
+                </h4>
+
+                <p>
+                  {user?.email}
+                </p>
+
+                <small>
+                  Premium Traveler 🚀
+                </small>
+
+              </div>
+
+            </div>
+
+          </div>
 
         </div>
 
-        {/* TOP FEATURE SECTION */}
+        {/* ACTION BUTTONS */}
+
+        <div className="d-flex gap-3 flex-wrap mb-5">
+
+          <Link
+            to="/create-trip"
+            className="btn btn-custom"
+          >
+
+            + Create Trip
+
+          </Link>
+
+        </div>
+
+        {/* TOP CARDS */}
 
         <div className="row g-4 mb-5">
 
+          {/* AI */}
+
           <div className="col-lg-8">
 
-            <div className="special-card h-100">
+            <div className="special-card glass-card h-100 p-4">
 
-              <h2 className="text-warning mb-4">
-                ✨ AI Trip Planner
-              </h2>
+              <div className="d-flex justify-content-between align-items-center flex-wrap gap-4">
 
-              <p className="mb-4">
+                <div>
 
-                Ask AI for:
-                destination ideas,
-                budget trips,
-                hotels,
-                itineraries,
-                weather,
-                and smart travel suggestions.
+                  <h2 className="text-warning mb-3">
 
-              </p>
+                    ✨ AI Travel Planner
 
-              <Link
-                to="/ai"
-                className="btn btn-custom"
-              >
-                Open AI Planner
-              </Link>
+                  </h2>
+
+                  <p className="dashboard-text">
+
+                    Generate itineraries,
+                    discover hidden destinations,
+                    estimate budgets,
+                    and build smarter adventures.
+
+                  </p>
+
+                </div>
+
+                <Link
+                  to="/ai"
+                  className="premium-ai-btn"
+                >
+
+                  Open AI Planner 🚀
+
+                </Link>
+
+              </div>
 
             </div>
 
           </div>
 
+          {/* STATS */}
+
           <div className="col-lg-4">
 
-            <div className="special-card h-100">
+            <div className="special-card glass-card h-100 p-4">
 
               <h3 className="text-warning mb-4">
+
                 📊 Travel Stats
+
               </h3>
 
-              <p>
-                ✈ Trips Completed: 12
-              </p>
+              <div className="d-flex flex-column gap-3">
 
-              <p>
-                🌍 Countries Visited: 5
-              </p>
+                <div className="stats-row">
 
-              <p>
-                👥 Travel Buddies: 18
-              </p>
+                  ✈ Trips Created
 
-              <p>
-                💰 Money Saved: ₹45,000
-              </p>
+                  <span>
+                    {trips.length}
+                  </span>
+
+                </div>
+
+                <div className="stats-row">
+
+                  🌍 Destinations
+
+                  <span>
+
+                    {
+                      new Set(
+                        trips.map(
+                          (trip) =>
+                            trip.destination
+                        )
+                      ).size
+                    }
+
+                  </span>
+
+                </div>
+
+                <div className="stats-row">
+
+                  👥 Travelers
+
+                  <span>
+                    {trips.length * 3}
+                  </span>
+
+                </div>
+
+                <div className="stats-row">
+
+                  💰 Savings
+
+                  <span>
+                    ₹{trips.length * 5000}
+                  </span>
+
+                </div>
+
+              </div>
 
             </div>
 
@@ -87,22 +253,20 @@ function Dashboard() {
 
         </div>
 
-        {/* MAIN DASHBOARD GRID */}
+        {/* QUICK ACTIONS */}
 
-        <div className="dashboard-grid">
+        <div className="dashboard-grid mb-5">
 
           <Link
             to="/trips"
             className="dashboard-box"
           >
 
-            <h3>
-              ✈️ Trips
-            </h3>
+            <h3>✈️ Trips</h3>
 
             <p>
               Explore and manage
-              your upcoming adventures.
+              your adventures.
             </p>
 
           </Link>
@@ -112,12 +276,10 @@ function Dashboard() {
             className="dashboard-box"
           >
 
-            <h3>
-              🧳 Create Trip
-            </h3>
+            <h3>🧳 Create Trip</h3>
 
             <p>
-              Organize a new journey
+              Organize journeys
               and invite travelers.
             </p>
 
@@ -128,13 +290,11 @@ function Dashboard() {
             className="dashboard-box"
           >
 
-            <h3>
-              👥 Smart Matches
-            </h3>
+            <h3>👥 Smart Matches</h3>
 
             <p>
-              Find travelers with
-              matching interests and budgets.
+              Find compatible
+              travel partners.
             </p>
 
           </Link>
@@ -144,135 +304,209 @@ function Dashboard() {
             className="dashboard-box"
           >
 
-            <h3>
-              💬 Chat Box
-            </h3>
+            <h3>💬 Chat</h3>
 
             <p>
-              Talk with your travel
-              companions in real time.
+              Real-time communication
+              with your groups.
             </p>
 
           </Link>
 
         </div>
 
-        {/* CURRENT TRIPS */}
+        {/* TRIPS */}
 
-        <div className="mt-5">
+       <div className="current-trips-wrapper mb-5">
 
-          <h2 className="section-title">
+          <h2 className="section-title mb-4">
+
             Current Trips ✈️
+
           </h2>
 
-          <div className="row g-4">
+          {
+            loading ? (
 
-            <div className="col-md-4">
+              <h3 className="text-light">
 
-              <div className="trip-card">
+                Loading trips...
 
-                <div className="trip-card-top">
+              </h3>
 
-                  <h3>Goa Escape</h3>
+            ) : (
 
-                  <span className="trip-badge">
-                    Active
-                  </span>
+              <div className="row g-4">
 
-                </div>
+                {
+                  trips.length === 0 ? (
 
-                <div className="trip-details">
+                    <div className="empty-box">
 
-                  <p>
-                    📍
-                    <span>Goa</span>
-                  </p>
+                      <div className="empty-icon">
+                        ✈️
+                      </div>
 
-                  <p>
-                    💰
-                    <span>₹12,000</span>
-                  </p>
+                      <h3>
+                        No Trips Yet
+                      </h3>
 
-                  <p>
-                    📅
-                    <span>June 14</span>
-                  </p>
+                      <p>
 
-                </div>
+                        Create your first adventure
+                        and start exploring the world.
+
+                      </p>
+
+                    </div>
+
+                  ) : (
+
+                    trips.map((trip, index) => (
+
+                      <div
+                        className="col-md-4"
+                        key={index}
+                      >
+
+                        <div className="trip-card glass-card">
+
+                          {
+                            trip.image && (
+
+                              <img
+                                src={trip.image}
+                                alt={trip.destination}
+                                className="trip-image"
+                              />
+
+                            )
+                          }
+
+                          <div className="p-4">
+
+                            <div className="trip-card-top">
+
+                              <h3>
+                                {trip.destination}
+                              </h3>
+
+                              <span className="trip-badge">
+
+                                Active
+
+                              </span>
+
+                            </div>
+
+                            <div className="trip-details">
+
+                              <p>
+                                📍 {trip.destination}
+                              </p>
+
+                              <p>
+                                💰 ₹{trip.budget}
+                              </p>
+
+                              <p>
+                                📅 {
+                                  trip.startDate
+                                    ?.slice(0, 10)
+                                }
+                              </p>
+
+                            </div>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    ))
+                  )
+                }
+
+              </div>
+            )
+          }
+
+        </div>
+
+        {/* LOWER SECTION */}
+
+        <div className="row g-4">
+
+          {/* EXPENSE */}
+
+          <div className="col-lg-6">
+
+            <div className="special-card glass-card p-4 h-100">
+
+              <h3 className="text-warning mb-4">
+
+                💸 Expense Summary
+
+              </h3>
+
+              <div className="expense-row">
+
+                Total Trips Budget
+
+                <span>
+
+                  ₹
+                  {
+                    trips.reduce(
+                      (acc, trip) =>
+                        acc +
+                        Number(
+                          trip.budget || 0
+                        ),
+                      0
+                    )
+                  }
+
+                </span>
 
               </div>
 
-            </div>
+              <div className="expense-row">
 
-            <div className="col-md-4">
+                Average Budget
 
-              <div className="trip-card">
+                <span>
 
-                <div className="trip-card-top">
+                  ₹
+                  {
+                    trips.length > 0
+                      ? Math.floor(
+                          trips.reduce(
+                            (acc, trip) =>
+                              acc +
+                              Number(
+                                trip.budget || 0
+                              ),
+                            0
+                          ) / trips.length
+                        )
+                      : 0
+                  }
 
-                  <h3>Manali Snow</h3>
-
-                  <span className="trip-badge">
-                    Upcoming
-                  </span>
-
-                </div>
-
-                <div className="trip-details">
-
-                  <p>
-                    📍
-                    <span>Manali</span>
-                  </p>
-
-                  <p>
-                    💰
-                    <span>₹18,000</span>
-                  </p>
-
-                  <p>
-                    📅
-                    <span>July 2</span>
-                  </p>
-
-                </div>
+                </span>
 
               </div>
 
-            </div>
+              <div className="expense-row">
 
-            <div className="col-md-4">
+                Estimated Savings
 
-              <div className="trip-card">
+                <span>
 
-                <div className="trip-card-top">
+                  ₹{trips.length * 5000}
 
-                  <h3>Kerala Nature</h3>
-
-                  <span className="trip-badge">
-                    Planning
-                  </span>
-
-                </div>
-
-                <div className="trip-details">
-
-                  <p>
-                    📍
-                    <span>Kerala</span>
-                  </p>
-
-                  <p>
-                    💰
-                    <span>₹15,000</span>
-                  </p>
-
-                  <p>
-                    📅
-                    <span>August 8</span>
-                  </p>
-
-                </div>
+                </span>
 
               </div>
 
@@ -280,49 +514,35 @@ function Dashboard() {
 
           </div>
 
-        </div>
+          {/* ACTIVITY */}
 
-        {/* PAST TRAVELS */}
+          <div className="col-lg-6">
 
-        <div className="mt-5">
+            <div className="special-card glass-card p-4 h-100">
 
-          <h2 className="section-title">
-            Past Travels 🌍
-          </h2>
+              <h3 className="text-warning mb-4">
 
-          <div className="row g-4">
+                🔔 Recent Activity
 
-            <div className="col-md-6">
+              </h3>
 
-              <div className="special-card">
+              {
+                trips.slice(0, 4).map(
+                  (trip, index) => (
 
-                <h4 className="text-warning">
-                  Taj Mahal Journey
-                </h4>
+                    <div
+                      className="activity-item"
+                      key={index}
+                    >
 
-                <p>
-                  Beautiful heritage trip
-                  with 4 travel buddies.
-                </p>
+                      ✈️ New update in
+                      {" "}
+                      {trip.destination}
 
-              </div>
-
-            </div>
-
-            <div className="col-md-6">
-
-              <div className="special-card">
-
-                <h4 className="text-warning">
-                  Hyderabad Food Tour
-                </h4>
-
-                <p>
-                  Explored famous food streets
-                  and local culture.
-                </p>
-
-              </div>
+                    </div>
+                  )
+                )
+              }
 
             </div>
 

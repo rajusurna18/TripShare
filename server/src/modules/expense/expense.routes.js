@@ -6,12 +6,27 @@ import {
   calculateBalances,
 } from "./expense.controller.js";
 
+import { protect }
+from "../../middleware/auth.middleware.js";
+
 const router = express.Router();
 
-router.post("/", createExpense);
+router.post(
+  "/:tripId",
+  protect,
+  createExpense
+);
 
-router.get("/:tripId", getTripExpenses);
+router.get(
+  "/:tripId",
+  protect,
+  getTripExpenses
+);
 
-router.get("/:tripId/balances", calculateBalances);
+router.get(
+  "/balance/:tripId",
+  protect,
+  calculateBalances
+);
 
 export default router;

@@ -7,6 +7,8 @@ function Home() {
   return (
     <>
 
+      {/* HERO */}
+
       <section className="hero">
 
         <div className="overlay"></div>
@@ -18,13 +20,13 @@ function Home() {
           </h1>
 
           <p>
-            Find your perfect travel buddy across all ages –
+            Find your perfect travel buddy across all ages —
             families, friends, and solo explorers.
           </p>
 
           <p className="quote">
-            “Travel is better when shared – with laughter,
-            stories, and smiles.”
+            “Travel is better when shared —
+            with laughter, stories, and smiles.”
           </p>
 
           <button
@@ -37,6 +39,8 @@ function Home() {
         </div>
 
       </section>
+
+      {/* WHY TRIPSHARE */}
 
       <section className="py-5 text-center">
 
@@ -52,11 +56,13 @@ function Home() {
 
               <div className="special-card">
 
-                <h5>“Meet. Match. Move.”</h5>
+                <h5>
+                  “Meet. Match. Move.”
+                </h5>
 
                 <p>
-                  Find travel partners with similar goals
-                  and personalities.
+                  Find travel partners with similar
+                  goals and personalities.
                 </p>
 
               </div>
@@ -89,7 +95,7 @@ function Home() {
                 </h5>
 
                 <p>
-                  Even solo travelers find great
+                  Even solo travelers find amazing
                   companions with TripShare.
                 </p>
 
@@ -103,73 +109,91 @@ function Home() {
 
       </section>
 
-      <section className="py-5 text-center bg-dark">
+      {/* USERS SECTION */}
+
+      <section className="users-section">
 
         <div className="container">
 
-          <h2 className="section-title">
+          <h2 className="users-title">
             Who is TripShare for?
           </h2>
 
-          <div className="row g-4">
+          <div className="users-grid">
 
-            <div className="col-md-3">
+            {/* FAMILY */}
 
-              <div className="special-card">
+            <div className="user-card">
 
-                <h6>👨‍👩‍👧 Families</h6>
-
-                <p>
-                  Find other families to co-plan
-                  safe and friendly vacations.
-                </p>
-
+              <div className="user-icon">
+                👨‍👩‍👧
               </div>
+
+              <h3>
+                Families
+              </h3>
+
+              <p>
+                Find other families to co-plan
+                safe and friendly vacations.
+              </p>
 
             </div>
 
-            <div className="col-md-3">
+            {/* STUDENTS */}
 
-              <div className="special-card">
+            <div className="user-card">
 
-                <h6>🧑‍🎓 Students</h6>
-
-                <p>
-                  Explore within budget by sharing
-                  trips with fellow students.
-                </p>
-
+              <div className="user-icon">
+                🧑‍🎓
               </div>
+
+              <h3>
+                Students
+              </h3>
+
+              <p>
+                Explore within budget by sharing
+                trips with fellow students.
+              </p>
 
             </div>
 
-            <div className="col-md-3">
+            {/* SENIORS */}
 
-              <div className="special-card">
+            <div className="user-card">
 
-                <h6>👴 Seniors</h6>
-
-                <p>
-                  Meet age-friendly travel partners
-                  and rediscover the joy of travel.
-                </p>
-
+              <div className="user-icon">
+                👴
               </div>
+
+              <h3>
+                Seniors
+              </h3>
+
+              <p>
+                Meet age-friendly travel partners
+                and rediscover joyful journeys.
+              </p>
 
             </div>
 
-            <div className="col-md-3">
+            {/* SOLO */}
 
-              <div className="special-card">
+            <div className="user-card">
 
-                <h6>🌍 Solo Travelers</h6>
-
-                <p>
-                  Never feel alone—connect and create
-                  unforgettable memories.
-                </p>
-
+              <div className="user-icon">
+                🌍
               </div>
+
+              <h3>
+                Solo Travelers
+              </h3>
+
+              <p>
+                Never feel alone — connect and
+                create unforgettable memories.
+              </p>
 
             </div>
 
@@ -179,28 +203,35 @@ function Home() {
 
       </section>
 
+      {/* FOOTER */}
+
       <footer className="footer">
 
-        <div className="text-center">
+        <div className="container text-center">
 
-          <div className="social-icons">
+          <div className="footer-socials">
 
-            <i className="fab fa-instagram fa-2x"></i>
+            <i className="fab fa-instagram"></i>
 
-            <i className="fab fa-whatsapp fa-2x"></i>
+            <i className="fab fa-whatsapp"></i>
 
-            <i className="fab fa-twitter fa-2x"></i>
+            <i className="fab fa-twitter"></i>
 
-            <i className="fab fa-facebook fa-2x"></i>
+            <i className="fab fa-facebook"></i>
 
           </div>
 
           <div className="contact-text">
+
             Contact Us
+
           </div>
 
           <div className="copyright">
-            © 2025 TripShare. All rights reserved.
+
+            © 2025 TripShare.
+            All rights reserved.
+
           </div>
 
         </div>

@@ -14,8 +14,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 
-import ProtectedRoute from "./routes/ProtectedRoute";
+import Expenses from "./pages/Expenses";
 
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
 
@@ -27,7 +28,10 @@ function App() {
 
       <Routes>
 
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/"
+          element={<Home />}
+        />
 
         <Route
           path="/dashboard"
@@ -57,6 +61,11 @@ function App() {
         <Route
           path="/create-trip"
           element={<CreateTrip />}
+        />
+
+        <Route
+          path="/expenses/:tripId"
+          element={<Expenses />}
         />
 
         <Route
