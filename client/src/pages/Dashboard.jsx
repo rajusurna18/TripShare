@@ -11,16 +11,17 @@ function Dashboard() {
   const [loading, setLoading] =
     useState(true);
 
-  const user =
-    JSON.parse(
-      localStorage.getItem("user")
-    );
+  const [user, setUser] =
+    useState(null);
 
   useEffect(() => {
 
     fetchTrips();
+    fetchProfile();
 
   }, []);
+
+  // FETCH TRIPS
 
   const fetchTrips = async () => {
 
@@ -51,6 +52,33 @@ function Dashboard() {
     }
   };
 
+  // FETCH PROFILE
+
+  const fetchProfile = async () => {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const res = await API.get(
+        "/api/profile",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      setUser(res.data);
+
+    } catch (err) {
+
+      console.log(err);
+    }
+  };
+
   return (
 
     <div className="dashboard-page min-vh-100 text-light">
@@ -69,9 +97,13 @@ function Dashboard() {
 
                 Welcome Back,
                 {" "}
+
                 <span className="text-warning">
+
                   {user?.name || "Traveler"}
+
                 </span>
+
                 {" "}
                 🌍
 
@@ -89,7 +121,10 @@ function Dashboard() {
 
             {/* PROFILE */}
 
-            <div className="profile-card-modern">
+            <Link
+              to="/profile"
+              className="profile-card-modern text-decoration-none"
+            >
 
               <img
                 src={
@@ -115,13 +150,13 @@ function Dashboard() {
 
               </div>
 
-            </div>
+            </Link>
 
           </div>
 
         </div>
 
-        {/* ACTION BUTTONS */}
+        {/* ACTION BUTTON */}
 
         <div className="d-flex gap-3 flex-wrap mb-5">
 
@@ -168,7 +203,7 @@ function Dashboard() {
                 </div>
 
                 <Link
-                  to="/ai"
+                  to="/itinerary"
                   className="premium-ai-btn"
                 >
 
@@ -313,27 +348,27 @@ function Dashboard() {
 
           </Link>
 
-         <Link
-               to="/itinerary"
-              className="dashboard-box"
-             >
+          <Link
+            to="/itinerary"
+            className="dashboard-box"
+          >
 
-              <h3>
-               ✨ AI Itinerary
-             </h3>
+            <h3>
+              ✨ AI Itinerary
+            </h3>
 
-              <p>
-             Generate smart AI-powered
-             travel plans instantly.
-             </p>
+            <p>
+              Generate smart AI-powered
+              travel plans instantly.
+            </p>
 
           </Link>
 
         </div>
 
-        {/* TRIPS */}
+        {/* CURRENT TRIPS */}
 
-       <div className="current-trips-wrapper mb-5">
+        <div className="current-trips-wrapper mb-5">
 
           <h2 className="section-title mb-4">
 
@@ -574,3 +609,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+

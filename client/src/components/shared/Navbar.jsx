@@ -2,13 +2,21 @@ import { Link } from "react-router-dom";
 
 function Navbar() {
 
+  const user =
+    JSON.parse(
+      localStorage.getItem("user")
+    );
+
   return (
 
     <nav className="navbar navbar-expand-lg navbar-dark">
 
       <div className="container-fluid">
 
-        <Link className="navbar-brand" to="/">
+        <Link
+          className="navbar-brand"
+          to="/"
+        >
           TripShare
         </Link>
 
@@ -18,7 +26,9 @@ function Navbar() {
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
         >
+
           <span className="navbar-toggler-icon"></span>
+
         </button>
 
         <div
@@ -26,39 +36,82 @@ function Navbar() {
           id="navbarNav"
         >
 
-          <ul className="navbar-nav ms-auto">
+          <ul className="navbar-nav ms-auto align-items-center gap-3">
 
             <li className="nav-item">
-              <Link className="nav-link active" to="/">
+
+              <Link
+                className="nav-link active"
+                to="/"
+              >
                 Home
               </Link>
+
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to="/about">
+
+              <Link
+                className="nav-link"
+                to="/about"
+              >
                 About
               </Link>
+
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to="/features">
+
+              <Link
+                className="nav-link"
+                to="/features"
+              >
                 Features
               </Link>
+
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to="/contact">
+
+              <Link
+                className="nav-link"
+                to="/contact"
+              >
                 Contact
               </Link>
+
             </li>
 
-                <li className="nav-item">
+            {/* NOTIFICATION */}
+
+            <li className="nav-item">
 
               <Link
                 className="nav-link"
                 to="/notifications"
               >
                 🔔
+              </Link>
+
+            </li>
+
+            {/* PROFILE IMAGE */}
+
+            <li className="nav-item">
+
+              <Link
+                to="/profile"
+                className="nav-profile"
+              >
+
+                <img
+                  src={
+                    user?.profileImage ||
+                    "https://i.pravatar.cc/40"
+                  }
+                  alt="profile"
+                />
+
               </Link>
 
             </li>

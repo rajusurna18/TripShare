@@ -21,6 +21,9 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import Notifications from "./pages/Notifications";
 import Itinerary from "./pages/Itinerary";
 
+import Profile
+from "./pages/Profile";
+
 function App() {
 
   return (
@@ -34,6 +37,11 @@ function App() {
         <Route
           path="/"
           element={<Home />}
+        />
+
+        <Route
+           path="/profile"
+           element={<Profile />}
         />
 
         <Route
@@ -96,10 +104,10 @@ function App() {
           element={<ProtectedRoute />}
         />
 
-        <Route
-  path="/itinerary"
-  element={<Itinerary />}
-/>
+         <Route
+           path="/itinerary"
+          element={<Itinerary />}
+        />
 
       </Routes>
 

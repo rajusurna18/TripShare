@@ -15,6 +15,9 @@ from "./modules/auth/auth.routes.js";
 import aiRoutes
 from "./modules/ai/ai.routes.js";
 
+import profileRoutes
+from "./modules/profile/profile.routes.js";
+
 dotenv.config();
 
 const app = express();
@@ -41,6 +44,11 @@ app.use(
 app.use(
   "/api/expenses",
   expenseRoutes
+);
+
+app.use(
+  "/api/profile",
+  profileRoutes
 );
 
 const server = http.createServer(app);

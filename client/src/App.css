@@ -73,20 +73,23 @@ body {
 .navbar {
 
   background:
-    rgba(8,12,20,0.88);
+    rgba(10, 10, 20, 0.72);
 
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(14px);
 
   border-bottom:
     1px solid rgba(255,255,255,0.08);
 
-  padding: 16px 24px;
+  padding: 14px 32px;
 
   position: sticky;
 
   top: 0;
 
   z-index: 1000;
+
+  box-shadow:
+    0 6px 20px rgba(0,0,0,0.25);
 }
 
 .navbar-brand {
@@ -96,6 +99,8 @@ body {
   font-weight: 800;
 
   color: #ffc107 !important;
+
+  letter-spacing: 1px;
 }
 
 .nav-link {
@@ -104,13 +109,73 @@ body {
 
   margin-left: 18px;
 
-  transition: 0.3s ease;
+  position: relative;
+
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease !important;
+}
+
+.nav-link::after {
+
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+
+  bottom: -6px;
+
+  width: 0;
+
+  height: 2px;
+
+  background: #ffc107;
+
+  transition: width 0.35s ease;
 }
 
 .nav-link:hover {
 
   color: #ffc107 !important;
+
+  transform: translateY(-2px);
 }
+
+.nav-link:hover::after {
+
+  width: 100%;
+}
+
+/* PROFILE IMAGE */
+
+.nav-profile img {
+
+  width: 44px;
+
+  height: 44px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  border: 2px solid #facc15;
+
+  transition: 0.35s ease;
+
+  box-shadow:
+    0 0 12px rgba(250,204,21,0.25);
+}
+
+.nav-profile img:hover {
+
+  transform:
+    scale(1.1);
+
+  box-shadow:
+    0 0 20px rgba(250,204,21,0.7);
+}
+
 
 /* =========================================
    HERO SECTION
@@ -284,7 +349,8 @@ textarea {
 
 .dashboard-header {
 
-  margin-bottom: 50px;
+  margin-bottom: 60px;
+   padding-top: 20px;
 }
 
 .dashboard-subtitle {
@@ -353,24 +419,50 @@ textarea {
 
   gap: 18px;
 
-  padding: 20px 24px;
+  padding: 22px 26px;
 
-  border-radius: 24px;
+  border-radius: 26px;
+
+  margin-top: 24px;
 
   background:
-    rgba(255,255,255,0.04);
+    linear-gradient(
+      145deg,
+      rgba(17,25,40,0.92),
+      rgba(10,15,28,0.96)
+    );
 
   border:
     1px solid rgba(255,255,255,0.08);
 
   backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.35);
+
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.profile-card-modern:hover {
+
+  transform:
+    translateY(-6px);
+
+  border-color:
+    rgba(255,193,7,0.3);
+
+  box-shadow:
+    0 18px 35px rgba(255,193,7,0.12);
 }
 
 .profile-card-modern img {
 
-  width: 85px;
+  width: 90px;
 
-  height: 85px;
+  height: 90px;
 
   border-radius: 50%;
 
@@ -385,6 +477,10 @@ textarea {
   color: white;
 
   margin-bottom: 6px;
+
+  font-size: 1.4rem;
+
+  font-weight: 700;
 }
 
 .profile-card-modern p {
@@ -397,6 +493,8 @@ textarea {
 .profile-card-modern small {
 
   color: #ffc107;
+
+  font-weight: 600;
 }
 
 /* =========================================
@@ -755,7 +853,7 @@ textarea {
 
   justify-content: center;
 
-  padding: 14px 28px;
+  padding: 14px 30px;
 
   border-radius: 16px;
 
@@ -765,20 +863,19 @@ textarea {
 
   letter-spacing: 0.5px;
 
-  color: #ffffff !important;
+  color: #111827 !important;
 
   background:
     linear-gradient(
       135deg,
-      #7c3aed,
-      #4f46e5
+      #facc15,
+      #f59e0b
     );
 
-  border:
-    1px solid rgba(255,255,255,0.08);
+  border: none;
 
   box-shadow:
-    0 10px 25px rgba(124,58,237,0.35);
+    0 10px 25px rgba(250,204,21,0.25);
 
   transition:
     all 0.35s ease;
@@ -790,17 +887,17 @@ textarea {
     translateY(-5px)
     scale(1.03);
 
-  color: white !important;
-
   box-shadow:
-    0 18px 35px rgba(124,58,237,0.45);
+    0 18px 35px rgba(250,204,21,0.4);
 
   background:
     linear-gradient(
       135deg,
-      #8b5cf6,
-      #6366f1
+      #fde047,
+      #f59e0b
     );
+
+  color: #000 !important;
 }
 
 /* =========================================
