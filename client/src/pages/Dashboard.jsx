@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+
 import { useEffect, useState } from "react";
 
 import API from "../services/api";
@@ -49,7 +50,9 @@ function Dashboard() {
       console.log(err);
 
       setLoading(false);
+
     }
+
   };
 
   // FETCH PROFILE
@@ -76,7 +79,9 @@ function Dashboard() {
     } catch (err) {
 
       console.log(err);
+
     }
+
   };
 
   return (
@@ -89,9 +94,11 @@ function Dashboard() {
 
         <div className="dashboard-header mb-5">
 
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-4">
+          <div className="row align-items-center g-4">
 
-            <div>
+            {/* LEFT */}
+
+            <div className="col-lg-8">
 
               <h1 className="fw-bold display-5 text-white">
 
@@ -104,7 +111,6 @@ function Dashboard() {
 
                 </span>
 
-                {" "}
                 🌍
 
               </h1>
@@ -113,7 +119,8 @@ function Dashboard() {
 
                 Plan smarter trips,
                 connect with travelers,
-                and explore the world with AI.
+                and explore the world
+                with TripShare AI.
 
               </p>
 
@@ -121,99 +128,140 @@ function Dashboard() {
 
             {/* PROFILE */}
 
-            <Link
-              to="/profile"
-              className="profile-card-modern text-decoration-none"
-            >
+            <div className="col-lg-4">
 
-              <img
-                src={
-                  user?.profileImage ||
-                  "https://i.pravatar.cc/150"
-                }
-                alt="profile"
-              />
+              <Link
+                to="/profile"
+                className="profile-card-modern text-decoration-none"
+              >
 
-              <div>
+                <img
+                  src={
+                    user?.profileImage ||
+                    "https://i.pravatar.cc/150"
+                  }
+                  alt="profile"
+                />
 
-                <h4>
-                  {user?.name || "Traveler"}
-                </h4>
+                <div>
 
-                <p>
-                  {user?.email}
-                </p>
+                  <h4>
 
-                <small>
-                  Premium Traveler 🚀
-                </small>
+                    {user?.name || "Traveler"}
 
-              </div>
+                  </h4>
 
-            </Link>
+                  <p>
+
+                    {user?.email}
+
+                  </p>
+
+                  <small>
+
+                    Premium Traveler 🚀
+
+                  </small>
+
+                </div>
+
+              </Link>
+
+            </div>
 
           </div>
 
         </div>
 
-        {/* ACTION BUTTON */}
-
-        <div className="d-flex gap-3 flex-wrap mb-5">
-
-          <Link
-            to="/create-trip"
-            className="btn btn-custom"
-          >
-
-            + Create Trip
-
-          </Link>
-
-        </div>
-
-        {/* TOP CARDS */}
+        {/* TOP SECTION */}
 
         <div className="row g-4 mb-5">
 
-          {/* AI */}
+          {/* LEFT SECTION */}
 
-          <div className="col-lg-8">
+          <div className="col-lg-8 d-flex flex-column gap-4">
 
-            <div className="special-card glass-card h-100 p-4">
+            {/* VIEW DETAILS */}
 
-              <div className="d-flex justify-content-between align-items-center flex-wrap gap-4">
+            <div className="special-card glass-card p-4 view-trip-card">
+
+              <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
                 <div>
 
-                  <h2 className="text-warning mb-3">
+                  <h2 className="text-warning mb-2">
 
-                    ✨ AI Travel Planner
+                    ✈️ Explore Your Trips
 
                   </h2>
 
-                  <p className="dashboard-text">
+                  <p className="dashboard-text m-0">
 
-                    Generate itineraries,
-                    discover hidden destinations,
-                    estimate budgets,
-                    and build smarter adventures.
+                    Manage your adventures,
+                    explore destinations,
+                    and track travel experiences.
 
                   </p>
 
                 </div>
 
                 <Link
-                  to="/itinerary"
-                  className="premium-ai-btn"
+                  to="/trips"
+                  className="btn btn-custom view-details-btn"
                 >
 
-                  Open AI Planner 🚀
+                  View Details
 
                 </Link>
 
               </div>
 
             </div>
+
+            {/* AI ASSISTANT */}
+
+<div className="special-card glass-card p-4 ai-assistant-card">
+
+  <div className="d-flex flex-column h-100 justify-content-between">
+
+    <div>
+
+      <h2 className="text-warning mb-3">
+
+        🤖 TripShare AI Assistant
+
+      </h2>
+
+      <p className="dashboard-text ai-text">
+
+        Ask travel questions,
+        generate itineraries,
+        estimate budgets,
+        discover destinations,
+        and get smart travel guidance instantly.
+
+      </p>
+
+    </div>
+
+    {/* BUTTON */}
+
+    <div className="mt-4">
+
+      <Link
+        to="/itinerary"
+        className="btn btn-custom ai-btn"
+      >
+
+        Open AI Planner 🚀
+
+      </Link>
+
+    </div>
+
+  </div>
+
+</div>
 
           </div>
 
@@ -236,7 +284,9 @@ function Dashboard() {
                   ✈ Trips Created
 
                   <span>
+
                     {trips.length}
+
                   </span>
 
                 </div>
@@ -265,7 +315,9 @@ function Dashboard() {
                   👥 Travelers
 
                   <span>
+
                     {trips.length * 3}
+
                   </span>
 
                 </div>
@@ -275,7 +327,9 @@ function Dashboard() {
                   💰 Savings
 
                   <span>
+
                     ₹{trips.length * 5000}
+
                   </span>
 
                 </div>
@@ -288,81 +342,96 @@ function Dashboard() {
 
         </div>
 
-        {/* QUICK ACTIONS */}
+        {/* FEATURES */}
 
-        <div className="dashboard-grid mb-5">
+        <div className="row g-4 mb-5">
 
-          <Link
-            to="/trips"
-            className="dashboard-box"
-          >
+          {/* MATCHES */}
 
-            <h3>✈️ Trips</h3>
+          <div className="col-lg-6">
 
-            <p>
-              Explore and manage
-              your adventures.
-            </p>
+            <Link
+              to="/matches"
+              className="dashboard-box feature-box h-100 text-decoration-none"
+            >
 
-          </Link>
+              <div className="feature-icon">
 
-          <Link
-            to="/create-trip"
-            className="dashboard-box"
-          >
+                👥
 
-            <h3>🧳 Create Trip</h3>
+              </div>
 
-            <p>
-              Organize journeys
-              and invite travelers.
-            </p>
+              <div className="feature-content">
 
-          </Link>
+                <h2>
 
-          <Link
-            to="/matches"
-            className="dashboard-box"
-          >
+                  Smart Travel Matches
 
-            <h3>👥 Smart Matches</h3>
+                </h2>
 
-            <p>
-              Find compatible
-              travel partners.
-            </p>
+                <p>
 
-          </Link>
+                  Find travelers who match
+                  your interests, vibe,
+                  budget, and travel goals.
 
-          <Link
-            to="/chat"
-            className="dashboard-box"
-          >
+                </p>
 
-            <h3>💬 Chat</h3>
+                <span className="feature-tag">
 
-            <p>
-              Real-time communication
-              with your groups.
-            </p>
+                  AI Compatibility System
 
-          </Link>
+                </span>
 
-          <Link
-            to="/itinerary"
-            className="dashboard-box"
-          >
+              </div>
 
-            <h3>
-              ✨ AI Itinerary
-            </h3>
+            </Link>
 
-            <p>
-              Generate smart AI-powered
-              travel plans instantly.
-            </p>
+          </div>
 
-          </Link>
+          {/* CHAT */}
+
+          <div className="col-lg-6">
+
+            <Link
+              to="/chat"
+              className="dashboard-box feature-box h-100 text-decoration-none"
+            >
+
+              <div className="feature-icon">
+
+                💬
+
+              </div>
+
+              <div className="feature-content">
+
+                <h2>
+
+                  Personal Travel Chat
+
+                </h2>
+
+                <p>
+
+                  Chat with travelers,
+                  share plans,
+                  and stay connected
+                  in real time.
+
+                </p>
+
+                <span className="feature-tag">
+
+                  Live Messaging Experience
+
+                </span>
+
+              </div>
+
+            </Link>
+
+          </div>
 
         </div>
 
@@ -370,20 +439,28 @@ function Dashboard() {
 
         <div className="current-trips-wrapper mb-5">
 
-          <h2 className="section-title mb-4">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
 
-            Current Trips ✈️
+            <h2 className="section-title m-0">
 
-          </h2>
+              Current Trips ✈️
+
+            </h2>
+
+          </div>
 
           {
             loading ? (
 
-              <h3 className="text-light">
+              <div className="empty-box">
 
-                Loading trips...
+                <h3>
 
-              </h3>
+                  Loading trips...
+
+                </h3>
+
+              </div>
 
             ) : (
 
@@ -395,11 +472,15 @@ function Dashboard() {
                     <div className="empty-box">
 
                       <div className="empty-icon">
+
                         ✈️
+
                       </div>
 
                       <h3>
+
                         No Trips Yet
+
                       </h3>
 
                       <p>
@@ -409,6 +490,15 @@ function Dashboard() {
 
                       </p>
 
+                      <Link
+                        to="/create-trip"
+                        className="btn btn-custom mt-3"
+                      >
+
+                        Create Trip
+
+                      </Link>
+
                     </div>
 
                   ) : (
@@ -416,31 +506,26 @@ function Dashboard() {
                     trips.map((trip, index) => (
 
                       <div
-                        className="col-md-4"
+                        className="col-sm-12 col-md-6 col-lg-4"
                         key={index}
                       >
 
-                        <div className="trip-card glass-card">
+                        <div className="trip-card glass-card h-100">
 
-                          {
-                            trip.image && (
+                          {/* IMAGE */}
 
-                              <img
-                                src={trip.image}
-                                alt={trip.destination}
-                                className="trip-image"
-                              />
+                          <div className="trip-image-wrapper">
 
-                            )
-                          }
+                            <img
+                              src={
+                                trip.image ||
+                                "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+                              }
+                              alt={trip.destination}
+                              className="trip-image"
+                            />
 
-                          <div className="p-4">
-
-                            <div className="trip-card-top">
-
-                              <h3>
-                                {trip.destination}
-                              </h3>
+                            <div className="trip-overlay">
 
                               <span className="trip-badge">
 
@@ -450,22 +535,55 @@ function Dashboard() {
 
                             </div>
 
-                            <div className="trip-details">
+                          </div>
+
+                          {/* CONTENT */}
+
+                          <div className="p-4">
+
+                            <h3 className="trip-title">
+
+                              {trip.destination}
+
+                            </h3>
+
+                            <div className="trip-details mt-3">
 
                               <p>
+
                                 📍 {trip.destination}
+
                               </p>
 
                               <p>
+
                                 💰 ₹{trip.budget}
+
                               </p>
 
                               <p>
+
                                 📅 {
-                                  trip.startDate
+                                  trip.date
                                     ?.slice(0, 10)
                                 }
+
                               </p>
+
+                            </div>
+
+                            {/* ACTION BUTTON */}
+
+                            <div className="trip-actions mt-4">
+
+                              <Link
+                                to="/trips"
+                                className="btn btn-custom w-100"
+                              >
+
+                                View Details
+
+                              </Link>
 
                             </div>
 
@@ -480,7 +598,9 @@ function Dashboard() {
                 }
 
               </div>
+
             )
+
           }
 
         </div>
@@ -489,7 +609,7 @@ function Dashboard() {
 
         <div className="row g-4">
 
-          {/* EXPENSE */}
+          {/* UPCOMING */}
 
           <div className="col-lg-6">
 
@@ -497,69 +617,62 @@ function Dashboard() {
 
               <h3 className="text-warning mb-4">
 
-                💸 Expense Summary
+                🌴 Upcoming Adventure
 
               </h3>
 
-              <div className="expense-row">
+              {
+                trips.length > 0 ? (
 
-                Total Trips Budget
+                  <div className="upcoming-trip">
 
-                <span>
+                    <h2>
 
-                  ₹
-                  {
-                    trips.reduce(
-                      (acc, trip) =>
-                        acc +
-                        Number(
-                          trip.budget || 0
-                        ),
-                      0
-                    )
-                  }
+                      {trips[0].destination}
 
-                </span>
+                    </h2>
 
-              </div>
+                    <p>
 
-              <div className="expense-row">
+                      📅 {
+                        trips[0].date
+                          ?.slice(0, 10)
+                      }
 
-                Average Budget
+                    </p>
 
-                <span>
+                    <p>
 
-                  ₹
-                  {
-                    trips.length > 0
-                      ? Math.floor(
-                          trips.reduce(
-                            (acc, trip) =>
-                              acc +
-                              Number(
-                                trip.budget || 0
-                              ),
-                            0
-                          ) / trips.length
-                        )
-                      : 0
-                  }
+                      💰 Budget:
+                      ₹{trips[0].budget}
 
-                </span>
+                    </p>
 
-              </div>
+                    <Link
+                      to="/trips"
+                      className="btn btn-custom mt-3"
+                    >
 
-              <div className="expense-row">
+                      Explore Trip
 
-                Estimated Savings
+                    </Link>
 
-                <span>
+                  </div>
 
-                  ₹{trips.length * 5000}
+                ) : (
 
-                </span>
+                  <div className="empty-box">
 
-              </div>
+                    <h4>
+
+                      No Upcoming Trips
+
+                    </h4>
+
+                  </div>
+
+                )
+              }
 
             </div>
 
@@ -578,20 +691,37 @@ function Dashboard() {
               </h3>
 
               {
-                trips.slice(0, 4).map(
-                  (trip, index) => (
+                trips.length === 0 ? (
 
-                    <div
-                      className="activity-item"
-                      key={index}
-                    >
+                  <div className="empty-box">
 
-                      ✈️ New update in
-                      {" "}
-                      {trip.destination}
+                    <h4>
 
-                    </div>
+                      No Recent Activity
+
+                    </h4>
+
+                  </div>
+
+                ) : (
+
+                  trips.slice(0, 4).map(
+                    (trip, index) => (
+
+                      <div
+                        className="activity-item"
+                        key={index}
+                      >
+
+                        ✈️ New update in
+                        {" "}
+                        {trip.destination}
+
+                      </div>
+
+                    )
                   )
+
                 )
               }
 
@@ -606,7 +736,7 @@ function Dashboard() {
     </div>
 
   );
+
 }
 
 export default Dashboard;
-

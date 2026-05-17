@@ -5,24 +5,76 @@ const socket = io("http://localhost:5000");
 
 function Chat() {
 
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [message, setMessage] =
+    useState("");
 
-  const tripId = "YOUR_TRIP_ID";
+  const [messages, setMessages] =
+    useState([]);
+
+  const [trip, setTrip] =
+    useState(null);
+
+  const tripId =
+    "YOUR_TRIP_ID";
+
+  // FETCH TRIP
+
+  const fetchTrip = async () => {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5000/api/trips/${tripId}`,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data =
+        await res.json();
+
+      setTrip(data);
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
 
   useEffect(() => {
 
-    socket.emit("join_trip", tripId);
+    fetchTrip();
 
-    socket.on("receive_message", (data) => {
+    socket.emit(
+      "join_trip",
+      tripId
+    );
 
-      setMessages((prev) => [...prev, data]);
+    socket.on(
+      "receive_message",
+      (data) => {
 
-    });
+        setMessages((prev) => [
+          ...prev,
+          data,
+        ]);
+
+      }
+    );
 
     return () => {
 
-      socket.off("receive_message");
+      socket.off(
+        "receive_message"
+      );
 
     };
 
@@ -30,12 +82,21 @@ function Chat() {
 
   const sendMessage = () => {
 
-    if (!message.trim()) return;
+    if (!message.trim())
+      return;
 
-    socket.emit("send_message", {
-      tripId,
-      text: message,
-    });
+    socket.emit(
+      "send_message",
+      {
+        tripId,
+        text: message,
+      }
+    );
+
+    setMessages((prev) => [
+      ...prev,
+      { text: message },
+    ]);
 
     setMessage("");
 
@@ -43,49 +104,146 @@ function Chat() {
 
   return (
 
-    <div className="dashboard-page">
+    <div className="chat-page">
 
       <div className="container py-5">
 
-        <h1 className="section-title">
-          Travel Chat 💬
-        </h1>
+        <div className="chat-layout">
 
-        <div className="chat-box">
+          {/* SIDEBAR */}
 
-          {
-            messages.map((msg, index) => (
+          <div className="chat-sidebar">
 
-              <div
-                key={index}
-                className="message"
-              >
-                {msg.text}
+            <h2>
+
+              🌍 TripShare
+
+            </h2>
+
+            <p>
+
+              Active Group
+
+            </p>
+
+            <div className="group-card active-group">
+
+              ✈ {
+                trip?.title ||
+                "Travel Group"
+              }
+
+            </div>
+
+          </div>
+
+          {/* MAIN CHAT */}
+
+          <div className="chat-main">
+
+            {/* TOP BAR */}
+
+            <div className="chat-topbar">
+
+              <div>
+
+                <h3>
+
+                  {
+                    trip?.title ||
+                    "Travel Group Chat"
+                  }
+
+                </h3>
+
+                <span>
+
+                  Travelers chatting live
+
+                </span>
+
               </div>
 
-            ))
-          }
+            </div>
 
-        </div>
+            {/* MESSAGES */}
 
-        <div className="d-flex gap-3 mt-4">
+            <div className="chat-messages">
 
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Type your message..."
-            value={message}
-            onChange={(e) =>
-              setMessage(e.target.value)
-            }
-          />
+              {
+                messages.length === 0 ? (
 
-          <button
-            className="btn btn-custom"
-            onClick={sendMessage}
-          >
-            Send
-          </button>
+                  <div className="empty-chat">
+
+                    <h2>
+
+                      👋 Welcome to Trip Chat
+
+                    </h2>
+
+                    <p>
+
+                      Start chatting with
+                      your travel crew.
+
+                    </p>
+
+                  </div>
+
+                ) : (
+
+                  messages.map(
+                    (msg, index) => (
+
+                      <div
+                        key={index}
+                        className="message-row"
+                      >
+
+                        <div className="message-bubble">
+
+                          {msg.text}
+
+                        </div>
+
+                      </div>
+
+                    )
+                  )
+
+                )
+              }
+
+            </div>
+
+            {/* INPUT */}
+
+            <div className="chat-input-wrapper">
+
+              <textarea
+                rows="1"
+                className="chat-input"
+                placeholder="Type your message..."
+                value={message}
+                onChange={(e) =>
+                  setMessage(
+                    e.target.value
+                  )
+                }
+              />
+
+              <button
+                className="send-btn-modern"
+                onClick={sendMessage}
+              >
+
+                send
+
+              </button>
+
+            </div>
+
+          </div>
 
         </div>
 
@@ -94,6 +252,7 @@ function Chat() {
     </div>
 
   );
+
 }
 
 export default Chat;

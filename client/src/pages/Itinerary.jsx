@@ -47,80 +47,165 @@ function Itinerary() {
       } finally {
 
         setLoading(false);
+
       }
-  };
+
+    };
 
   return (
 
-    <div className="min-h-screen bg-gray-100 p-10">
+    <div className="dashboard-page min-vh-100 text-light">
 
-      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+      <div className="container py-5">
 
-        <h1 className="text-4xl font-bold mb-8">
+        {/* HERO */}
 
-          AI Itinerary Generator ✨
+        <div className="text-center mb-5">
 
-        </h1>
+          <h1 className="section-title">
 
-        <div className="grid md:grid-cols-3 gap-4 mb-6">
+            AI Itinerary Generator ✨
 
-          <input
-            type="text"
-            placeholder="Destination"
-            className="border p-3 rounded-lg"
-            onChange={(e) =>
-              setDestination(e.target.value)
-            }
-          />
+          </h1>
 
-          <input
-            type="number"
-            placeholder="Budget"
-            className="border p-3 rounded-lg"
-            onChange={(e) =>
-              setBudget(e.target.value)
-            }
-          />
+          <p className="dashboard-subtitle">
 
-          <input
-            type="number"
-            placeholder="Days"
-            className="border p-3 rounded-lg"
-            onChange={(e) =>
-              setDays(e.target.value)
-            }
-          />
+            Generate smart AI-powered
+            travel plans instantly.
+
+          </p>
 
         </div>
 
-        <button
-          onClick={generatePlan}
-          className="bg-black text-white px-8 py-3 rounded-xl"
-        >
+        {/* MAIN BOX */}
 
-          {
-            loading
-            ? "Generating..."
-            : "Generate Plan"
-          }
+        <div className="itinerary-box glass-card">
 
-        </button>
+          {/* INPUTS */}
 
-        {
-          result && (
+          <div className="row g-4">
 
-            <div className="mt-10 bg-gray-100 p-6 rounded-xl whitespace-pre-wrap">
+            <div className="col-md-4">
 
-              {result}
+              <label className="form-label">
+
+                Destination
+
+              </label>
+
+              <input
+                type="text"
+                placeholder="Goa"
+                className="form-control itinerary-input"
+                onChange={(e) =>
+                  setDestination(
+                    e.target.value
+                  )
+                }
+              />
 
             </div>
-          )
-        }
+
+            <div className="col-md-4">
+
+              <label className="form-label">
+
+                Budget
+
+              </label>
+
+              <input
+                type="number"
+                placeholder="5000"
+                className="form-control itinerary-input"
+                onChange={(e) =>
+                  setBudget(
+                    e.target.value
+                  )
+                }
+              />
+
+            </div>
+
+            <div className="col-md-4">
+
+              <label className="form-label">
+
+                Days
+
+              </label>
+
+              <input
+                type="number"
+                placeholder="3"
+                className="form-control itinerary-input"
+                onChange={(e) =>
+                  setDays(
+                    e.target.value
+                  )
+                }
+              />
+
+            </div>
+
+          </div>
+
+          {/* BUTTON */}
+
+          <div className="mt-5 text-center">
+
+            <button
+              onClick={generatePlan}
+              disabled={loading}
+              className="premium-ai-btn border-0"
+            >
+
+              {
+                loading
+                ? "Generating Plan..."
+                : "Generate AI Plan 🚀"
+              }
+
+            </button>
+
+          </div>
+
+          {/* RESULT */}
+
+          {
+            result && (
+
+              <div className="itinerary-result mt-5">
+
+                <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+                  <h2 className="text-warning m-0">
+
+                    Your AI Travel Plan ✨
+
+                  </h2>
+
+                </div>
+
+                <div className="itinerary-content">
+
+                  {result}
+
+                </div>
+
+              </div>
+
+            )
+          }
+
+        </div>
 
       </div>
 
     </div>
+
   );
+
 }
 
 export default Itinerary;

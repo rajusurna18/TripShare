@@ -2,21 +2,27 @@ import { useState } from "react";
 
 import API from "../services/api";
 
+import toast from "react-hot-toast";
+
 function CreateTrip() {
 
-  const [tripData, setTripData] = useState({
+  const [loading, setLoading] =
+    useState(false);
 
-    title: "",
-    destination: "",
-    budget: "",
-    date: "",
-    travelers: "",
-    category: "",
-    transport: "",
-    visibility: "",
-    description: "",
+  const [tripData, setTripData] =
+    useState({
 
-  });
+      title: "",
+      destination: "",
+      budget: "",
+      date: "",
+      travelers: "",
+      category: "",
+      transport: "",
+      visibility: "",
+      description: "",
+
+    });
 
   const [image, setImage] =
     useState(null);
@@ -34,73 +40,96 @@ function CreateTrip() {
 
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit =
+    async (e) => {
 
-    e.preventDefault();
+      e.preventDefault();
 
-    try {
+      try {
 
-      const formData =
-        new FormData();
+        setLoading(true);
 
-      Object.keys(tripData)
-        .forEach((key) => {
+        const formData =
+          new FormData();
+
+        Object.keys(tripData)
+          .forEach((key) => {
+
+            formData.append(
+              key,
+              tripData[key]
+            );
+
+          });
+
+        if (image) {
 
           formData.append(
-            key,
-            tripData[key]
+            "image",
+            image
           );
+
+        }
+
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        await API.post(
+
+          "/api/trips",
+
+          formData,
+
+          {
+            headers: {
+
+              Authorization:
+                token,
+
+              "Content-Type":
+                "multipart/form-data",
+
+            },
+          }
+
+        );
+
+        toast.success(
+          "Trip Created Successfully ✈️"
+        );
+
+        setTripData({
+
+          title: "",
+          destination: "",
+          budget: "",
+          date: "",
+          travelers: "",
+          category: "",
+          transport: "",
+          visibility: "",
+          description: "",
 
         });
 
-      if (image) {
+        setImage(null);
 
-        formData.append(
-          "image",
-          image
+      } catch (err) {
+
+        toast.error(
+          err.response?.data?.message ||
+          "Trip Creation Failed"
         );
+
+      } finally {
+
+        setLoading(false);
 
       }
 
-      const token =
-        localStorage.getItem(
-          "token"
-        );
-
-      await API.post(
-
-        "/api/trips",
-
-        formData,
-
-        {
-          headers: {
-
-            Authorization: token,
-
-            "Content-Type":
-              "multipart/form-data",
-
-          },
-        }
-
-      );
-
-      alert(
-        "Trip Created Successfully ✈️"
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
-      alert(
-        "Trip Creation Failed"
-      );
-
-    }
-
-  };
+    };
 
   return (
 
@@ -113,14 +142,18 @@ function CreateTrip() {
           <div className="text-center mb-5">
 
             <h1 className="section-title">
+
               Create Your Dream Trip ✈️
+
             </h1>
 
             <p>
+
               Plan adventures,
               invite travelers,
               and explore the
               world smarter.
+
             </p>
 
           </div>
@@ -129,66 +162,88 @@ function CreateTrip() {
 
             <div className="row g-4">
 
+              {/* TITLE */}
+
               <div className="col-md-6">
 
                 <label className="form-label">
+
                   Trip Title
+
                 </label>
 
                 <input
                   type="text"
                   name="title"
+                  value={tripData.title}
                   className="form-control trip-input"
-                  placeholder="Goa Beach Adventure"
+                  placeholder="please enter trip title"
                   onChange={handleChange}
+                  minLength="3"
                   required
                 />
 
               </div>
 
+              {/* DESTINATION */}
+
               <div className="col-md-6">
 
                 <label className="form-label">
+
                   Destination
+
                 </label>
 
                 <input
                   type="text"
                   name="destination"
+                  value={tripData.destination}
                   className="form-control trip-input"
-                  placeholder="Goa"
+                  placeholder="please enter destination"
                   onChange={handleChange}
                   required
                 />
 
               </div>
 
+              {/* BUDGET */}
+
               <div className="col-md-6">
 
                 <label className="form-label">
+
                   Budget
+
                 </label>
 
                 <input
                   type="number"
                   name="budget"
+                  value={tripData.budget}
                   className="form-control trip-input"
-                  placeholder="5000"
+                  placeholder="please enter budget"
                   onChange={handleChange}
+                  min="100"
                   required
                 />
 
               </div>
 
+              {/* DATE */}
+
               <div className="col-md-6">
 
                 <label className="form-label">
+
                   Travel Date
+
                 </label>
 
                 <input
                   type="date"
                   name="date"
+                  value={tripData.date}
                   className="form-control trip-input"
                   onChange={handleChange}
                   required
@@ -196,32 +251,45 @@ function CreateTrip() {
 
               </div>
 
+              {/* TRAVELERS */}
+
               <div className="col-md-6">
 
                 <label className="form-label">
+
                   Travelers
+
                 </label>
 
                 <input
                   type="number"
                   name="travelers"
+                  value={tripData.travelers}
                   className="form-control trip-input"
-                  placeholder="4"
+                  placeholder="number of travelers"
                   onChange={handleChange}
+                  min="1"
+                  max="50"
                 />
 
               </div>
 
+              {/* CATEGORY */}
+
               <div className="col-md-6">
 
                 <label className="form-label">
+
                   Trip Category
+
                 </label>
 
                 <select
                   name="category"
+                  value={tripData.category}
                   className="form-control trip-input"
                   onChange={handleChange}
+                  required
                 >
 
                   <option value="">
@@ -252,16 +320,22 @@ function CreateTrip() {
 
               </div>
 
+              {/* TRANSPORT */}
+
               <div className="col-md-6">
 
                 <label className="form-label">
+
                   Transport Mode
+
                 </label>
 
                 <select
                   name="transport"
+                  value={tripData.transport}
                   className="form-control trip-input"
                   onChange={handleChange}
+                  required
                 >
 
                   <option value="">
@@ -292,16 +366,22 @@ function CreateTrip() {
 
               </div>
 
+              {/* VISIBILITY */}
+
               <div className="col-md-6">
 
                 <label className="form-label">
+
                   Visibility
+
                 </label>
 
                 <select
                   name="visibility"
+                  value={tripData.visibility}
                   className="form-control trip-input"
                   onChange={handleChange}
+                  required
                 >
 
                   <option value="">
@@ -320,10 +400,14 @@ function CreateTrip() {
 
               </div>
 
+              {/* IMAGE */}
+
               <div className="col-md-12">
 
                 <label className="form-label">
+
                   Upload Trip Image
+
                 </label>
 
                 <input
@@ -337,31 +421,53 @@ function CreateTrip() {
                   }
                 />
 
+                <small className="text-secondary">
+
+                  Upload travel destination image
+
+                </small>
+
               </div>
+
+              {/* DESCRIPTION */}
 
               <div className="col-md-12">
 
                 <label className="form-label">
+
                   Trip Description
+
                 </label>
 
                 <textarea
                   rows="5"
                   name="description"
+                  value={tripData.description}
                   className="form-control trip-input"
                   placeholder="Describe your dream trip..."
                   onChange={handleChange}
+                  minLength="20"
+                  required
                 />
 
               </div>
+
+              {/* BUTTON */}
 
               <div className="col-md-12">
 
                 <button
                   type="submit"
+                  disabled={loading}
                   className="btn btn-custom w-100"
                 >
-                  Create Trip 🚀
+
+                  {
+                    loading
+                    ? "Creating Trip..."
+                    : "Create Trip 🚀"
+                  }
+
                 </button>
 
               </div>

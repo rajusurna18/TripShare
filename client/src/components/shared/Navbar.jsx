@@ -2,11 +2,6 @@ import { Link } from "react-router-dom";
 
 function Navbar() {
 
-  const user =
-    JSON.parse(
-      localStorage.getItem("user")
-    );
-
   return (
 
     <nav className="navbar navbar-expand-lg navbar-dark">
@@ -91,27 +86,6 @@ function Navbar() {
                 to="/notifications"
               >
                 🔔
-              </Link>
-
-            </li>
-
-            {/* PROFILE IMAGE */}
-
-            <li className="nav-item">
-
-              <Link
-                to="/profile"
-                className="nav-profile"
-              >
-
-                <img
-                  src={
-                    user?.profileImage ||
-                    "https://i.pravatar.cc/40"
-                  }
-                  alt="profile"
-                />
-
               </Link>
 
             </li>

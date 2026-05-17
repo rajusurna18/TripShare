@@ -24,6 +24,8 @@ import Itinerary from "./pages/Itinerary";
 import Profile
 from "./pages/Profile";
 
+import TripDetails from "./pages/TripDetails";
+
 function App() {
 
   return (
@@ -108,6 +110,11 @@ function App() {
            path="/itinerary"
           element={<Itinerary />}
         />
+
+         <Route
+             path="/trip/:tripId"
+            element={<TripDetails />}
+           />
 
       </Routes>
 

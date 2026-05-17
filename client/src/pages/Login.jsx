@@ -1,78 +1,117 @@
 import { useState } from "react";
-import { login } from "../services/auth.api";
 import { useNavigate, Link } from "react-router-dom";
+
+import toast from "react-hot-toast";
 
 function Login() {
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [loading, setLoading] =
+    useState(false);
+
+  const [formData, setFormData] =
+    useState({
+      email: "",
+      password: "",
+    });
 
   const handleChange = (e) => {
 
     setFormData({
+
       ...formData,
-      [e.target.name]: e.target.value,
+
+      [e.target.name]:
+        e.target.value,
+
     });
 
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit =
+    async (e) => {
 
-    e.preventDefault();
+      e.preventDefault();
 
-    try {
+      try {
 
-      const res = await fetch(
-        "http://localhost:5000/api/auth/login",
-        {
-          method: "POST",
+        setLoading(true);
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const res =
+          await fetch(
+            "http://localhost:5000/api/auth/login",
+            {
+              method: "POST",
 
-          body: JSON.stringify(formData),
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body:
+                JSON.stringify(
+                  formData
+                ),
+            }
+          );
+
+        const data =
+          await res.json();
+
+        if (!res.ok) {
+
+          return toast.error(
+            data.message ||
+            "Invalid credentials"
+          );
+
         }
-      );
 
-      const data = await res.json();
+        localStorage.setItem(
+          "token",
+          data.token
+        );
 
-      localStorage.setItem("token", data.token);
+        toast.success(
+          "Login successful 🚀"
+        );
 
-      alert("Login successful 🚀");
+        navigate("/dashboard");
 
-      navigate("/dashboard");
+      } catch (err) {
 
-    } catch (err) {
+        toast.error(
+          "Login failed"
+        );
 
-      console.log(err);
+      } finally {
 
-      alert("Login failed");
+        setLoading(false);
 
-    }
+      }
 
-  };
+    };
 
   return (
 
     <div className="container vh-100 d-flex justify-content-center align-items-center">
 
       <div
-        className="card p-4 bg-dark text-white shadow-lg"
-        style={{
-          maxWidth: "450px",
-          width: "100%",
-          borderRadius: "20px",
-          border: "1px solid #FFD700"
-        }}
+        className="
+          card
+          p-4
+          bg-dark
+          text-white
+          shadow-lg
+          auth-card
+        "
       >
 
         <h2 className="text-center mb-4 text-warning">
+
           Welcome Back 🌍
+
         </h2>
 
         <form onSubmit={handleSubmit}>
@@ -80,7 +119,9 @@ function Login() {
           <div className="mb-3">
 
             <label className="form-label">
+
               Email
+
             </label>
 
             <input
@@ -97,7 +138,9 @@ function Login() {
           <div className="mb-3">
 
             <label className="form-label">
+
               Password
+
             </label>
 
             <input
@@ -113,20 +156,74 @@ function Login() {
 
           <button
             type="submit"
-            className="btn btn-warning w-100 fw-bold"
+            disabled={loading}
+            className="
+              btn
+              btn-warning
+              w-100
+              fw-bold
+              loading-btn
+            "
           >
-            Login
+
+            {
+              loading
+              ? "Logging in..."
+              : "Login"
+            }
+
           </button>
 
         </form>
+
+     
+
+        {/* SOCIAL LOGIN */}
+
+        <div className="social-login mt-4">
+
+          <p className="text-center text-light">
+
+            Or continue with
+
+          </p>
+
+          <div className="d-flex justify-content-center gap-3 mt-3">
+
+            <button className="social-btn">
+
+              <i className="fab fa-google"></i>
+
+            </button>
+
+            <button className="social-btn">
+
+              <i className="fab fa-github"></i>
+
+            </button>
+
+            <button className="social-btn">
+
+              <i className="fab fa-facebook-f"></i>
+
+            </button>
+
+          </div>
+
+        </div>
 
         <div className="text-center mt-4">
 
           <Link
             to="/forgot-password"
-            className="text-info text-decoration-none"
+            className="
+              text-info
+              text-decoration-none
+            "
           >
+
             Forgot Password?
+
           </Link>
 
           <p className="mt-3">
@@ -135,9 +232,15 @@ function Login() {
 
             <Link
               to="/register"
-              className="text-warning text-decoration-none ms-2"
+              className="
+                text-warning
+                text-decoration-none
+                ms-2
+              "
             >
+
               Register
+
             </Link>
 
           </p>
@@ -149,6 +252,7 @@ function Login() {
     </div>
 
   );
+
 }
 
 export default Login;

@@ -3,23 +3,40 @@ import API from "../services/api";
 
 function AI() {
 
-  const [prompt, setPrompt] = useState("");
-  const [reply, setReply] = useState("");
+  const [prompt, setPrompt] =
+    useState("");
+
+  const [reply, setReply] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
 
   const handleAsk = async () => {
 
+    if (!prompt.trim())
+      return;
+
     try {
+
+      setLoading(true);
 
       const res = await API.post(
         "/api/ai/suggest",
         { prompt }
       );
 
-      setReply(res.data.reply);
+      setReply(
+        res.data.reply
+      );
 
     } catch (err) {
 
       console.log(err);
+
+    } finally {
+
+      setLoading(false);
 
     }
 
@@ -27,43 +44,82 @@ function AI() {
 
   return (
 
-    <div className="dashboard-page">
+    <div className="ai-page min-vh-100">
 
       <div className="container py-5">
 
-        <div className="ai-box">
+        <div className="ai-container">
 
-          <h1 className="section-title">
-            AI Travel Planner 🤖
-          </h1>
+          {/* HEADER */}
 
-          <textarea
-            className="form-control ai-input"
-            rows="6"
-            placeholder="Ask AI about destinations, budget trips, hotels..."
-            value={prompt}
-            onChange={(e) =>
-              setPrompt(e.target.value)
-            }
-          />
+          <div className="ai-header text-center">
 
-          <button
-            className="btn btn-custom mt-4"
-            onClick={handleAsk}
-          >
-            Ask AI
-          </button>
+            <h1 className="ai-title">
+
+              ✨ AI Travel Planner
+
+            </h1>
+
+            <p className="ai-subtitle">
+
+              Ask AI about destinations,
+              budgets, hotels,
+              itineraries, and hidden gems.
+
+            </p>
+
+          </div>
+
+          {/* INPUT */}
+
+          <div className="ai-input-box">
+
+            <textarea
+              className="ai-input-modern"
+              rows="6"
+              placeholder="Example: Plan a 5-day Goa trip under ₹15,000..."
+              value={prompt}
+              onChange={(e) =>
+                setPrompt(
+                  e.target.value
+                )
+              }
+            />
+
+            <button
+              className="ai-btn"
+              onClick={handleAsk}
+              disabled={loading}
+            >
+
+              {
+                loading
+                ? "Thinking..."
+                : "Ask AI 🚀"
+              }
+
+            </button>
+
+          </div>
+
+          {/* RESPONSE */}
 
           {
             reply && (
 
-              <div className="ai-reply mt-5">
+              <div className="ai-reply-box">
 
-                <h3 className="text-warning">
-                  AI Suggestion ✨
-                </h3>
+                <div className="ai-reply-header">
 
-                <p>{reply}</p>
+                  🤖 AI Suggestion
+
+                </div>
+
+                <div className="ai-reply-content">
+
+                  {reply}
+
+                </div>
 
               </div>
 
@@ -77,6 +133,7 @@ function AI() {
     </div>
 
   );
+
 }
 
 export default AI;

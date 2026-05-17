@@ -1,63 +1,100 @@
+import { Link } from "react-router-dom";
+
 function TripCard({ trip }) {
 
   return (
 
-    <div className="trip-card">
+    <div className="trip-card glass-card">
 
-      <div className="trip-card-top">
+      {/* IMAGE */}
+
+      <div className="trip-image-wrapper">
 
         <img
-  src={trip.image}
-  alt={trip.title}
-  className="trip-image"
-/>
-
-        <h3>
-          {trip.title}
-        </h3>
+          src={trip.image}
+          alt={trip.title}
+          className="trip-image"
+        />
 
         <span className="trip-badge">
+
           Active
+
         </span>
 
       </div>
 
-      <div className="trip-details">
+      {/* CONTENT */}
 
-        <p>
-          📍 Destination:
-          <span>
-            {trip.destination}
-          </span>
-        </p>
+      <div className="trip-card-content">
 
-        <p>
-          💰 Budget:
-          <span>
-            ₹{trip.budget}
-          </span>
-        </p>
+        <h3 className="trip-title">
 
-        <p>
-          📅 Date:
-          <span>
-            {new Date(trip.date).toDateString()}
-          </span>
-        </p>
+          {trip.title}
 
-      </div>
+        </h3>
 
-      <div className="trip-buttons">
+        <div className="trip-details">
 
-        <button className="btn btn-custom">
-          Join Trip
-        </button>
+          <p>
+
+            📍
+            <span>
+              {trip.destination}
+            </span>
+
+          </p>
+
+          <p>
+
+            💰
+            <span>
+              ₹{trip.budget}
+            </span>
+
+          </p>
+
+          <p>
+
+            📅
+            <span>
+              {
+                new Date(trip.date)
+                  .toDateString()
+              }
+            </span>
+
+          </p>
+
+        </div>
+
+        {/* BUTTONS */}
+
+        <div className="trip-buttons">
+
+          <button className="btn btn-custom">
+
+            Join Trip
+
+          </button>
+
+          <Link
+            to={`/matches/${trip._id}`}
+            className="btn btn-outline-warning"
+          >
+
+            Matches
+
+          </Link>
+
+        </div>
 
       </div>
 
     </div>
 
   );
+
 }
 
 export default TripCard;
