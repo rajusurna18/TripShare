@@ -3,27 +3,35 @@ import { getMatches } from "../services/match.api";
 
 function Matches() {
 
-  const [matches, setMatches] = useState([]);
+  const [matches, setMatches] =
+    useState([]);
 
-  const tripId = "69fc8561761a0df82dc9e096";
+  const tripId =
+    "69fc8561761a0df82dc9e096";
 
   useEffect(() => {
 
-    const fetchMatches = async () => {
+    const fetchMatches =
+      async () => {
 
-      try {
+        try {
 
-        const res = await getMatches(tripId);
+          const res =
+            await getMatches(
+              tripId
+            );
 
-        setMatches(res.data);
+          setMatches(
+            res.data
+          );
 
-      } catch (err) {
+        } catch (err) {
 
-        console.log(err);
+          console.log(err);
 
-      }
+        }
 
-    };
+      };
 
     fetchMatches();
 
@@ -35,44 +43,108 @@ function Matches() {
 
       <div className="container py-5">
 
-        <h1 className="section-title">
+        <h1 className="section-title mb-5">
+
           Smart Travel Matches 🌍
+
         </h1>
 
         <div className="row g-4">
 
           {
-            matches.map((item) => (
+            matches.map(
+              (item, index) => (
 
-              <div
-                className="col-md-4"
-                key={item.trip._id}
-              >
+                <div
+                  className="col-md-4"
+                  key={index}
+                >
 
-                <div className="special-card">
+                  <div className="glass-card p-4 h-100 text-center">
 
-                  <h4 className="text-warning">
-                    {item.trip.title}
-                  </h4>
+                    <img
+                      src={
+                        item.user
+                          ?.profileImage ||
 
-                  <p>
-                    📍 {item.trip.destination}
-                  </p>
+                        "https://i.pravatar.cc/150"
+                      }
 
-                  <p>
-                    💰 ₹{item.trip.budget}
-                  </p>
+                      alt="profile"
 
-                  <p>
-                    🔥 Match Score:
-                    {item.score}%
-                  </p>
+                      className="match-profile-img"
+                    />
+
+                    <h2 className="match-name mt-4">
+
+                      {
+                        item.user?.name
+                      }
+
+                    </h2>
+
+                    <p className="match-info">
+
+                      🧠 Personality:
+                      {" "}
+
+                      {
+                        item.user
+                          ?.personality ||
+                        "Not Added"
+                      }
+
+                    </p>
+
+                    <p className="match-info">
+
+                      ✈️ Style:
+                      {" "}
+
+                      {
+                        item.user
+                          ?.travelStyle ||
+                        "Not Added"
+                      }
+
+                    </p>
+
+                    <p className="match-info">
+
+                      ❤️ Interests:
+                      {" "}
+
+                      {
+                        item
+                          .commonInterests
+                          ?.length > 0
+
+                          ? item
+                              .commonInterests
+                              .join(", ")
+
+                          : "No Common Interests"
+                      }
+
+                    </p>
+
+                    <div className="match-score-box mt-4">
+
+                      🔥 Match Score
+                      <span>
+
+                        {item.score}%
+
+                      </span>
+
+                    </div>
+
+                  </div>
 
                 </div>
 
-              </div>
-
-            ))
+              )
+            )
           }
 
         </div>

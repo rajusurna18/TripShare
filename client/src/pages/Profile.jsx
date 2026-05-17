@@ -14,6 +14,12 @@ function Profile() {
   const [interests, setInterests] =
     useState("");
 
+  const [travelStyle, setTravelStyle] =
+    useState("");
+
+  const [personality, setPersonality] =
+    useState("");
+
   const [image, setImage] =
     useState(null);
 
@@ -42,15 +48,27 @@ function Profile() {
 
         setUser(res.data);
 
-        setBio(res.data.bio);
+        setBio(
+          res.data.bio || ""
+        );
 
         setInterests(
-          res.data.interests.join(", ")
+          res.data.interests
+            ?.join(", ") || ""
+        );
+
+        setTravelStyle(
+          res.data.travelStyle || ""
+        );
+
+        setPersonality(
+          res.data.personality || ""
         );
 
       } catch (err) {
 
         console.log(err);
+
       }
   };
 
@@ -65,7 +83,10 @@ function Profile() {
         const formData =
           new FormData();
 
-        formData.append("bio", bio);
+        formData.append(
+          "bio",
+          bio
+        );
 
         formData.append(
           "interests",
@@ -74,11 +95,23 @@ function Profile() {
             .map((i) => i.trim())
         );
 
+        formData.append(
+          "travelStyle",
+          travelStyle
+        );
+
+        formData.append(
+          "personality",
+          personality
+        );
+
         if (image) {
+
           formData.append(
             "profileImage",
             image
           );
+
         }
 
         const res = await API.put(
@@ -100,11 +133,14 @@ function Profile() {
       } catch (err) {
 
         console.log(err);
+
       }
   };
 
   if (!user) {
+
     return <h1>Loading...</h1>;
+
   }
 
   return (
@@ -112,6 +148,8 @@ function Profile() {
     <div className="min-h-screen bg-gray-100 p-10">
 
       <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+
+        {/* PROFILE */}
 
         <div className="flex flex-col items-center">
 
@@ -143,7 +181,9 @@ function Profile() {
         <div className="mt-8">
 
           <label className="font-bold">
+
             Bio
+
           </label>
 
           <textarea
@@ -162,7 +202,9 @@ function Profile() {
         <div className="mt-6">
 
           <label className="font-bold">
+
             Interests
+
           </label>
 
           <input
@@ -176,6 +218,86 @@ function Profile() {
               )
             }
           />
+
+        </div>
+
+        {/* TRAVEL STYLE */}
+
+        <div className="mt-6">
+
+          <label className="font-bold">
+
+            Travel Style
+
+          </label>
+
+          <select
+            className="w-full border p-4 rounded-xl mt-2"
+            value={travelStyle}
+            onChange={(e) =>
+              setTravelStyle(
+                e.target.value
+              )
+            }
+          >
+
+            <option value="">
+              Select Travel Style
+            </option>
+
+            <option value="Budget">
+              Budget
+            </option>
+
+            <option value="Luxury">
+              Luxury
+            </option>
+
+            <option value="Adventure">
+              Adventure
+            </option>
+
+            <option value="Backpacking">
+              Backpacking
+            </option>
+
+          </select>
+
+        </div>
+
+        {/* PERSONALITY */}
+
+        <div className="mt-6">
+
+          <label className="font-bold">
+
+            Personality
+
+          </label>
+
+          <select
+            className="w-full border p-4 rounded-xl mt-2"
+            value={personality}
+            onChange={(e) =>
+              setPersonality(
+                e.target.value
+              )
+            }
+          >
+
+            <option value="">
+              Select Personality
+            </option>
+
+            <option value="Introvert">
+              Introvert
+            </option>
+
+            <option value="Extrovert">
+              Extrovert
+            </option>
+
+          </select>
 
         </div>
 
@@ -194,6 +316,8 @@ function Profile() {
 
         </div>
 
+        {/* BUTTON */}
+
         <button
           onClick={updateProfile}
           className="mt-8 bg-black text-white px-8 py-3 rounded-xl"
@@ -206,6 +330,7 @@ function Profile() {
       </div>
 
     </div>
+
   );
 }
 

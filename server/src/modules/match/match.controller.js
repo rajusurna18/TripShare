@@ -3,7 +3,8 @@ import { findMatchesService } from "./match.service.js";
 export const getMatches = async (req, res) => {
   try {
     const matches = await findMatchesService(
-      req.params.tripId
+      req.params.tripId,
+       req.user.id
     );
 
     res.json(matches);
