@@ -24,9 +24,10 @@ export const getTripsService =
   async () => {
 
     return await Trip.find()
+
       .populate(
         "createdBy",
-        "name email"
+        "name email profileImage"
       );
 
 };
@@ -39,10 +40,13 @@ export const joinTripService =
     const trip =
       await Trip.findById(tripId);
 
-    if (!trip)
+    if (!trip) {
+
       throw new Error(
         "Trip not found"
       );
+
+    }
 
     if (
       trip.members.includes(userId)
@@ -57,6 +61,36 @@ export const joinTripService =
     trip.members.push(userId);
 
     await trip.save();
+
+    return trip;
+
+};
+
+// GET SINGLE TRIP
+
+export const getTripByIdService =
+  async (tripId) => {
+
+    const trip =
+      await Trip.findById(tripId)
+
+        .populate(
+          "createdBy",
+          "name profileImage email"
+        )
+
+        .populate(
+          "members",
+          "name profileImage travelStyle"
+        );
+
+    if (!trip) {
+
+      throw new Error(
+        "Trip not found"
+      );
+
+    }
 
     return trip;
 

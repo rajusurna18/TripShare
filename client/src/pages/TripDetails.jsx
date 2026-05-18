@@ -72,13 +72,14 @@ function TripDetails() {
 
     <div className="dashboard-page min-vh-100 text-light">
 
-      {/* HERO BANNER */}
+      {/* HERO */}
 
       <div className="trip-hero">
 
         <img
           src={
             trip?.image ||
+
             "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
           }
           alt={trip?.destination}
@@ -115,7 +116,7 @@ function TripDetails() {
 
       <div className="container py-5">
 
-        {/* TOP ACTIONS */}
+        {/* ACTIONS */}
 
         <div className="d-flex flex-wrap gap-3 mb-5">
 
@@ -214,13 +215,15 @@ function TripDetails() {
 
                   <p>
 
-                    {trip?.travelers || 0}
+                    {trip?.members?.length || 0}
 
                   </p>
 
                 </div>
 
               </div>
+
+              {/* DESCRIPTION */}
 
               <div className="trip-description mt-5">
 
@@ -234,6 +237,7 @@ function TripDetails() {
 
                   {
                     trip?.description ||
+
                     "No description added yet."
                   }
 
@@ -333,68 +337,57 @@ function TripDetails() {
 
           <div className="traveler-grid">
 
-            <div className="traveler-card">
+            {
 
-              <img
-                src="https://i.pravatar.cc/100?img=1"
-                alt=""
-              />
+              trip?.members?.length > 0 ? (
 
-              <h5>
+                trip.members.map((member) => (
 
-                Alex
+                  <div
+                    className="traveler-card"
+                    key={member._id}
+                  >
 
-              </h5>
+                    <img
+                      src={
+                        member.profileImage ||
 
-              <p>
+                        "https://i.pravatar.cc/100"
+                      }
+                      alt={member.name}
+                    />
 
-                Adventure Lover
+                    <h5>
 
-              </p>
+                      {member.name}
 
-            </div>
+                    </h5>
 
-            <div className="traveler-card">
+                    <p>
 
-              <img
-                src="https://i.pravatar.cc/100?img=5"
-                alt=""
-              />
+                      {
+                        member.travelStyle ||
 
-              <h5>
+                        "Traveler"
+                      }
 
-                Sophia
+                    </p>
 
-              </h5>
+                  </div>
 
-              <p>
+                ))
 
-                Budget Traveler
+              ) : (
 
-              </p>
+                <p>
 
-            </div>
+                  No travelers joined yet.
 
-            <div className="traveler-card">
+                </p>
 
-              <img
-                src="https://i.pravatar.cc/100?img=8"
-                alt=""
-              />
+              )
 
-              <h5>
-
-                Ethan
-
-              </h5>
-
-              <p>
-
-                Nature Explorer
-
-              </p>
-
-            </div>
+            }
 
           </div>
 
@@ -435,10 +428,15 @@ function TripDetails() {
                 <span>
 
                   ₹{
+
                     Math.floor(
+
                       trip?.budget /
-                      (trip?.travelers || 1)
+
+                      (trip?.members?.length || 1)
+
                     )
+
                   }
 
                 </span>

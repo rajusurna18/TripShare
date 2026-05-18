@@ -6,6 +6,8 @@ import {
 
   joinTripService,
 
+  getTripByIdService,
+
 } from "./trip.service.js";
 
 // CREATE TRIP
@@ -45,7 +47,7 @@ export const createTrip =
 
 };
 
-// GET TRIPS
+// GET ALL TRIPS
 
 export const getTrips =
   async (req, res) => {
@@ -83,6 +85,32 @@ export const joinTrip =
 
           req.user.id
 
+        );
+
+      res.json(trip);
+
+    } catch (err) {
+
+      res.status(400).json({
+
+        message: err.message,
+
+      });
+
+    }
+
+};
+
+// GET SINGLE TRIP
+
+export const getTripById =
+  async (req, res) => {
+
+    try {
+
+      const trip =
+        await getTripByIdService(
+          req.params.id
         );
 
       res.json(trip);
