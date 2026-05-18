@@ -1,5 +1,8 @@
-
 import API from "./api";
 
+// GET MATCHES
+
 export const getMatches = (tripId) =>
-  API.get(`/api/match/${tripId}`);
+  API.get(
+    `/api/match/${tripId}`
+  );

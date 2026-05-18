@@ -115,6 +115,14 @@ function App() {
              path="/trip/:tripId"
             element={<TripDetails />}
            />
+         <Route
+             path="/dashboard"
+             element={
+            <ProtectedRoute>
+             <Dashboard />
+         </ProtectedRoute>
+             }
+         />
 
       </Routes>
 

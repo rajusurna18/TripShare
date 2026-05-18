@@ -4,33 +4,51 @@ function ForgotPassword() {
 
   return (
 
-    <div className="container vh-100 d-flex justify-content-center align-items-center">
+    <div className="auth-page d-flex justify-content-center align-items-center min-vh-100">
 
-      <div
-        className="card p-4 bg-dark text-white shadow-lg"
-        style={{
-          maxWidth: "450px",
-          width: "100%",
-          borderRadius: "20px",
-          border: "1px solid #FFD700"
-        }}
-      >
+      <div className="auth-card glass-card p-5">
 
-        <h2 className="text-center mb-4 text-warning">
-          Reset Password 🔑
-        </h2>
+        {/* HEADER */}
+
+        <div className="text-center mb-4">
+
+          <div className="auth-icon mb-3">
+
+            🔑
+
+          </div>
+
+          <h2 className="text-warning fw-bold">
+
+            Forgot Password
+
+          </h2>
+
+          <p className="auth-subtitle">
+
+            Enter your email address
+            and we’ll send you a
+            password reset link.
+
+          </p>
+
+        </div>
+
+        {/* FORM */}
 
         <form>
 
-          <div className="mb-3">
+          <div className="mb-4">
 
-            <label className="form-label">
-              Email
+            <label className="form-label text-light">
+
+              Email Address
+
             </label>
 
             <input
               type="email"
-              className="form-control"
+              className="form-control auth-input"
               placeholder="Enter your email"
               required
             />
@@ -39,20 +57,26 @@ function ForgotPassword() {
 
           <button
             type="submit"
-            className="btn btn-warning w-100 fw-bold"
+            className="btn btn-custom w-100 fw-bold py-3"
           >
+
             Send Reset Link
+
           </button>
 
         </form>
+
+        {/* FOOTER */}
 
         <div className="text-center mt-4">
 
           <Link
             to="/login"
-            className="text-info text-decoration-none"
+            className="auth-link"
           >
-            Back to Login
+
+            ← Back to Login
+
           </Link>
 
         </div>
@@ -62,6 +86,7 @@ function ForgotPassword() {
     </div>
 
   );
+
 }
 
 export default ForgotPassword;
