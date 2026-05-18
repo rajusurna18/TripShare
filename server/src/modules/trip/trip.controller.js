@@ -1,80 +1,100 @@
 import {
+
   createTripService,
+
   getTripsService,
+
   joinTripService,
+
 } from "./trip.service.js";
 
-export const createTrip = async (req, res) => {
+// CREATE TRIP
 
-  try {
+export const createTrip =
+  async (req, res) => {
 
-    if (req.file) {
+    try {
 
-      req.body.image = req.file.path;
+      if (req.file) {
+
+        req.body.image =
+          req.file.path;
+
+      }
+
+      const trip =
+        await createTripService(
+
+          req.body,
+
+          req.user.id
+
+        );
+
+      res.status(201).json(trip);
+
+    } catch (err) {
+
+      res.status(400).json({
+
+        message: err.message,
+
+      });
 
     }
 
-    const trip =
-      await createTripService(
-        req.body,
-        req.user.id
-      );
+};
 
-    res.json(trip);
+// GET TRIPS
 
-  } catch (err) {
+export const getTrips =
+  async (req, res) => {
 
-    res.status(400).json({
+    try {
 
-      message: err.message,
+      const trips =
+        await getTripsService();
 
-    });
+      res.json(trips);
 
-  }
+    } catch (err) {
+
+      res.status(400).json({
+
+        message: err.message,
+
+      });
+
+    }
 
 };
 
-export const getTrips = async (req, res) => {
+// JOIN TRIP
 
-  try {
+export const joinTrip =
+  async (req, res) => {
 
-    const trips =
-      await getTripsService();
+    try {
 
-    res.json(trips);
+      const trip =
+        await joinTripService(
 
-  } catch (err) {
+          req.params.id,
 
-    res.status(400).json({
+          req.user.id
 
-      message: err.message,
+        );
 
-    });
+      res.json(trip);
 
-  }
+    } catch (err) {
 
-};
+      res.status(400).json({
 
-export const joinTrip = async (req, res) => {
+        message: err.message,
 
-  try {
+      });
 
-    const trip =
-      await joinTripService(
-        req.params.id,
-        req.user.id
-      );
-
-    res.json(trip);
-
-  } catch (err) {
-
-    res.status(400).json({
-
-      message: err.message,
-
-    });
-
-  }
+    }
 
 };

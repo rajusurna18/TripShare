@@ -1,6 +1,12 @@
 import {
+
   getNotificationsService,
+
+  markNotificationReadService,
+
 } from "./notification.service.js";
+
+// GET NOTIFICATIONS
 
 export const getNotifications =
   async (req, res) => {
@@ -8,6 +14,7 @@ export const getNotifications =
     try {
 
       const notifications =
+
         await getNotificationsService(
           req.user.id
         );
@@ -17,7 +24,38 @@ export const getNotifications =
     } catch (err) {
 
       res.status(400).json({
+
         message: err.message,
+
       });
+
     }
+
+};
+
+// MARK AS READ
+
+export const markNotificationRead =
+  async (req, res) => {
+
+    try {
+
+      const notification =
+
+        await markNotificationReadService(
+          req.params.id
+        );
+
+      res.json(notification);
+
+    } catch (err) {
+
+      res.status(400).json({
+
+        message: err.message,
+
+      });
+
+    }
+
 };

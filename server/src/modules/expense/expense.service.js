@@ -1,9 +1,12 @@
 import Expense from "./expense.model.js";
+
 import Trip from "../trip/trip.model.js";
 
 import {
   createNotificationService,
 } from "../notification/notification.service.js";
+
+// CREATE EXPENSE
 
 export const createExpenseService =
   async (data) => {
@@ -14,68 +17,119 @@ export const createExpenseService =
     // 🔔 Notification
 
     await createNotificationService(
+
       data.paidBy,
+
       "Expense added successfully 💸"
+
     );
 
     return expense;
+
 };
+
+// GET TRIP EXPENSES
 
 export const getTripExpensesService =
   async (tripId) => {
 
     return await Expense.find({
+
       trip: tripId,
+
     })
-      .populate("paidBy", "name")
-      .populate("splitAmong", "name");
+
+      .populate(
+        "paidBy",
+        "name"
+      )
+
+      .populate(
+        "splitAmong",
+        "name"
+      );
+
 };
+
+// CALCULATE BALANCES
 
 export const calculateBalancesService =
   async (tripId) => {
 
-    // Get trip
+    // GET TRIP
 
     const trip =
       await Trip.findById(tripId)
-        .populate("members", "name");
 
-    // Get expenses
+        .populate(
+          "members",
+          "name"
+        );
+
+    // CHECK TRIP
+
+    if (!trip) {
+
+      throw new Error(
+        "Trip not found"
+      );
+
+    }
+
+    // GET EXPENSES
 
     const expenses =
       await Expense.find({
-        trip: tripId,
-      }).populate("paidBy", "name");
 
-    // Total amount
+        trip: tripId,
+
+      })
+
+        .populate(
+          "paidBy",
+          "name"
+        );
+
+    // TOTAL EXPENSE
 
     let total = 0;
 
     expenses.forEach((exp) => {
 
       total += exp.amount;
+
     });
 
-    // Per person share
+    // MEMBER COUNT SAFETY
+
+    const memberCount =
+      trip.members.length || 1;
+
+    // PER PERSON SHARE
 
     const perPerson =
-      total / trip.members.length;
+      total / memberCount;
 
-    // Track payments
+    // PAYMENT TRACKER
 
     const paidMap = {};
 
     trip.members.forEach((member) => {
 
       paidMap[member._id] = 0;
+
     });
+
+    // TRACK PAYMENTS
 
     expenses.forEach((exp) => {
 
-      paidMap[exp.paidBy._id] += exp.amount;
+      paidMap[exp.paidBy._id] +=
+        exp.amount;
+
     });
 
-    // Final balances
+    // FINAL BALANCES
 
     const balances = [];
 
@@ -94,7 +148,9 @@ export const calculateBalancesService =
         paid,
 
         balance,
+
       });
+
     });
 
     return {
@@ -104,5 +160,7 @@ export const calculateBalancesService =
       perPerson,
 
       balances,
+
     };
+
 };

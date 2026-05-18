@@ -1,48 +1,64 @@
 import mongoose from "mongoose";
 
-const tripSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: true,
-    },
+const tripSchema =
+  new mongoose.Schema(
 
-    destination: {
-      type: String,
-      required: true,
-    },
+    {
 
-    budget: {
-      type: Number,
-      required: true,
-    },
+      title: {
+        type: String,
+        required: true,
+      },
 
-    image: {
-      type: String,
-    },
+      destination: {
+        type: String,
+        required: true,
+      },
 
-    date: {
-      type: Date,
-      required: true,
-    },
+      budget: {
+        type: Number,
+        required: true,
+      },
 
-    description: String,
+      image: {
+        type: String,
+        default: "",
+      },
 
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+      date: {
+        type: Date,
+        required: true,
+      },
 
-    members: [
-      {
+      description: {
+        type: String,
+        default: "",
+      },
+
+      createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+        required: true,
       },
-    ],
-  },
 
-  { timestamps: true }
-);
+      members: [
+
+        {
+          type:
+            mongoose.Schema.Types.ObjectId,
+
+          ref: "User",
+        }
+
+      ],
+
+    },
+
+    {
+      timestamps: true,
+    }
+
+  );
 
 export default mongoose.model(
   "Trip",

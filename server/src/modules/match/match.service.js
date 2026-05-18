@@ -1,10 +1,12 @@
 import User from "../auth/auth.model.js";
+
 import Trip from "../trip/trip.model.js";
 
 export const findMatchesService =
   async (tripId, currentUserId) => {
 
-    // Current Trip
+    // CURRENT TRIP
+
     const currentTrip =
       await Trip.findById(tripId);
 
@@ -16,18 +18,30 @@ export const findMatchesService =
 
     }
 
-    // Current User
+    // CURRENT USER
+
     const currentUser =
       await User.findById(
         currentUserId
       );
 
-    // Other Users
+    if (!currentUser) {
+
+      throw new Error(
+        "User not found"
+      );
+
+    }
+
+    // OTHER USERS
+
     const users =
       await User.find({
+
         _id: {
           $ne: currentUserId,
         },
+
       });
 
     const matches = users.map(
@@ -35,86 +49,75 @@ export const findMatchesService =
 
         let score = 0;
 
-        // =========================
-        // INTERESTS MATCH
-        // =========================
+        // =====================
+        // INTEREST MATCH
+        // =====================
 
         const commonInterests =
+
           user.interests.filter(
             (interest) =>
+
               currentUser.interests.includes(
                 interest
               )
+
           );
 
         score +=
           commonInterests.length * 10;
 
-        // =========================
+        // =====================
         // TRAVEL STYLE
-        // =========================
+        // =====================
 
         if (
+
+          user.travelStyle &&
           user.travelStyle ===
           currentUser.travelStyle
+
         ) {
 
           score += 25;
 
         }
 
-        // =========================
+        // =====================
         // PERSONALITY
-        // =========================
+        // =====================
 
         if (
+
+          user.personality &&
           user.personality ===
           currentUser.personality
+
         ) {
 
           score += 20;
 
         }
 
-        // =========================
+        // =====================
         // DESTINATION MATCH
-        // =========================
-
-        const userTrips =
-          currentTrip.destination
-            ? 15
-            : 0;
-
-        score += userTrips;
-
-        // =========================
-        // BUDGET SIMILARITY
-        // =========================
+        // =====================
 
         if (
-          currentTrip.budget
+
+          user.destinationPreference &&
+          user.destinationPreference ===
+          currentTrip.destination
+
         ) {
 
-          const budgetDiff =
-            Math.abs(
-              Number(
-                currentTrip.budget
-              ) - 10000
-            );
-
-          if (
-            budgetDiff <= 2000
-          ) {
-
-            score += 15;
-
-          }
+          score += 15;
 
         }
 
-        // =========================
-        // FINAL SCORE LIMIT
-        // =========================
+        // =====================
+        // FINAL LIMIT
+        // =====================
 
         if (score > 100) {
 
@@ -125,7 +128,9 @@ export const findMatchesService =
         return {
 
           user,
+
           score,
+
           commonInterests,
 
         };
@@ -133,11 +138,13 @@ export const findMatchesService =
       }
     );
 
-    // SORT HIGH TO LOW
+    // SORT HIGH → LOW
 
     matches.sort(
+
       (a, b) =>
         b.score - a.score
+
     );
 
     return matches;

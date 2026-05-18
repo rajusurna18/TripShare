@@ -1,4 +1,4 @@
-import openai from "../../config/openai.js";
+import genAI from "../../config/gemini.js";
 
 export const generateItinerary =
   async (req, res) => {
@@ -11,48 +11,63 @@ export const generateItinerary =
         days,
       } = req.body;
 
+      // PROMPT
+
       const prompt = `
+
       Create a detailed ${days}-day
       travel itinerary for ${destination}
       under ₹${budget}.
 
       Include:
-      - Day-wise plan
+
+      - Day-wise travel plan
       - Hotels
       - Food suggestions
       - Tourist attractions
       - Transportation
       - Budget breakdown
+
       `;
 
-      const response =
-        await openai.chat.completions.create({
+      // GEMINI MODEL
 
-          model: "gpt-3.5-turbo",
+      const model =
+        genAI.getGenerativeModel({
 
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are an expert travel planner.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
+          model: "gemini-1.5-flash",
+
         });
 
+      // GENERATE RESPONSE
+
+      const result =
+        await model.generateContent(
+          prompt
+        );
+
+      const response =
+        result.response.text();
+
+      // SEND RESPONSE
+
       res.json({
-        itinerary:
-          response.choices[0]
-          .message.content,
+
+        itinerary: response,
+
       });
 
     } catch (err) {
 
+      console.log(err);
+
       res.status(500).json({
-        message: err.message,
+
+        message:
+          "AI itinerary generation failed",
+
       });
+
     }
-};
+
+  };

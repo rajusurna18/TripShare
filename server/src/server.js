@@ -6,11 +6,16 @@ import { Server } from "socket.io";
 
 import connectDB from "./config/db.js";
 
-import expenseRoutes
-from "./modules/expense/expense.routes.js";
+// ROUTES
 
 import authRoutes
 from "./modules/auth/auth.routes.js";
+
+import tripRoutes
+from "./modules/trip/trip.routes.js";
+
+import expenseRoutes
+from "./modules/expense/expense.routes.js";
 
 import aiRoutes
 from "./modules/ai/ai.routes.js";
@@ -22,6 +27,8 @@ dotenv.config();
 
 const app = express();
 
+// MIDDLEWARES
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -31,14 +38,20 @@ app.use(
 
 app.use(express.json());
 
+// DATABASE
+
 connectDB();
 
-// Routes
-app.use("/api/ai", aiRoutes);
+// ROUTES
 
 app.use(
   "/api/auth",
   authRoutes
+);
+
+app.use(
+  "/api/trips",
+  tripRoutes
 );
 
 app.use(
@@ -51,35 +64,92 @@ app.use(
   profileRoutes
 );
 
-const server = http.createServer(app);
+app.use(
+  "/api/ai",
+  aiRoutes
+);
+
+// HTTP SERVER
+
+const server =
+  http.createServer(app);
+
+// SOCKET.IO
 
 const io = new Server(server, {
+
   cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+
+    origin:
+      "http://localhost:5173",
+
+    methods:
+      ["GET", "POST"],
+
   },
+
 });
 
-io.on("connection", (socket) => {
-
-  console.log(
-    "User Connected:",
-    socket.id
-  );
-
-  socket.on("disconnect", () => {
+io.on(
+  "connection",
+  (socket) => {
 
     console.log(
-      "User Disconnected"
+      "User Connected:",
+      socket.id
     );
 
-  });
+    // JOIN ROOM
 
-});
+    socket.on(
+      "join_trip",
+      (tripId) => {
+
+        socket.join(tripId);
+
+      }
+    );
+
+    // SEND MESSAGE
+
+    socket.on(
+      "send_message",
+      (data) => {
+
+        io.to(data.tripId)
+          .emit(
+            "receive_message",
+            data
+          );
+
+      }
+    );
+
+    // DISCONNECT
+
+    socket.on(
+      "disconnect",
+      () => {
+
+        console.log(
+          "User Disconnected"
+        );
+
+      }
+    );
+
+  }
+);
+
+// TEST ROUTE
 
 app.get("/", (req, res) => {
-  res.send("API Running");
+
+  res.send("API Running 🚀");
+
 });
+
+// SERVER
 
 const PORT =
   process.env.PORT || 5000;
