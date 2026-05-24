@@ -124,6 +124,21 @@ function Dashboard() {
 
               </p>
 
+              {/* ACTION BUTTONS */}
+
+              <div className="d-flex flex-column align-items-start gap-3 mt-4">
+
+                <Link
+                  to="/create-trip"
+                  className="btn btn-custom create-trip-btn"
+                >
+
+                  + Create New Trip
+
+                </Link>
+
+              </div>
+
             </div>
 
             {/* PROFILE */}
@@ -220,48 +235,48 @@ function Dashboard() {
 
             {/* AI ASSISTANT */}
 
-<div className="special-card glass-card p-4 ai-assistant-card">
+            <div className="special-card glass-card p-4 ai-assistant-card">
 
-  <div className="d-flex flex-column h-100 justify-content-between">
+              <div className="d-flex flex-column h-100 justify-content-between">
 
-    <div>
+                <div>
 
-      <h2 className="text-warning mb-3">
+                  <h2 className="text-warning mb-3">
 
-        🤖 TripShare AI Assistant
+                    🤖 TripShare AI Assistant
 
-      </h2>
+                  </h2>
 
-      <p className="dashboard-text ai-text">
+                  <p className="dashboard-text ai-text">
 
-        Ask travel questions,
-        generate itineraries,
-        estimate budgets,
-        discover destinations,
-        and get smart travel guidance instantly.
+                    Ask travel questions,
+                    generate itineraries,
+                    estimate budgets,
+                    discover destinations,
+                    and get smart travel guidance instantly.
 
-      </p>
+                  </p>
 
-    </div>
+                </div>
 
-    {/* BUTTON */}
+                {/* BUTTON */}
 
-    <div className="mt-4">
+                <div className="mt-4 d-flex justify-content-end">
 
-      <Link
-        to="/itinerary"
-        className="btn btn-custom ai-btn"
-      >
+                  <Link
+                    to="/itinerary"
+                    className="btn btn-custom ai-btn"
+                  >
 
-        Open AI Planner 🚀
+                    Open AI Planner 🚀
 
-      </Link>
+                  </Link>
 
-    </div>
+                </div>
 
-  </div>
+              </div>
 
-</div>
+            </div>
 
           </div>
 
@@ -435,248 +450,9 @@ function Dashboard() {
 
         </div>
 
-        {/* CURRENT TRIPS */}
-
-        <div className="current-trips-wrapper mb-5">
-
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-
-            <h2 className="section-title m-0">
-
-              Current Trips ✈️
-
-            </h2>
-
-          </div>
-
-          {
-            loading ? (
-
-              <div className="empty-box">
-
-                <h3>
-
-                  Loading trips...
-
-                </h3>
-
-              </div>
-
-            ) : (
-
-              <div className="row g-4">
-
-                {
-                  trips.length === 0 ? (
-
-                    <div className="empty-box">
-
-                      <div className="empty-icon">
-
-                        ✈️
-
-                      </div>
-
-                      <h3>
-
-                        No Trips Yet
-
-                      </h3>
-
-                      <p>
-
-                        Create your first adventure
-                        and start exploring the world.
-
-                      </p>
-
-                      <Link
-                        to="/create-trip"
-                        className="btn btn-custom mt-3"
-                      >
-
-                        Create Trip
-
-                      </Link>
-
-                    </div>
-
-                  ) : (
-
-                    trips.map((trip, index) => (
-
-                      <div
-                        className="col-sm-12 col-md-6 col-lg-4"
-                        key={index}
-                      >
-
-                        <div className="trip-card glass-card h-100">
-
-                          {/* IMAGE */}
-
-                          <div className="trip-image-wrapper">
-
-                            <img
-                              src={
-                                trip.image ||
-                                "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
-                              }
-                              alt={trip.destination}
-                              className="trip-image"
-                            />
-
-                            <div className="trip-overlay">
-
-                              <span className="trip-badge">
-
-                                Active
-
-                              </span>
-
-                            </div>
-
-                          </div>
-
-                          {/* CONTENT */}
-
-                          <div className="p-4">
-
-                            <h3 className="trip-title">
-
-                              {trip.destination}
-
-                            </h3>
-
-                            <div className="trip-details mt-3">
-
-                              <p>
-
-                                📍 {trip.destination}
-
-                              </p>
-
-                              <p>
-
-                                💰 ₹{trip.budget}
-
-                              </p>
-
-                              <p>
-
-                                📅 {
-                                  trip.date
-                                    ?.slice(0, 10)
-                                }
-
-                              </p>
-
-                            </div>
-
-                            {/* ACTION BUTTON */}
-
-                            <div className="trip-actions mt-4">
-
-                              <Link
-                                to="/trips"
-                                className="btn btn-custom w-100"
-                              >
-
-                                View Details
-
-                              </Link>
-
-                            </div>
-
-                          </div>
-
-                        </div>
-
-                      </div>
-
-                    ))
-                  )
-                }
-
-              </div>
-
-            )
-
-          }
-
-        </div>
-
         {/* LOWER SECTION */}
 
         <div className="row g-4">
-
-          {/* UPCOMING */}
-
-          <div className="col-lg-6">
-
-            <div className="special-card glass-card p-4 h-100">
-
-              <h3 className="text-warning mb-4">
-
-                🌴 Upcoming Adventure
-
-              </h3>
-
-              {
-                trips.length > 0 ? (
-
-                  <div className="upcoming-trip">
-
-                    <h2>
-
-                      {trips[0].destination}
-
-                    </h2>
-
-                    <p>
-
-                      📅 {
-                        trips[0].date
-                          ?.slice(0, 10)
-                      }
-
-                    </p>
-
-                    <p>
-
-                      💰 Budget:
-                      ₹{trips[0].budget}
-
-                    </p>
-
-                    <Link
-                      to="/trips"
-                      className="btn btn-custom mt-3"
-                    >
-
-                      Explore Trip
-
-                    </Link>
-
-                  </div>
-
-                ) : (
-
-                  <div className="empty-box">
-
-                    <h4>
-
-                      No Upcoming Trips
-
-                    </h4>
-
-                  </div>
-
-                )
-              }
-
-            </div>
-
-          </div>
 
           {/* ACTIVITY */}
 

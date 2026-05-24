@@ -1,12 +1,18 @@
-
 import dotenv from "dotenv";
-dotenv.config();
-import express from "express";
-import cors from "cors";
-import http from "http";
-import { Server } from "socket.io";
 
-import connectDB from "./config/db.js";
+dotenv.config();
+
+import express from "express";
+
+import cors from "cors";
+
+import http from "http";
+
+import { Server }
+from "socket.io";
+
+import connectDB
+from "./config/db.js";
 
 // ROUTES
 
@@ -25,15 +31,24 @@ from "./modules/ai/ai.routes.js";
 import profileRoutes
 from "./modules/profile/profile.routes.js";
 
+import messageRoutes
+from "./modules/message/message.routes.js";
+
 const app = express();
 
 // MIDDLEWARES
 
 app.use(
+
   cors({
-    origin: "http://localhost:5173",
+
+    origin:
+      "http://localhost:5173",
+
     credentials: true,
+
   })
+
 );
 
 app.use(express.json());
@@ -69,6 +84,21 @@ app.use(
   aiRoutes
 );
 
+app.use(
+  "/api/messages",
+  messageRoutes
+);
+
+// TEST ROUTE
+
+app.get("/", (req, res) => {
+
+  res.send(
+    "API Running 🚀"
+  );
+
+});
+
 // HTTP SERVER
 
 const server =
@@ -76,59 +106,88 @@ const server =
 
 // SOCKET.IO
 
-const io = new Server(server, {
+const io = new Server(
 
-  cors: {
+  server,
 
-    origin:
-      "http://localhost:5173",
+  {
 
-    methods:
-      ["GET", "POST"],
+    cors: {
 
-  },
+      origin:
+        "http://localhost:5173",
 
-});
+      methods:
+        ["GET", "POST"],
+
+    },
+
+  }
+
+);
+
+// SOCKET CONNECTION
 
 io.on(
+
   "connection",
+
   (socket) => {
 
     console.log(
+
       "User Connected:",
+
       socket.id
+
     );
 
-    // JOIN ROOM
+    // JOIN TRIP ROOM
 
     socket.on(
+
       "join_trip",
+
       (tripId) => {
 
         socket.join(tripId);
 
+        console.log(
+          `Joined Room: ${tripId}`
+        );
+
       }
+
     );
 
     // SEND MESSAGE
 
     socket.on(
+
       "send_message",
+
       (data) => {
 
         io.to(data.tripId)
+
           .emit(
+
             "receive_message",
+
             data
+
           );
 
       }
+
     );
 
     // DISCONNECT
 
     socket.on(
+
       "disconnect",
+
       () => {
 
         console.log(
@@ -136,28 +195,30 @@ io.on(
         );
 
       }
+
     );
 
   }
+
 );
-
-// TEST ROUTE
-
-app.get("/", (req, res) => {
-
-  res.send("API Running 🚀");
-
-});
 
 // SERVER
 
 const PORT =
   process.env.PORT || 5000;
 
-server.listen(PORT, () => {
+server.listen(
 
-  console.log(
-    `Server running on port ${PORT}`
-  );
+  PORT,
 
-});
+  () => {
+
+    console.log(
+
+      `Server running on port ${PORT}`
+
+    );
+
+  }
+
+);

@@ -121,8 +121,20 @@ function TripDetails() {
         <div className="d-flex flex-wrap gap-3 mb-5">
 
           <Link
+
             to="/chat"
+
             className="btn btn-custom"
+
+            onClick={() =>
+
+              localStorage.setItem(
+                "activeTripId",
+                trip._id
+              )
+
+            }
+
           >
 
             Open Group Chat 💬
@@ -494,8 +506,20 @@ function TripDetails() {
               </div>
 
               <Link
+
                 to="/chat"
+
                 className="btn btn-custom mt-4 w-100"
+
+                onClick={() =>
+
+                  localStorage.setItem(
+                    "activeTripId",
+                    trip._id
+                  )
+
+                }
+
               >
 
                 Open Full Chat

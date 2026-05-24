@@ -3711,3 +3711,27 @@ select option:hover {
 
   color: #ffc107;
 }
+
+
+/* AI BUTTON MOVE LEFT → RIGHT */
+
+.ai-assistant-card .mt-4 {
+
+  display: flex;
+
+  justify-content: flex-end;
+
+}
+
+/* OPTIONAL: BETTER BUTTON LOOK */
+
+.ai-btn {
+
+  padding: 12px 28px;
+
+  border-radius: 12px;
+
+  font-weight: 600;
+
+}
+

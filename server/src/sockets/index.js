@@ -2,40 +2,93 @@ import { Server } from "socket.io";
 
 let io;
 
-export const initSocket = (server) => {
+// INITIALIZE SOCKET
 
-  io = new Server(server, {
-    cors: {
-      origin: "http://localhost:5173",
-      methods: ["GET", "POST"],
-    },
-  });
+export const initSocket =
+  (server) => {
 
-  io.on("connection", (socket) => {
+    io = new Server(server, {
 
-    console.log("User connected:", socket.id);
+      cors: {
 
-    // Join trip room
-    socket.on("join_trip", (tripId) => {
+        origin:
+          "http://localhost:5173",
 
-      socket.join(tripId);
+        methods:
+          ["GET", "POST"],
 
-      console.log(`Joined room: ${tripId}`);
+      },
+
     });
 
-    // Send message
-    socket.on("send_message", (data) => {
+    io.on(
+      "connection",
+      (socket) => {
 
-      io.to(data.tripId).emit(
-        "receive_message",
-        data
-      );
-    });
+        console.log(
+          "User connected:",
+          socket.id
+        );
 
-    socket.on("disconnect", () => {
-      console.log("User disconnected");
-    });
-  });
+        // JOIN ROOM
+
+        socket.on(
+          "join_trip",
+          (tripId) => {
+
+            socket.join(
+              tripId
+            );
+
+            console.log(
+              `Joined room: ${tripId}`
+            );
+
+          }
+        );
+
+        // SEND MESSAGE
+
+        socket.on(
+          "send_message",
+          (data) => {
+
+            console.log(
+              "Message received:",
+              data
+            );
+
+            io.to(
+              data.tripId
+            ).emit(
+
+              "receive_message",
+
+              data
+
+            );
+
+          }
+        );
+
+        // DISCONNECT
+
+        socket.on(
+          "disconnect",
+          () => {
+
+            console.log(
+              "User disconnected"
+            );
+
+          }
+        );
+
+      }
+    );
+
 };
+
+// EXPORT SOCKET INSTANCE
 
 export { io };

@@ -1,7 +1,16 @@
-import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import {
 
-const socket = io("http://localhost:5000");
+  useEffect,
+
+  useState,
+
+} from "react";
+
+import API
+from "../services/api";
+
+import socket
+from "../socket";
 
 function Chat() {
 
@@ -14,60 +23,92 @@ function Chat() {
   const [trip, setTrip] =
     useState(null);
 
+  // ACTIVE TRIP ID
+
   const tripId =
-    "YOUR_TRIP_ID";
+
+    localStorage.getItem(
+      "activeTripId"
+    ) || "global-room";
 
   // FETCH TRIP
 
-  const fetchTrip = async () => {
+  const fetchTrip =
+    async () => {
 
-    try {
+      try {
 
-      const token =
-        localStorage.getItem("token");
+        const token =
 
-      const res = await fetch(
-        `http://localhost:5000/api/trips/${tripId}`,
-        {
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
-      );
+          localStorage.getItem(
+            "token"
+          );
 
-      const data =
-        await res.json();
+        const res =
+          await API.get(
 
-      setTrip(data);
+            `/api/trips/${tripId}`,
 
-    } catch (err) {
+            {
 
-      console.log(err);
+              headers: {
 
-    }
+                Authorization:
+                  `Bearer ${token}`,
+
+              },
+
+            }
+
+          );
+
+        setTrip(res.data);
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
 
   };
+
+  // SOCKET + INITIAL DATA
 
   useEffect(() => {
 
     fetchTrip();
+
+    // CONNECT SOCKET
+
+    socket.connect();
+
+    // JOIN ROOM
 
     socket.emit(
       "join_trip",
       tripId
     );
 
+    // RECEIVE MESSAGE
+
     socket.on(
+
       "receive_message",
+
       (data) => {
 
-        setMessages((prev) => [
-          ...prev,
-          data,
-        ]);
+        setMessages(
+          (prev) => [
+
+            ...prev,
+
+            data,
+
+          ]
+        );
 
       }
+
     );
 
     return () => {
@@ -76,29 +117,43 @@ function Chat() {
         "receive_message"
       );
 
+      socket.disconnect();
+
     };
 
   }, []);
 
-  const sendMessage = () => {
+  // SEND MESSAGE
 
-    if (!message.trim())
-      return;
+  const sendMessage =
+    () => {
 
-    socket.emit(
-      "send_message",
-      {
-        tripId,
-        text: message,
-      }
-    );
+      if (!message.trim())
+        return;
 
-    setMessages((prev) => [
-      ...prev,
-      { text: message },
-    ]);
+      // SOCKET EMIT
 
-    setMessage("");
+      socket.emit(
+
+        "send_message",
+
+        {
+
+          tripId,
+
+          sender: {
+
+            name: "You",
+
+          },
+
+          message,
+
+        }
+
+      );
+
+      setMessage("");
 
   };
 
@@ -129,8 +184,11 @@ function Chat() {
             <div className="group-card active-group">
 
               ✈ {
+
                 trip?.title ||
+
                 "Travel Group"
+
               }
 
             </div>
@@ -150,8 +208,11 @@ function Chat() {
                 <h3>
 
                   {
+
                     trip?.title ||
+
                     "Travel Group Chat"
+
                   }
 
                 </h3>
@@ -171,6 +232,7 @@ function Chat() {
             <div className="chat-messages">
 
               {
+
                 messages.length === 0 ? (
 
                   <div className="empty-chat">
@@ -183,8 +245,8 @@ function Chat() {
 
                     <p>
 
-                      Start chatting with
-                      your travel crew.
+                      Start chatting
+                      with your travel crew.
 
                     </p>
 
@@ -193,6 +255,7 @@ function Chat() {
                 ) : (
 
                   messages.map(
+
                     (msg, index) => (
 
                       <div
@@ -202,16 +265,38 @@ function Chat() {
 
                         <div className="message-bubble">
 
-                          {msg.text}
+                          <strong>
+
+                            {
+
+                              msg.sender?.name ||
+
+                              "Traveler"
+
+                            }
+
+                            :
+
+                          </strong>
+
+                          <br />
+
+                          {
+
+                            msg.message
+
+                          }
 
                         </div>
 
                       </div>
 
                     )
+
                   )
 
                 )
+
               }
 
             </div>
@@ -221,23 +306,34 @@ function Chat() {
             <div className="chat-input-wrapper">
 
               <textarea
+
                 rows="1"
+
                 className="chat-input"
+
                 placeholder="Type your message..."
+
                 value={message}
+
                 onChange={(e) =>
+
                   setMessage(
                     e.target.value
                   )
+
                 }
+
               />
 
               <button
+
                 className="send-btn-modern"
+
                 onClick={sendMessage}
+
               >
 
-                send
+                Send
 
               </button>
 
