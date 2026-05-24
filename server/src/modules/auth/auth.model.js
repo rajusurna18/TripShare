@@ -32,9 +32,11 @@ const userSchema =
       },
 
       interests: [
+
         {
           type: String,
         }
+
       ],
 
       travelStyle: {
@@ -47,11 +49,27 @@ const userSchema =
         default: "",
       },
 
-      // NEW FIELD
-
       destinationPreference: {
         type: String,
         default: "",
+      },
+
+      // FORGOT PASSWORD OTP
+
+      resetOTP: {
+        type: String,
+        default: "",
+      },
+
+      resetOTPExpire: {
+        type: Date,
+      },
+
+      // EMAIL VERIFICATION
+
+      isVerified: {
+        type: Boolean,
+        default: false,
       },
 
     },

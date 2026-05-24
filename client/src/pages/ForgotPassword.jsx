@@ -1,6 +1,71 @@
-import { Link } from "react-router-dom";
+import { Link,
+  useNavigate } from "react-router-dom";
+
+import { useState } from "react";
+
+import API from "../services/api";
+
+import toast from "react-hot-toast";
 
 function ForgotPassword() {
+
+  const navigate =
+    useNavigate();
+
+  const [email, setEmail] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const handleSubmit =
+    async (e) => {
+
+      e.preventDefault();
+
+      try {
+
+        setLoading(true);
+
+        const res =
+          await API.post(
+
+            "/api/auth/forgot-password",
+
+            { email }
+
+          );
+
+        toast.success(
+          res.data.message
+        );
+
+        // SAVE EMAIL
+
+        localStorage.setItem(
+          "resetEmail",
+          email
+        );
+
+        navigate("/verify-otp");
+
+      } catch (err) {
+
+        toast.error(
+
+          err.response?.data?.message ||
+
+          "Something went wrong"
+
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+  };
 
   return (
 
@@ -27,8 +92,8 @@ function ForgotPassword() {
           <p className="auth-subtitle">
 
             Enter your email address
-            and we’ll send you a
-            password reset link.
+            and we’ll send you an OTP
+            to reset your password.
 
           </p>
 
@@ -36,7 +101,7 @@ function ForgotPassword() {
 
         {/* FORM */}
 
-        <form>
+        <form onSubmit={handleSubmit}>
 
           <div className="mb-4">
 
@@ -50,6 +115,10 @@ function ForgotPassword() {
               type="email"
               className="form-control auth-input"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               required
             />
 
@@ -58,9 +127,18 @@ function ForgotPassword() {
           <button
             type="submit"
             className="btn btn-custom w-100 fw-bold py-3"
+            disabled={loading}
           >
 
-            Send Reset Link
+            {
+
+              loading
+
+                ? "Sending OTP..."
+
+                : "Send OTP"
+
+            }
 
           </button>
 

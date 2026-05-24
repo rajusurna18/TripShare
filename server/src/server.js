@@ -1,5 +1,7 @@
-import express from "express";
+
 import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
@@ -22,8 +24,6 @@ from "./modules/ai/ai.routes.js";
 
 import profileRoutes
 from "./modules/profile/profile.routes.js";
-
-dotenv.config();
 
 const app = express();
 

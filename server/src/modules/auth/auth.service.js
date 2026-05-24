@@ -4,87 +4,285 @@ import bcrypt from "bcryptjs";
 
 import jwt from "jsonwebtoken";
 
-export const registerUser = async (data) => {
+import {
 
-  const existingUser =
-    await User.findOne({
-      email: data.email,
-    });
+  generateOTP,
 
-  if (existingUser) {
+  sendOTPEmail,
 
-    throw new Error(
-      "Email already exists"
-    );
+} from "../../utils/auth.utils.js";
 
-  }
+// REGISTER USER
 
-  const hashedPassword =
-    await bcrypt.hash(
-      data.password,
-      10
-    );
+export const registerUser =
+  async (data) => {
 
-  const user =
-    await User.create({
+    // CHECK EXISTING EMAIL
 
-      ...data,
+    const existingUser =
+      await User.findOne({
 
-      password: hashedPassword,
+        email: data.email,
 
-    });
+      });
 
-  return user;
+    if (existingUser) {
+
+      throw new Error(
+        "Email already exists"
+      );
+
+    }
+
+    // HASH PASSWORD
+
+    const hashedPassword =
+      await bcrypt.hash(
+        data.password,
+        10
+      );
+
+    // CREATE USER
+
+    const user =
+      await User.create({
+
+        ...data,
+
+        password:
+          hashedPassword,
+
+      });
+
+    return user;
 
 };
 
-export const loginUser = async (data) => {
+// LOGIN USER
 
-  const user =
-    await User.findOne({
-      email: data.email,
-    });
+export const loginUser =
+  async (data) => {
 
-  if (!user) {
+    const user =
+      await User.findOne({
 
-    throw new Error(
-      "User not found"
-    );
+        email: data.email,
 
-  }
+      });
 
-  const isMatch =
-    await bcrypt.compare(
-      data.password,
-      user.password
-    );
+    if (!user) {
 
-  if (!isMatch) {
+      throw new Error(
+        "User not found"
+      );
 
-    throw new Error(
-      "Invalid credentials"
-    );
-
-  }
-
-  const token = jwt.sign(
-
-    { id: user._id },
-
-    process.env.JWT_SECRET,
-
-    {
-      expiresIn: "7d",
     }
 
-  );
+    // CHECK PASSWORD
 
-  return {
+    const isMatch =
+      await bcrypt.compare(
 
-    user,
+        data.password,
 
-    token,
+        user.password
 
-  };
+      );
+
+    if (!isMatch) {
+
+      throw new Error(
+        "Invalid credentials"
+      );
+
+    }
+
+    // JWT TOKEN
+
+    const token =
+      jwt.sign(
+
+        {
+          id: user._id,
+        },
+
+        process.env.JWT_SECRET,
+
+        {
+          expiresIn: "7d",
+        }
+
+      );
+
+    return {
+
+      user,
+
+      token,
+
+    };
+
+};
+
+// FORGOT PASSWORD
+
+export const forgotPasswordService =
+  async (email) => {
+
+    const user =
+      await User.findOne({
+
+        email,
+
+      });
+
+    if (!user) {
+
+      throw new Error(
+        "User not found"
+      );
+
+    }
+
+    // GENERATE OTP
+
+    const otp =
+      generateOTP();
+
+    // SAVE OTP
+
+    user.resetOTP = otp;
+
+    user.resetOTPExpire =
+      Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    // SEND EMAIL
+
+    await sendOTPEmail(
+      email,
+      otp
+    );
+
+    return {
+
+      message:
+        "OTP sent successfully",
+
+    };
+
+};
+
+// VERIFY OTP
+
+export const verifyOTPService =
+  async (email, otp) => {
+
+    const user =
+      await User.findOne({
+
+        email,
+
+      });
+
+    if (!user) {
+
+      throw new Error(
+        "User not found"
+      );
+
+    }
+
+    // CHECK OTP
+
+    if (
+
+      user.resetOTP !== otp ||
+
+      user.resetOTPExpire < Date.now()
+
+    ) {
+
+      throw new Error(
+        "Invalid or expired OTP"
+      );
+
+    }
+
+    return {
+
+      message:
+        "OTP verified successfully",
+
+    };
+
+};
+
+// RESET PASSWORD
+
+export const resetPasswordService =
+  async (
+    email,
+    otp,
+    newPassword
+  ) => {
+
+    const user =
+      await User.findOne({
+
+        email,
+
+      });
+
+    if (!user) {
+
+      throw new Error(
+        "User not found"
+      );
+
+    }
+
+    // VERIFY OTP
+
+    if (
+
+      user.resetOTP !== otp ||
+
+      user.resetOTPExpire < Date.now()
+
+    ) {
+
+      throw new Error(
+        "Invalid or expired OTP"
+      );
+
+    }
+
+    // HASH NEW PASSWORD
+
+    const hashedPassword =
+      await bcrypt.hash(
+        newPassword,
+        10
+      );
+
+    user.password =
+      hashedPassword;
+
+    // CLEAR OTP
+
+    user.resetOTP = "";
+
+    user.resetOTPExpire = null;
+
+    await user.save();
+
+    return {
+
+      message:
+        "Password reset successful",
+
+    };
 
 };

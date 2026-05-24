@@ -1,30 +1,42 @@
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
+
 import Navbar from "./components/shared/Navbar";
 
 import Matches from "./pages/Matches";
+
 import Chat from "./pages/Chat";
+
 import AI from "./pages/AI";
+
 import Trips from "./pages/Trips";
+
 import Dashboard from "./pages/Dashboard";
+
 import CreateTrip from "./pages/CreateTrip";
 
 import Login from "./pages/Login";
+
 import Register from "./pages/Register";
+
 import ForgotPassword from "./pages/ForgotPassword";
+
+import VerifyOTP from "./pages/VerifyOTP";
+
+import ResetPassword from "./pages/ResetPassword";
 
 import Expenses from "./pages/Expenses";
 
-import ProtectedRoute from "./routes/ProtectedRoute";
-
 import Notifications from "./pages/Notifications";
+
 import Itinerary from "./pages/Itinerary";
 
-import Profile
-from "./pages/Profile";
+import Profile from "./pages/Profile";
 
 import TripDetails from "./pages/TripDetails";
+
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
 
@@ -36,55 +48,14 @@ function App() {
 
       <Routes>
 
+        {/* HOME */}
+
         <Route
           path="/"
           element={<Home />}
         />
 
-        <Route
-           path="/profile"
-           element={<Profile />}
-        />
-
-        <Route
-  path="/notifications"
-  element={<Notifications />}
-       />
-
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
-
-        <Route
-          path="/matches"
-          element={<Matches />}
-        />
-
-        <Route
-          path="/chat"
-          element={<Chat />}
-        />
-
-        <Route
-          path="/ai"
-          element={<AI />}
-        />
-
-        <Route
-          path="/trips"
-          element={<Trips />}
-        />
-
-        <Route
-          path="/create-trip"
-          element={<CreateTrip />}
-        />
-
-        <Route
-          path="/expenses/:tripId"
-          element={<Expenses />}
-        />
+        {/* AUTH */}
 
         <Route
           path="/login"
@@ -102,33 +73,144 @@ function App() {
         />
 
         <Route
-          path="/protected"
-          element={<ProtectedRoute />}
+          path="/verify-otp"
+          element={<VerifyOTP />}
         />
 
-         <Route
-           path="/itinerary"
-          element={<Itinerary />}
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
         />
 
-         <Route
-             path="/trip/:tripId"
-            element={<TripDetails />}
-           />
-         <Route
-             path="/dashboard"
-             element={
+        {/* PROTECTED ROUTES */}
+
+        <Route
+          path="/dashboard"
+          element={
             <ProtectedRoute>
-             <Dashboard />
-         </ProtectedRoute>
-             }
-         />
+
+              <Dashboard />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+
+              <Profile />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+
+              <Notifications />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/matches"
+          element={
+            <ProtectedRoute>
+
+              <Matches />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+
+              <Chat />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ai"
+          element={
+            <ProtectedRoute>
+
+              <AI />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/trips"
+          element={
+            <ProtectedRoute>
+
+              <Trips />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/create-trip"
+          element={
+            <ProtectedRoute>
+
+              <CreateTrip />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/expenses/:tripId"
+          element={
+            <ProtectedRoute>
+
+              <Expenses />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/itinerary"
+          element={
+            <ProtectedRoute>
+
+              <Itinerary />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/trip/:tripId"
+          element={
+            <ProtectedRoute>
+
+              <TripDetails />
+
+            </ProtectedRoute>
+          }
+        />
 
       </Routes>
 
     </>
 
   );
+
 }
 
 export default App;
