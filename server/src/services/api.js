@@ -1,18 +1,27 @@
+
 import axios from "axios";
 
 const API = axios.create({
+
   baseURL:
-    import.meta.env.VITE_API_URL ||
-    "http://localhost:5000/api",
+
+    import.meta.env
+      .VITE_API_URL ||
+
+    "http://localhost:5000",
+
 });
 
 // AUTO TOKEN
 
 API.interceptors.request.use(
+
   (config) => {
 
     const token =
-      localStorage.getItem("token");
+      localStorage.getItem(
+        "token"
+      );
 
     if (token) {
 
@@ -27,9 +36,13 @@ API.interceptors.request.use(
 
   (error) => {
 
-    return Promise.reject(error);
+    return Promise.reject(
+      error
+    );
 
   }
+
 );
 
 export default API;
+

@@ -1,12 +1,19 @@
-import { useEffect, useState } from "react";
 
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useState }
+from "react";
 
-import API from "../services/api";
+import {
+  useParams,
+  Link,
+} from "react-router-dom";
+
+import API
+from "../services/api";
 
 function TripDetails() {
 
-  const { tripId } = useParams();
+  const { tripId } =
+    useParams();
 
   const [trip, setTrip] =
     useState(null);
@@ -20,47 +27,73 @@ function TripDetails() {
 
   }, []);
 
-  const fetchTrip = async () => {
+  // FETCH TRIP
 
-    try {
+  const fetchTrip =
+    async () => {
 
-      const token =
-        localStorage.getItem("token");
+      try {
 
-      const res = await API.get(
+        const token =
+          localStorage.getItem(
+            "token"
+          );
 
-        `/api/trips/${tripId}`,
+        const res =
+          await API.get(
 
-        {
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
+            `/api/trips/${tripId}`,
 
-      );
+            {
 
-      setTrip(res.data);
+              headers: {
 
-      setLoading(false);
+                Authorization:
+                  `Bearer ${token}`,
 
-    } catch (err) {
+              },
 
-      console.log(err);
+            }
 
-      setLoading(false);
+          );
 
-    }
+        setTrip(
+          res.data
+        );
+
+      } catch (err) {
+
+        console.log(err);
+
+      } finally {
+
+        setLoading(false);
+
+      }
 
   };
+
+  // LOADING
 
   if (loading) {
 
     return (
 
-      <div className="dashboard-page text-light p-5">
+      <div className="dashboard-page min-vh-100 d-flex justify-content-center align-items-center text-light">
 
-        Loading Trip...
+        <div className="text-center">
+
+          <div
+            className="spinner-border text-warning mb-3"
+          />
+
+          <h4>
+
+            Loading Trip...
+
+          </h4>
+
+        </div>
 
       </div>
 
@@ -77,13 +110,19 @@ function TripDetails() {
       <div className="trip-hero">
 
         <img
+
           src={
+
             trip?.image ||
 
             "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+
           }
+
           alt={trip?.destination}
+
           className="trip-hero-image"
+
         />
 
         <div className="trip-hero-overlay">
@@ -92,7 +131,7 @@ function TripDetails() {
 
             <span className="trip-status">
 
-              Active Adventure ✈️
+              Active Trip ✈️
 
             </span>
 
@@ -104,7 +143,9 @@ function TripDetails() {
 
             <p>
 
-              Explore smarter with TripShare AI
+              Travel smarter with
+              your crew using
+              TripShare AI.
 
             </p>
 
@@ -122,15 +163,18 @@ function TripDetails() {
 
           <Link
 
-            to="/chat"
+            to={`/chat/${trip._id}`}
 
             className="btn btn-custom"
 
             onClick={() =>
 
               localStorage.setItem(
+
                 "activeTripId",
+
                 trip._id
+
               )
 
             }
@@ -141,13 +185,17 @@ function TripDetails() {
 
           </Link>
 
-          <button
+          <Link
+
+            to="/matches"
+
             className="btn btn-outline-warning"
+
           >
 
-            Invite Travelers 👥
+            Find Travel Matches 🌍
 
-          </button>
+          </Link>
 
         </div>
 
@@ -211,7 +259,12 @@ function TripDetails() {
 
                   <p>
 
-                    {trip?.date?.slice(0, 10)}
+                    {
+
+                      trip?.date
+                        ?.slice(0, 10)
+
+                    }
 
                   </p>
 
@@ -227,7 +280,12 @@ function TripDetails() {
 
                   <p>
 
-                    {trip?.members?.length || 0}
+                    {
+
+                      trip?.members
+                        ?.length || 0
+
+                    }
 
                   </p>
 
@@ -248,9 +306,11 @@ function TripDetails() {
                 <p>
 
                   {
+
                     trip?.description ||
 
                     "No description added yet."
+
                   }
 
                 </p>
@@ -269,17 +329,22 @@ function TripDetails() {
 
               <h2 className="text-warning mb-4">
 
-                Quick Stats
+                Trip Insights 📊
 
               </h2>
 
               <div className="trip-stat-box">
 
-                ✈️ Adventure Level
+                👥 Members Joined
 
                 <span>
 
-                  High
+                  {
+
+                    trip?.members
+                      ?.length || 0
+
+                  }
 
                 </span>
 
@@ -287,11 +352,15 @@ function TripDetails() {
 
               <div className="trip-stat-box">
 
-                🌍 Travel Type
+                💰 Total Budget
 
                 <span>
 
-                  Explorer
+                  ₹{
+
+                    trip?.budget || 0
+
+                  }
 
                 </span>
 
@@ -299,11 +368,16 @@ function TripDetails() {
 
               <div className="trip-stat-box">
 
-                🔥 Popularity
+                📅 Travel Date
 
                 <span>
 
-                  Trending
+                  {
+
+                    trip?.date
+                      ?.slice(0, 10)
+
+                  }
 
                 </span>
 
@@ -311,11 +385,18 @@ function TripDetails() {
 
               <div className="trip-stat-box">
 
-                💬 Chat Activity
+                🧑 Created By
 
                 <span>
 
-                  Active
+                  {
+
+                    trip?.createdBy
+                      ?.name ||
+
+                    "Traveler"
+
+                  }
 
                 </span>
 
@@ -339,11 +420,17 @@ function TripDetails() {
 
             </h2>
 
-            <button className="btn btn-custom">
+            <Link
 
-              Invite More
+              to="/matches"
 
-            </button>
+              className="btn btn-custom"
+
+            >
+
+              Find More Travelers
+
+            </Link>
 
           </div>
 
@@ -353,49 +440,64 @@ function TripDetails() {
 
               trip?.members?.length > 0 ? (
 
-                trip.members.map((member) => (
+                trip.members.map(
 
-                  <div
-                    className="traveler-card"
-                    key={member._id}
-                  >
+                  (member) => (
 
-                    <img
-                      src={
-                        member.profileImage ||
+                    <div
+                      className="traveler-card"
+                      key={member._id}
+                    >
 
-                        "https://i.pravatar.cc/100"
-                      }
-                      alt={member.name}
-                    />
+                      <img
 
-                    <h5>
+                        src={
 
-                      {member.name}
+                          member.profileImage ||
 
-                    </h5>
+                          "https://i.pravatar.cc/100"
 
-                    <p>
+                        }
 
-                      {
-                        member.travelStyle ||
+                        alt={member.name}
 
-                        "Traveler"
-                      }
+                      />
 
-                    </p>
+                      <h5>
 
-                  </div>
+                        {member.name}
 
-                ))
+                      </h5>
+
+                      <p>
+
+                        {
+
+                          member.travelStyle ||
+
+                          "Traveler"
+
+                        }
+
+                      </p>
+
+                    </div>
+
+                  )
+
+                )
 
               ) : (
 
-                <p>
+                <div className="text-center w-100">
 
-                  No travelers joined yet.
+                  <h5>
 
-                </p>
+                    No travelers joined yet.
+
+                  </h5>
+
+                </div>
 
               )
 
@@ -457,11 +559,16 @@ function TripDetails() {
 
               <div className="expense-item">
 
-                Estimated Savings
+                Total Travelers
 
                 <span>
 
-                  ₹5000
+                  {
+
+                    trip?.members
+                      ?.length || 0
+
+                  }
 
                 </span>
 
@@ -479,27 +586,27 @@ function TripDetails() {
 
               <h2 className="text-warning mb-4">
 
-                Group Chat Preview 💬
+                Group Chat 💬
 
               </h2>
 
               <div className="chat-preview-box">
 
-                <div className="chat-preview-msg">
+                <div className="empty-chat">
 
-                  “Who's ready for the trip?” 🔥
+                  <h4>
 
-                </div>
+                    Connect With Travelers
 
-                <div className="chat-preview-msg">
+                  </h4>
 
-                  “Let's finalize hotels tonight.”
+                  <p>
 
-                </div>
+                    Open the live group
+                    chat and coordinate
+                    your trip in real time.
 
-                <div className="chat-preview-msg">
-
-                  “Budget split updated.”
+                  </p>
 
                 </div>
 
@@ -507,15 +614,18 @@ function TripDetails() {
 
               <Link
 
-                to="/chat"
+                to={`/chat/${trip._id}`}
 
                 className="btn btn-custom mt-4 w-100"
 
                 onClick={() =>
 
                   localStorage.setItem(
+
                     "activeTripId",
+
                     trip._id
+
                   )
 
                 }
@@ -541,3 +651,4 @@ function TripDetails() {
 }
 
 export default TripDetails;
+

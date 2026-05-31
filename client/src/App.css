@@ -24,6 +24,23 @@ body {
   background-attachment: fixed;
 }
 
+.special-card,
+.feature-box,
+.quick-action-btn {
+
+  transition:
+    all 0.3s ease;
+
+}
+
+.special-card:hover,
+.feature-box:hover {
+
+  transform:
+    translateY(-6px);
+
+}
+
 /* =========================================
    ANIMATIONS
 ========================================= */
@@ -175,6 +192,131 @@ body {
   box-shadow:
     0 0 20px rgba(250,204,21,0.7);
 }
+
+.navbar-collapse {
+
+  margin-top: 15px;
+
+}
+
+.navbar-nav {
+
+  gap: 10px;
+
+}
+
+
+.navbar {
+
+  backdrop-filter: blur(18px);
+
+  background:
+    rgba(0,0,0,0.4);
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,0.08);
+
+  padding:
+    14px 20px;
+
+}
+
+.navbar-profile {
+
+  width: 38px;
+
+  height: 38px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  border:
+    2px solid #ffb703;
+
+}
+
+.notification-badge {
+
+  position: absolute;
+
+  top: -2px;
+
+  right: -8px;
+
+  background: #ff4d4d;
+
+  color: white;
+
+  width: 20px;
+
+  height: 20px;
+
+  border-radius: 50%;
+
+  font-size: 12px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  font-weight: bold;
+
+}
+
+.navbar-nav {
+
+  gap: 10px;
+
+}
+
+.nav-link {
+
+  transition:
+    0.3s ease;
+
+}
+
+.nav-link:hover {
+
+  color: #ffb703 !important;
+
+}
+
+@media (max-width: 768px) {
+
+  .navbar-collapse {
+
+    margin-top: 20px;
+
+  }
+
+  .navbar-nav {
+
+    align-items: flex-start !important;
+
+  }
+
+}
+
+.notification-card {
+
+  transition:
+    0.3s ease;
+
+}
+
+.notification-card:hover {
+
+  transform:
+    translateY(-4px);
+
+}
+
+
 
 
 /* =========================================
@@ -1366,6 +1508,86 @@ textarea {
   }
 }
 
+/* MOBILE RESPONSIVE */
+
+@media (max-width: 992px) {
+
+  .dashboard-header .row,
+
+  .chat-layout,
+
+  .trip-info-grid {
+
+    flex-direction: column;
+
+  }
+
+  .profile-card-modern {
+
+    width: 100%;
+
+  }
+
+  .quick-actions {
+
+    justify-content: center;
+
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .glass-card,
+
+  .special-card,
+
+  .feature-box {
+
+    padding: 20px !important;
+
+  }
+
+  .dashboard-page h1 {
+
+    font-size: 2rem;
+
+  }
+
+  .dashboard-subtitle {
+
+    font-size: 14px;
+
+  }
+
+  .quick-action-btn {
+
+    width: 100%;
+
+    text-align: center;
+
+  }
+
+  .stats-row {
+
+    font-size: 14px;
+
+  }
+
+  .chat-input-wrapper {
+
+    flex-direction: column;
+
+  }
+
+  .send-btn-modern {
+
+    width: 100%;
+
+  }
+
+}
+
 /* =========================================
    SELECT DROPDOWN FIX
 ========================================= */
@@ -2118,6 +2340,13 @@ select option:hover {
   transition: 0.3s ease;
 }
 
+button,
+.btn {
+
+  min-height: 48px;
+
+}
+
 .btn-custom:hover,
 .premium-ai-btn:hover {
 
@@ -2582,7 +2811,6 @@ select option:hover {
 /* =========================================
    PREMIUM CHAT UI
 ========================================= */
-
 .chat-page {
 
   min-height: 100vh;
@@ -2624,6 +2852,8 @@ select option:hover {
   padding: 25px;
 
   height: 82vh;
+
+  backdrop-filter: blur(14px);
 }
 
 .chat-sidebar h2 {
@@ -2679,6 +2909,8 @@ select option:hover {
   flex-direction: column;
 
   overflow: hidden;
+
+  backdrop-filter: blur(14px);
 }
 
 /* TOPBAR */
@@ -2725,14 +2957,64 @@ select option:hover {
   gap: 18px;
 }
 
+/* SCROLLBAR */
+
+.chat-messages::-webkit-scrollbar {
+
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+
+  background: #374151;
+
+  border-radius: 20px;
+}
+
+/* MESSAGE ROW */
+
 .message-row {
 
   display: flex;
+
+  margin-bottom: 12px;
 }
+
+/* SELF MESSAGE */
+
+.message-row.self {
+
+  justify-content: flex-end;
+}
+
+/* MESSAGE BUBBLE */
 
 .message-bubble {
 
   max-width: 70%;
+
+  background:
+    rgba(255,255,255,0.08);
+
+  color: white;
+
+  padding: 14px 18px;
+
+  border-radius: 22px;
+
+  backdrop-filter: blur(10px);
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* SELF BUBBLE */
+
+.message-row.self
+.message-bubble {
 
   background:
     linear-gradient(
@@ -2742,15 +3024,32 @@ select option:hover {
     );
 
   color: black;
+}
 
-  padding: 14px 20px;
+/* AVATAR */
 
-  border-radius: 22px;
+.chat-avatar {
 
-  font-weight: 600;
+  width: 35px;
 
-  box-shadow:
-    0 10px 25px rgba(255,193,7,0.2);
+  height: 35px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+/* TIME */
+
+.chat-time {
+
+  display: block;
+
+  margin-top: 8px;
+
+  font-size: 12px;
+
+  opacity: 0.7;
 }
 
 /* EMPTY */
@@ -2803,6 +3102,14 @@ select option:hover {
   outline: none;
 
   min-height: 58px;
+
+  transition: 0.3s ease;
+}
+
+.chat-input:focus {
+
+  border:
+    1px solid rgba(255,193,7,0.5);
 }
 
 .chat-input::placeholder {
@@ -2814,7 +3121,7 @@ select option:hover {
 
 .send-btn-modern {
 
-  width: 58px;
+  min-width: 90px;
 
   height: 58px;
 
@@ -2829,14 +3136,37 @@ select option:hover {
       #ff9800
     );
 
-  font-size: 1.2rem;
+  font-size: 1rem;
+
+  font-weight: 600;
 
   transition: 0.3s ease;
+
+  color: black;
 }
 
 .send-btn-modern:hover {
 
-  transform: scale(1.08);
+  transform: scale(1.05);
+}
+
+.send-btn-modern:disabled {
+
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* STATUS */
+
+.text-success {
+
+  font-weight: 600;
+}
+
+.text-danger {
+
+  font-weight: 600;
 }
 
 /* MOBILE */
@@ -2851,6 +3181,11 @@ select option:hover {
   .chat-sidebar {
 
     display: none;
+  }
+
+  .chat-main {
+
+    height: 90vh;
   }
 
 }
@@ -3735,3 +4070,92 @@ select option:hover {
 
 }
 
+.quick-actions {
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 15px;
+
+}
+
+.quick-action-btn {
+
+  background:
+    rgba(255,255,255,0.06);
+
+  border:
+    1px solid
+    rgba(255,255,255,0.08);
+
+  padding: 14px 22px;
+
+  border-radius: 14px;
+
+  color: white;
+
+  text-decoration: none;
+
+  font-weight: 600;
+
+  transition: 0.3s ease;
+
+}
+
+.quick-action-btn:hover {
+
+  transform:
+    translateY(-5px);
+
+  background: #ffb703;
+
+  color: black;
+
+  box-shadow:
+    0 0 20px
+    rgba(255,183,3,0.3);
+
+}
+
+.special-card {
+
+  transition: 0.3s ease;
+
+}
+
+.special-card:hover {
+
+  transform:
+    translateY(-6px);
+
+}
+
+.mini-trip-preview {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+}
+
+.mini-trip-item {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  background:
+    rgba(255,255,255,0.05);
+
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+
+}

@@ -32,7 +32,10 @@ import profileRoutes
 from "./modules/profile/profile.routes.js";
 
 import messageRoutes
-from "./modules/message/message.routes.js";
+from "./modules/messages/message.routes.js";
+
+import notificationRoutes
+from "./modules/notification/notification.routes.js";
 
 const app = express();
 
@@ -52,6 +55,16 @@ app.use(
 );
 
 app.use(express.json());
+
+// STATIC FILES
+
+app.use(
+
+  "/uploads",
+
+  express.static("uploads")
+
+);
 
 // DATABASE
 
@@ -87,6 +100,11 @@ app.use(
 app.use(
   "/api/messages",
   messageRoutes
+);
+
+app.use(
+  "/api/notifications",
+  notificationRoutes
 );
 
 // TEST ROUTE
@@ -126,6 +144,11 @@ const io = new Server(
 
 );
 
+// ONLINE USERS
+
+const onlineUsers =
+  new Map();
+
 // SOCKET CONNECTION
 
 io.on(
@@ -139,6 +162,41 @@ io.on(
       "User Connected:",
 
       socket.id
+
+    );
+
+    // REGISTER USER
+
+    socket.on(
+
+      "register_user",
+
+      (userId) => {
+
+        onlineUsers.set(
+          userId,
+          socket.id
+        );
+
+        io.emit(
+
+          "online_users",
+
+          Array.from(
+            onlineUsers.keys()
+          )
+
+        );
+
+        console.log(
+
+          "Online Users:",
+
+          onlineUsers.size
+
+        );
+
+      }
 
     );
 
@@ -168,13 +226,119 @@ io.on(
 
       (data) => {
 
-        io.to(data.tripId)
+        // LIVE MESSAGE
+
+        io.to(data.trip)
 
           .emit(
 
             "receive_message",
 
             data
+
+          );
+
+        // LIVE NOTIFICATION
+
+        socket.to(data.trip)
+
+          .emit(
+
+            "new_notification",
+
+            {
+
+              type: "message",
+
+              text:
+
+                `${data.sender?.name || "Traveler"} sent a message`,
+
+              tripId:
+
+                data.trip,
+
+            }
+
+          );
+
+        console.log(
+
+          "Message Sent:",
+
+          data.message
+
+        );
+
+      }
+
+    );
+
+    // USER TYPING
+
+    socket.on(
+
+      "typing",
+
+      (data) => {
+
+        socket.to(data.tripId)
+
+          .emit(
+
+            "user_typing",
+
+            data
+
+          );
+
+      }
+
+    );
+
+    // STOP TYPING
+
+    socket.on(
+
+      "stop_typing",
+
+      (data) => {
+
+        socket.to(data.tripId)
+
+          .emit(
+
+            "user_stop_typing"
+
+          );
+
+      }
+
+    );
+
+    // MESSAGE SEEN
+
+    socket.on(
+
+      "message_seen",
+
+      (data) => {
+
+        socket.to(data.tripId)
+
+          .emit(
+
+            "message_seen_update",
+
+            {
+
+              messageId:
+                data.messageId,
+
+              userId:
+                data.userId,
+
+            }
 
           );
 
@@ -189,6 +353,36 @@ io.on(
       "disconnect",
 
       () => {
+
+        for (
+
+          const [userId, id]
+
+          of onlineUsers.entries()
+
+        ) {
+
+          if (id === socket.id) {
+
+            onlineUsers.delete(
+              userId
+            );
+
+            break;
+
+          }
+
+        }
+
+        io.emit(
+
+          "online_users",
+
+          Array.from(
+            onlineUsers.keys()
+          )
+
+        );
 
         console.log(
           "User Disconnected"

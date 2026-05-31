@@ -5,6 +5,8 @@ const messageSchema =
 
     {
 
+      // SENDER
+
       sender: {
 
         type:
@@ -15,6 +17,8 @@ const messageSchema =
         required: true,
 
       },
+
+      // TRIP
 
       trip: {
 
@@ -27,13 +31,82 @@ const messageSchema =
 
       },
 
+      // MESSAGE TEXT
+
       message: {
 
         type: String,
 
-        required: true,
+        default: "",
+
+        trim: true,
 
       },
+
+      // FILE URL
+
+      fileUrl: {
+
+        type: String,
+
+        default: "",
+
+      },
+
+      // FILE TYPE
+
+      fileType: {
+
+        type: String,
+
+        default: "",
+
+      },
+
+      // AUDIO URL
+
+      audioUrl: {
+
+        type: String,
+
+        default: "",
+
+      },
+
+      // SEEN STATUS
+
+      seen: {
+
+        type: Boolean,
+
+        default: false,
+
+      },
+
+      // EDIT STATUS
+
+      isEdited: {
+
+        type: Boolean,
+
+        default: false,
+
+      },
+
+      // USERS WHO READ MESSAGE
+
+      readBy: [
+
+        {
+
+          type:
+            mongoose.Schema.Types.ObjectId,
+
+          ref: "User",
+
+        },
+
+      ],
 
     },
 
@@ -44,6 +117,16 @@ const messageSchema =
     }
 
   );
+
+// FAST CHAT FETCHING
+
+messageSchema.index({
+
+  trip: 1,
+
+  createdAt: -1,
+
+});
 
 export default mongoose.model(
 

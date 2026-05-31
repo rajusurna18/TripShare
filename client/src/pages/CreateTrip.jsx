@@ -78,7 +78,7 @@ function CreateTrip() {
 
         await API.post(
 
-          "/api/trips",
+          "/trips",
 
           formData,
 

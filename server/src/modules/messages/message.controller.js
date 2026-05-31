@@ -13,8 +13,45 @@ export const saveMessage =
 
     try {
 
-      const message =
+      let fileUrl = "";
 
+      let fileType = "";
+
+      let audioUrl = "";
+
+      // FILE
+
+      if (
+
+        req.files?.file
+
+      ) {
+
+        fileUrl =
+
+          `uploads/${req.files.file[0].filename}`;
+
+        fileType =
+
+          req.files.file[0].mimetype;
+
+      }
+
+      // AUDIO
+
+      if (
+
+        req.files?.audio
+
+      ) {
+
+        audioUrl =
+
+          `uploads/${req.files.audio[0].filename}`;
+
+      }
+
+      const message =
         await saveMessageService({
 
           ...req.body,
@@ -22,13 +59,30 @@ export const saveMessage =
           sender:
             req.user.id,
 
+          fileUrl,
+
+          fileType,
+
+          audioUrl,
+
         });
 
-      res.json(message);
+      res.status(201).json({
+
+        success: true,
+
+        message:
+          "Message saved successfully",
+
+        data: message,
+
+      });
 
     } catch (err) {
 
       res.status(400).json({
+
+        success: false,
 
         message:
           err.message,
@@ -47,18 +101,28 @@ export const getMessages =
     try {
 
       const messages =
-
         await getMessagesService(
 
           req.params.tripId
 
         );
 
-      res.json(messages);
+      res.status(200).json({
+
+        success: true,
+
+        totalMessages:
+          messages.length,
+
+        messages,
+
+      });
 
     } catch (err) {
 
       res.status(400).json({
+
+        success: false,
 
         message:
           err.message,

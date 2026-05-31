@@ -11,17 +11,23 @@ from "../../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+// CREATE EXPENSE
+
 router.post(
   "/:tripId",
   protect,
   createExpense
 );
 
+// GET ALL EXPENSES OF A TRIP
+
 router.get(
   "/:tripId",
   protect,
   getTripExpenses
 );
+
+// GET BALANCE SUMMARY
 
 router.get(
   "/balance/:tripId",

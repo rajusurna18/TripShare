@@ -82,7 +82,7 @@ function App() {
           element={<ResetPassword />}
         />
 
-        {/* PROTECTED ROUTES */}
+        {/* DASHBOARD */}
 
         <Route
           path="/dashboard"
@@ -95,6 +95,8 @@ function App() {
           }
         />
 
+        {/* PROFILE */}
+
         <Route
           path="/profile"
           element={
@@ -105,6 +107,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* NOTIFICATIONS */}
 
         <Route
           path="/notifications"
@@ -117,6 +121,8 @@ function App() {
           }
         />
 
+        {/* MATCHES */}
+
         <Route
           path="/matches"
           element={
@@ -128,8 +134,10 @@ function App() {
           }
         />
 
+        {/* CHAT WITH TRIP ID */}
+
         <Route
-          path="/chat"
+          path="/chat/:tripId"
           element={
             <ProtectedRoute>
 
@@ -138,6 +146,21 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* FALLBACK CHAT ROUTE */}
+
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+
+              <Trips />
+
+            </ProtectedRoute>
+          }
+        />
+
+        {/* AI */}
 
         <Route
           path="/ai"
@@ -150,6 +173,8 @@ function App() {
           }
         />
 
+        {/* TRIPS */}
+
         <Route
           path="/trips"
           element={
@@ -160,6 +185,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* CREATE TRIP */}
 
         <Route
           path="/create-trip"
@@ -172,6 +199,8 @@ function App() {
           }
         />
 
+        {/* EXPENSES */}
+
         <Route
           path="/expenses/:tripId"
           element={
@@ -183,6 +212,8 @@ function App() {
           }
         />
 
+        {/* ITINERARY */}
+
         <Route
           path="/itinerary"
           element={
@@ -193,6 +224,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* TRIP DETAILS */}
 
         <Route
           path="/trip/:tripId"

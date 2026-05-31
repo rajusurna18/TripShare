@@ -4,66 +4,110 @@ import {
   calculateBalancesService,
 } from "./expense.service.js";
 
-export const createExpense = async (
-  req,
-  res
-) => {
+// CREATE EXPENSE
 
-  try {
+export const createExpense =
+  async (req, res) => {
 
-    const expense =
-      await createExpenseService(req.body);
+    try {
 
-    res.json(expense);
+      const expense =
+        await createExpenseService(
+          req.body
+        );
 
-  } catch (err) {
+      res.status(201).json({
 
-    res.status(400).json({
-      message: err.message,
-    });
-  }
+        success: true,
+
+        message:
+          "Expense added successfully",
+
+        expense,
+
+      });
+
+    } catch (err) {
+
+      res.status(400).json({
+
+        success: false,
+
+        message: err.message,
+
+      });
+
+    }
+
 };
 
-export const getTripExpenses = async (
-  req,
-  res
-) => {
+// GET TRIP EXPENSES
 
-  try {
+export const getTripExpenses =
+  async (req, res) => {
 
-    const expenses =
-      await getTripExpensesService(
-        req.params.tripId
-      );
+    try {
 
-    res.json(expenses);
+      const expenses =
+        await getTripExpensesService(
+          req.params.tripId
+        );
 
-  } catch (err) {
+      res.status(200).json({
 
-    res.status(400).json({
-      message: err.message,
-    });
-  }
+        success: true,
+
+        totalExpenses:
+          expenses.length,
+
+        expenses,
+
+      });
+
+    } catch (err) {
+
+      res.status(400).json({
+
+        success: false,
+
+        message: err.message,
+
+      });
+
+    }
+
 };
 
-export const calculateBalances = async (
-  req,
-  res
-) => {
+// CALCULATE BALANCES
 
-  try {
+export const calculateBalances =
+  async (req, res) => {
 
-    const balances =
-      await calculateBalancesService(
-        req.params.tripId
-      );
+    try {
 
-    res.json(balances);
+      const balances =
+        await calculateBalancesService(
+          req.params.tripId
+        );
 
-  } catch (err) {
+      res.status(200).json({
 
-    res.status(400).json({
-      message: err.message,
-    });
-  }
+        success: true,
+
+        ...balances,
+
+      });
+
+    } catch (err) {
+
+      res.status(400).json({
+
+        success: false,
+
+        message: err.message,
+
+      });
+
+    }
+
 };

@@ -1,11 +1,8 @@
 import {
 
   createTripService,
-
   getTripsService,
-
   joinTripService,
-
   getTripByIdService,
 
 } from "./trip.service.js";
@@ -26,18 +23,26 @@ export const createTrip =
 
       const trip =
         await createTripService(
-
           req.body,
-
           req.user.id
-
         );
 
-      res.status(201).json(trip);
+      res.status(201).json({
+
+        success: true,
+
+        message:
+          "Trip created successfully",
+
+        trip,
+
+      });
 
     } catch (err) {
 
       res.status(400).json({
+
+        success: false,
 
         message: err.message,
 
@@ -55,13 +60,26 @@ export const getTrips =
     try {
 
       const trips =
-        await getTripsService();
+        await getTripsService(
+          req.user.id
+        );
 
-      res.json(trips);
+      res.status(200).json({
+
+        success: true,
+
+        totalTrips:
+          trips.length,
+
+        trips,
+
+      });
 
     } catch (err) {
 
       res.status(400).json({
+
+        success: false,
 
         message: err.message,
 
@@ -82,16 +100,26 @@ export const joinTrip =
         await joinTripService(
 
           req.params.id,
-
           req.user.id
 
         );
 
-      res.json(trip);
+      res.status(200).json({
+
+        success: true,
+
+        message:
+          "Joined trip successfully",
+
+        trip,
+
+      });
 
     } catch (err) {
 
       res.status(400).json({
+
+        success: false,
 
         message: err.message,
 
@@ -113,11 +141,19 @@ export const getTripById =
           req.params.id
         );
 
-      res.json(trip);
+      res.status(200).json({
+
+        success: true,
+
+        trip,
+
+      });
 
     } catch (err) {
 
       res.status(400).json({
+
+        success: false,
 
         message: err.message,
 

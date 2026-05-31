@@ -1,11 +1,15 @@
 import jwt from "jsonwebtoken";
 
-export const protect = (req, res, next) => {
+export const protect = (
+  req,
+  res,
+  next
+) => {
 
-  const token =
+  const authHeader =
     req.headers.authorization;
 
-  if (!token) {
+  if (!authHeader) {
 
     return res.status(401).json({
       message: "No token",
@@ -14,6 +18,9 @@ export const protect = (req, res, next) => {
   }
 
   try {
+
+    const token =
+      authHeader.split(" ")[1];
 
     const decoded = jwt.verify(
       token,
@@ -24,9 +31,9 @@ export const protect = (req, res, next) => {
 
     next();
 
-  } catch {
+  } catch (error) {
 
-    res.status(401).json({
+    return res.status(401).json({
       message: "Invalid token",
     });
 

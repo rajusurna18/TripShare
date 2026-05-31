@@ -12,23 +12,50 @@ export const createTripService =
 
         createdBy: userId,
 
+        members: [userId],
+
       });
 
-    return trip;
+    return await Trip.findById(
+      trip._id
+    )
+
+      .populate(
+        "createdBy",
+        "name email profileImage"
+      )
+
+      .populate(
+        "members",
+        "name profileImage travelStyle"
+      );
 
 };
 
 // GET ALL TRIPS
 
 export const getTripsService =
-  async () => {
+  async (userId) => {
 
-    return await Trip.find()
+    return await Trip.find({
+
+      createdBy: userId,
+
+    })
 
       .populate(
         "createdBy",
         "name email profileImage"
-      );
+      )
+
+      .populate(
+        "members",
+        "name profileImage travelStyle"
+      )
+
+      .sort({
+        createdAt: -1,
+      });
 
 };
 
@@ -38,7 +65,9 @@ export const joinTripService =
   async (tripId, userId) => {
 
     const trip =
-      await Trip.findById(tripId);
+      await Trip.findById(
+        tripId
+      );
 
     if (!trip) {
 
@@ -48,12 +77,19 @@ export const joinTripService =
 
     }
 
-    if (
-      trip.members.includes(userId)
-    ) {
+    const alreadyJoined =
+
+      trip.members.some(
+        (member) =>
+
+          member.toString() ===
+          userId.toString()
+      );
+
+    if (alreadyJoined) {
 
       throw new Error(
-        "Already joined"
+        "Already joined this trip"
       );
 
     }
@@ -62,7 +98,19 @@ export const joinTripService =
 
     await trip.save();
 
-    return trip;
+    return await Trip.findById(
+      trip._id
+    )
+
+      .populate(
+        "createdBy",
+        "name email profileImage"
+      )
+
+      .populate(
+        "members",
+        "name profileImage travelStyle"
+      );
 
 };
 
@@ -72,7 +120,9 @@ export const getTripByIdService =
   async (tripId) => {
 
     const trip =
-      await Trip.findById(tripId)
+      await Trip.findById(
+        tripId
+      )
 
         .populate(
           "createdBy",
@@ -81,7 +131,7 @@ export const getTripByIdService =
 
         .populate(
           "members",
-          "name profileImage travelStyle"
+          "name profileImage travelStyle personality interests"
         );
 
     if (!trip) {
@@ -92,6 +142,15 @@ export const getTripByIdService =
 
     }
 
-    return trip;
+    const totalMembers =
+      trip.members.length;
+
+    return {
+
+      ...trip.toObject(),
+
+      totalMembers,
+
+    };
 
 };

@@ -41,13 +41,17 @@ export const getTripExpensesService =
 
       .populate(
         "paidBy",
-        "name"
+        "name profileImage"
       )
 
       .populate(
         "splitAmong",
-        "name"
-      );
+        "name profileImage"
+      )
+
+      .sort({
+        createdAt: -1,
+      });
 
 };
 
@@ -63,7 +67,7 @@ export const calculateBalancesService =
 
         .populate(
           "members",
-          "name"
+          "name profileImage"
         );
 
     // CHECK TRIP
@@ -87,18 +91,46 @@ export const calculateBalancesService =
 
         .populate(
           "paidBy",
-          "name"
+          "name profileImage"
         );
+
+    // EMPTY STATE
+
+    if (
+      expenses.length === 0
+    ) {
+
+      return {
+
+        total: 0,
+
+        perPerson: 0,
+
+        totalExpenses: 0,
+
+        totalTravelers:
+          trip.members.length,
+
+        balances: [],
+
+        recentExpenses: [],
+
+      };
+
+    }
 
     // TOTAL EXPENSE
 
-    let total = 0;
+    const total =
+      expenses.reduce(
 
-    expenses.forEach((exp) => {
+        (sum, exp) =>
 
-      total += exp.amount;
+          sum + exp.amount,
 
-    });
+        0
+
+      );
 
     // MEMBER COUNT SAFETY
 
@@ -114,52 +146,120 @@ export const calculateBalancesService =
 
     const paidMap = {};
 
-    trip.members.forEach((member) => {
+    trip.members.forEach(
+      (member) => {
 
-      paidMap[member._id] = 0;
+        paidMap[
+          member._id
+        ] = 0;
 
-    });
+      }
+    );
 
     // TRACK PAYMENTS
 
-    expenses.forEach((exp) => {
+    expenses.forEach(
+      (exp) => {
 
-      paidMap[exp.paidBy._id] +=
-        exp.amount;
+        const payerId =
+          exp.paidBy._id
+            .toString();
 
-    });
+        paidMap[payerId] +=
+          exp.amount;
+
+      }
+    );
 
     // FINAL BALANCES
 
     const balances = [];
 
-    trip.members.forEach((member) => {
+    trip.members.forEach(
+      (member) => {
 
-      const paid =
-        paidMap[member._id];
+        const memberId =
+          member._id.toString();
 
-      const balance =
-        paid - perPerson;
+        const paid =
+          paidMap[
+            memberId
+          ];
 
-      balances.push({
+        const balance =
+          paid - perPerson;
 
-        user: member.name,
+        balances.push({
 
-        paid,
+          user:
+            member.name,
 
-        balance,
+          profileImage:
+            member.profileImage,
 
-      });
+          paid,
 
-    });
+          balance:
+            Number(
+              balance.toFixed(2)
+            ),
+
+          status:
+
+            balance > 0
+
+              ? "gets back"
+
+              : balance < 0
+
+              ? "owes"
+
+              : "settled",
+
+        });
+
+      }
+    );
+
+    // RECENT EXPENSES
+
+    const recentExpenses =
+      expenses
+        .slice(0, 5)
+        .map((exp) => ({
+
+          title:
+            exp.title,
+
+          amount:
+            exp.amount,
+
+          paidBy:
+            exp.paidBy.name,
+
+          createdAt:
+            exp.createdAt,
+
+        }));
 
     return {
 
       total,
 
-      perPerson,
+      perPerson:
+        Number(
+          perPerson.toFixed(2)
+        ),
+
+      totalExpenses:
+        expenses.length,
+
+      totalTravelers:
+        memberCount,
 
       balances,
+
+      recentExpenses,
 
     };
 

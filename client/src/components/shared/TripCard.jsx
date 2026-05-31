@@ -72,14 +72,21 @@ function TripCard({ trip }) {
 
         <div className="trip-buttons">
 
-          <button className="btn btn-custom">
-
-            Join Trip
-
-          </button>
+          {/* OPEN CHAT */}
 
           <Link
-            to={`/matches/${trip._id}`}
+            to={`/chat/${trip._id}`}
+            className="btn btn-custom"
+          >
+
+            Open Chat
+
+          </Link>
+
+          {/* MATCHES */}
+
+          <Link
+            to="/matches"
             className="btn btn-outline-warning"
           >
 

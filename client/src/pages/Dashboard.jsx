@@ -18,6 +18,7 @@ function Dashboard() {
   useEffect(() => {
 
     fetchTrips();
+
     fetchProfile();
 
   }, []);
@@ -32,7 +33,7 @@ function Dashboard() {
         localStorage.getItem("token");
 
       const res = await API.get(
-        "/api/trips",
+        "/trips",
         {
           headers: {
             Authorization:
@@ -41,7 +42,11 @@ function Dashboard() {
         }
       );
 
-      setTrips(res.data);
+      setTrips(
+        Array.isArray(res.data.trips)
+          ? res.data.trips
+          : []
+      );
 
       setLoading(false);
 
@@ -65,7 +70,7 @@ function Dashboard() {
         localStorage.getItem("token");
 
       const res = await API.get(
-        "/api/profile",
+        "/profile",
         {
           headers: {
             Authorization:
@@ -83,6 +88,71 @@ function Dashboard() {
     }
 
   };
+
+  // STATS
+
+  const uniqueDestinations =
+    new Set(
+      (Array.isArray(trips)
+        ? trips
+        : []
+      ).map(
+        (trip) =>
+          trip.destination
+      )
+    ).size;
+
+  const totalTravelers =
+    trips.reduce(
+
+      (total, trip) =>
+
+        total +
+        (
+          trip.members?.length || 0
+        ),
+
+      0
+
+    );
+
+  const totalBudget =
+    trips.reduce(
+
+      (sum, trip) =>
+
+        sum +
+        (trip.budget || 0),
+
+      0
+
+    );
+
+  if (loading) {
+
+    return (
+
+      <div className="dashboard-page min-vh-100 text-light d-flex justify-content-center align-items-center">
+
+        <div className="text-center">
+
+          <div
+            className="spinner-border text-warning mb-3"
+          />
+
+          <h4>
+
+            Loading Dashboard...
+
+          </h4>
+
+        </div>
+
+      </div>
+
+    );
+
+  }
 
   return (
 
@@ -102,8 +172,7 @@ function Dashboard() {
 
               <h1 className="fw-bold display-5 text-white">
 
-                Welcome Back,
-                {" "}
+                Welcome Back{" "}
 
                 <span className="text-warning">
 
@@ -123,21 +192,6 @@ function Dashboard() {
                 with TripShare AI.
 
               </p>
-
-              {/* ACTION BUTTONS */}
-
-              <div className="d-flex flex-column align-items-start gap-3 mt-4">
-
-                <Link
-                  to="/create-trip"
-                  className="btn btn-custom create-trip-btn"
-                >
-
-                  + Create New Trip
-
-                </Link>
-
-              </div>
 
             </div>
 
@@ -174,7 +228,13 @@ function Dashboard() {
 
                   <small>
 
-                    Premium Traveler 🚀
+                    {
+
+                      user?.travelStyle ||
+
+                      "Explorer"
+
+                    } ✈️
 
                   </small>
 
@@ -188,87 +248,338 @@ function Dashboard() {
 
         </div>
 
-        {/* TOP SECTION */}
+        {/* EMPTY STATE */}
 
-        <div className="row g-4 mb-5">
+        {
 
-          {/* LEFT SECTION */}
+          !loading && trips.length === 0 && (
 
-          <div className="col-lg-8 d-flex flex-column gap-4">
+            <div className="glass-card p-5 text-center mb-5">
 
-            {/* VIEW DETAILS */}
+              <h2 className="text-warning mb-3">
 
-            <div className="special-card glass-card p-4 view-trip-card">
+                No Trips Yet ✈️
 
-              <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+              </h2>
 
-                <div>
+              <p className="dashboard-text mb-4">
 
-                  <h2 className="text-warning mb-2">
+                Start your first adventure
+                and explore the world
+                with TripShare AI.
 
-                    ✈️ Explore Your Trips
+              </p>
 
-                  </h2>
+              <Link
+                to="/create-trip"
+                className="btn btn-custom"
+              >
 
-                  <p className="dashboard-text m-0">
+                Create Your First Trip
 
-                    Manage your adventures,
-                    explore destinations,
-                    and track travel experiences.
-
-                  </p>
-
-                </div>
-
-                <Link
-                  to="/trips"
-                  className="btn btn-custom view-details-btn"
-                >
-
-                  View Details
-
-                </Link>
-
-              </div>
+              </Link>
 
             </div>
 
-            {/* AI ASSISTANT */}
+          )
 
-            <div className="special-card glass-card p-4 ai-assistant-card">
+        }
 
-              <div className="d-flex flex-column h-100 justify-content-between">
+        {
 
-                <div>
+          trips.length > 0 && (
 
-                  <h2 className="text-warning mb-3">
+            <>
 
-                    🤖 TripShare AI Assistant
+              {/* TOP SECTION */}
 
-                  </h2>
+              <div className="row g-4 mb-5">
 
-                  <p className="dashboard-text ai-text">
+                {/* LEFT */}
 
-                    Ask travel questions,
-                    generate itineraries,
-                    estimate budgets,
-                    discover destinations,
-                    and get smart travel guidance instantly.
+                <div className="col-lg-8 d-flex flex-column gap-4">
 
-                  </p>
+                  {/* ACTIVE TRIPS */}
+
+                  <div className="special-card glass-card p-4 view-trip-card">
+
+                    <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                      <div>
+
+                        <h2 className="text-warning mb-2">
+
+                          ✈️ Your Active Trips
+
+                        </h2>
+
+                        <p className="dashboard-text m-0">
+
+                          Manage your trips and
+                          continue your travel journey.
+
+                        </p>
+
+                        {/* MINI TRIP PREVIEW */}
+
+                        <div className="mini-trip-preview mt-3">
+
+                          {
+
+                            trips.slice(0, 2).map(
+                              (trip, index) => (
+
+                                <div
+                                  key={index}
+                                  className="mini-trip-item"
+                                >
+
+                                  🌍 {trip.destination}
+
+                                  <span>
+
+                                    ₹{trip.budget}
+
+                                  </span>
+
+                                </div>
+
+                              )
+                            )
+
+                          }
+
+                        </div>
+
+                      </div>
+
+                      <Link
+                        to="/trips"
+                        className="btn btn-custom"
+                      >
+
+                        Open Trips →
+
+                      </Link>
+
+                    </div>
+
+                  </div>
+
+                  {/* QUICK ACTIONS */}
+
+                  <div className="quick-actions">
+
+                    <Link
+                      to="/create-trip"
+                      className="quick-action-btn"
+                    >
+                      ✈️ Create Trip
+                    </Link>
+
+                    <Link
+
+                      to={
+                        trips.length > 0
+                          ? `/chat/${trips[0]._id}`
+                          : "/trips"
+                      }
+
+                      className="quick-action-btn"
+
+                    >
+
+                      💬 Open Chat
+
+                    </Link>
+
+                    <Link
+                      to="/itinerary"
+                      className="quick-action-btn"
+                    >
+                      🤖 AI Planner
+                    </Link>
+
+                    <Link
+                      to="/expenses"
+                      className="quick-action-btn"
+                    >
+                      💸 Expenses
+                    </Link>
+
+                  </div>
 
                 </div>
 
-                {/* BUTTON */}
+                {/* STATS */}
 
-                <div className="mt-4 d-flex justify-content-end">
+                <div className="col-lg-4">
+
+                  <div className="special-card glass-card h-100 p-4">
+
+                    <h3 className="text-warning mb-4">
+
+                      📊 Travel Stats
+
+                    </h3>
+
+                    <div className="d-flex flex-column gap-3">
+
+                      <div className="stats-row">
+
+                        ✈ Trips Created
+
+                        <span>
+
+                          {trips.length}
+
+                        </span>
+
+                      </div>
+
+                      <div className="stats-row">
+
+                        🌍 Destinations
+
+                        <span>
+
+                          {uniqueDestinations}
+
+                        </span>
+
+                      </div>
+
+                      <div className="stats-row">
+
+                        👥 Travelers
+
+                        <span>
+
+                          {totalTravelers}
+
+                        </span>
+
+                      </div>
+
+                      <div className="stats-row">
+
+                        💰 Shared Budget
+
+                        <span>
+
+                          ₹{totalBudget}
+
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* FEATURES */}
+
+              <div className="row g-4 mb-5">
+
+                {/* SMART MATCHES */}
+
+                <div className="col-lg-6">
 
                   <Link
-                    to="/itinerary"
-                    className="btn btn-custom ai-btn"
+                    to="/matches"
+                    className="dashboard-box feature-box h-100 text-decoration-none"
                   >
 
-                    Open AI Planner 🚀
+                    <div className="feature-icon">
+
+                      👥
+
+                    </div>
+
+                    <div className="feature-content">
+
+                      <h2>
+
+                        Smart Travel Matches
+
+                      </h2>
+
+                      <p>
+
+                        Discover compatible travelers
+                        based on interests,
+                        budget, destinations,
+                        and travel personality.
+
+                      </p>
+
+                      <span className="feature-tag">
+
+                        AI Match System Beta 🚀
+
+                      </span>
+
+                    </div>
+
+                  </Link>
+
+                </div>
+
+                {/* CHAT */}
+
+                <div className="col-lg-6">
+
+                  <Link
+
+                    to={`/chat/${trips[0]?._id}`}
+
+                    className="dashboard-box feature-box h-100 text-decoration-none"
+
+                  >
+
+                    <div className="feature-icon">
+
+                      💬
+
+                    </div>
+
+                    <div className="feature-content">
+
+                      <h2>
+
+                        Travel Group Chat
+
+                      </h2>
+
+                      <p>
+
+                        Open live trip discussions,
+                        coordinate plans,
+                        and connect with travelers instantly.
+
+                      </p>
+
+                      <span className="feature-tag">
+
+                        Live Messaging Experience
+
+                      </span>
+
+                      <div className="mt-3">
+
+                        <small className="text-secondary">
+
+                          Last active: 2 mins ago
+
+                        </small>
+
+                      </div>
+
+                    </div>
 
                   </Link>
 
@@ -276,236 +587,11 @@ function Dashboard() {
 
               </div>
 
-            </div>
+            </>
 
-          </div>
+          )
 
-          {/* STATS */}
-
-          <div className="col-lg-4">
-
-            <div className="special-card glass-card h-100 p-4">
-
-              <h3 className="text-warning mb-4">
-
-                📊 Travel Stats
-
-              </h3>
-
-              <div className="d-flex flex-column gap-3">
-
-                <div className="stats-row">
-
-                  ✈ Trips Created
-
-                  <span>
-
-                    {trips.length}
-
-                  </span>
-
-                </div>
-
-                <div className="stats-row">
-
-                  🌍 Destinations
-
-                  <span>
-
-                    {
-                      new Set(
-                        trips.map(
-                          (trip) =>
-                            trip.destination
-                        )
-                      ).size
-                    }
-
-                  </span>
-
-                </div>
-
-                <div className="stats-row">
-
-                  👥 Travelers
-
-                  <span>
-
-                    {trips.length * 3}
-
-                  </span>
-
-                </div>
-
-                <div className="stats-row">
-
-                  💰 Savings
-
-                  <span>
-
-                    ₹{trips.length * 5000}
-
-                  </span>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* FEATURES */}
-
-        <div className="row g-4 mb-5">
-
-          {/* MATCHES */}
-
-          <div className="col-lg-6">
-
-            <Link
-              to="/matches"
-              className="dashboard-box feature-box h-100 text-decoration-none"
-            >
-
-              <div className="feature-icon">
-
-                👥
-
-              </div>
-
-              <div className="feature-content">
-
-                <h2>
-
-                  Smart Travel Matches
-
-                </h2>
-
-                <p>
-
-                  Find travelers who match
-                  your interests, vibe,
-                  budget, and travel goals.
-
-                </p>
-
-                <span className="feature-tag">
-
-                  AI Compatibility System
-
-                </span>
-
-              </div>
-
-            </Link>
-
-          </div>
-
-          {/* CHAT */}
-
-          <div className="col-lg-6">
-
-            <Link
-              to="/chat"
-              className="dashboard-box feature-box h-100 text-decoration-none"
-            >
-
-              <div className="feature-icon">
-
-                💬
-
-              </div>
-
-              <div className="feature-content">
-
-                <h2>
-
-                  Personal Travel Chat
-
-                </h2>
-
-                <p>
-
-                  Chat with travelers,
-                  share plans,
-                  and stay connected
-                  in real time.
-
-                </p>
-
-                <span className="feature-tag">
-
-                  Live Messaging Experience
-
-                </span>
-
-              </div>
-
-            </Link>
-
-          </div>
-
-        </div>
-
-        {/* LOWER SECTION */}
-
-        <div className="row g-4">
-
-          {/* ACTIVITY */}
-
-          <div className="col-lg-6">
-
-            <div className="special-card glass-card p-4 h-100">
-
-              <h3 className="text-warning mb-4">
-
-                🔔 Recent Activity
-
-              </h3>
-
-              {
-                trips.length === 0 ? (
-
-                  <div className="empty-box">
-
-                    <h4>
-
-                      No Recent Activity
-
-                    </h4>
-
-                  </div>
-
-                ) : (
-
-                  trips.slice(0, 4).map(
-                    (trip, index) => (
-
-                      <div
-                        className="activity-item"
-                        key={index}
-                      >
-
-                        ✈️ New update in
-                        {" "}
-                        {trip.destination}
-
-                      </div>
-
-                    )
-                  )
-
-                )
-              }
-
-            </div>
-
-          </div>
-
-        </div>
+        }
 
       </div>
 

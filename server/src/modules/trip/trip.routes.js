@@ -1,15 +1,10 @@
 import express from "express";
 
 import {
-
   createTrip,
-
   getTrips,
-
   joinTrip,
-
   getTripById,
-
 } from "./trip.controller.js";
 
 import { protect }
@@ -33,6 +28,7 @@ router.post(
 
 router.get(
   "/",
+  protect,
   getTrips
 );
 

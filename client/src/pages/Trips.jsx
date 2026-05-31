@@ -41,6 +41,8 @@ function Trips() {
 
   }, [search, trips]);
 
+  // FETCH TRIPS
+
   const fetchTrips = async () => {
 
     try {
@@ -48,9 +50,13 @@ function Trips() {
       const res =
         await getTrips();
 
-      setTrips(res.data);
+      setTrips(
+        res.data.trips || []
+      );
 
-      setFilteredTrips(res.data);
+      setFilteredTrips(
+        res.data.trips || []
+      );
 
       setLoading(false);
 
@@ -114,6 +120,7 @@ function Trips() {
         {/* LOADING */}
 
         {
+
           loading ? (
 
             <div className="empty-box">
@@ -131,6 +138,7 @@ function Trips() {
             <div className="row g-4">
 
               {
+
                 filteredTrips.length === 0 ? (
 
                   <div className="empty-box">
@@ -172,11 +180,13 @@ function Trips() {
                   ))
 
                 )
+
               }
 
             </div>
 
           )
+
         }
 
       </div>
@@ -184,6 +194,7 @@ function Trips() {
     </div>
 
   );
+
 }
 
 export default Trips;

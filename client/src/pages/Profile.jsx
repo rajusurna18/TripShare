@@ -1,7 +1,9 @@
+
 import { useEffect, useState }
 from "react";
 
-import API from "../services/api";
+import API
+from "../services/api";
 
 function Profile() {
 
@@ -23,62 +25,81 @@ function Profile() {
   const [image, setImage] =
     useState(null);
 
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
   useEffect(() => {
 
     fetchProfile();
 
   }, []);
 
+  // FETCH PROFILE
+
   const fetchProfile =
     async () => {
 
       try {
 
-        const token =
-          localStorage.getItem("token");
+        const res =
+          await API.get(
+            "/api/profile"
+          );
 
-        const res = await API.get(
-          "/api/profile",
-          {
-            headers: {
-              Authorization: token,
-            },
-          }
-        );
+        const profile =
 
-        setUser(res.data);
+          res.data.user ||
+
+          res.data;
+
+        setUser(profile);
 
         setBio(
-          res.data.bio || ""
+          profile.bio || ""
         );
 
         setInterests(
-          res.data.interests
+
+          profile.interests
             ?.join(", ") || ""
+
         );
 
         setTravelStyle(
-          res.data.travelStyle || ""
+
+          profile.travelStyle || ""
+
         );
 
         setPersonality(
-          res.data.personality || ""
+
+          profile.personality || ""
+
         );
 
       } catch (err) {
 
         console.log(err);
 
+      } finally {
+
+        setLoading(false);
+
       }
+
   };
+
+  // UPDATE PROFILE
 
   const updateProfile =
     async () => {
 
       try {
 
-        const token =
-          localStorage.getItem("token");
+        setSaving(true);
 
         const formData =
           new FormData();
@@ -88,11 +109,26 @@ function Profile() {
           bio
         );
 
-        formData.append(
-          "interests",
+        const interestArray =
+
           interests
             .split(",")
-            .map((i) => i.trim())
+
+            .map((i) =>
+              i.trim()
+            )
+
+            .filter(Boolean);
+
+        interestArray.forEach(
+          (interest) => {
+
+            formData.append(
+              "interests",
+              interest
+            );
+
+          }
         );
 
         formData.append(
@@ -108,23 +144,54 @@ function Profile() {
         if (image) {
 
           formData.append(
+
             "profileImage",
+
             image
+
           );
 
         }
 
-        const res = await API.put(
-          "/api/profile",
-          formData,
-          {
-            headers: {
-              Authorization: token,
-            },
-          }
+        const res =
+          await API.put(
+
+            "/api/profile",
+
+            formData
+
+          );
+
+        const updatedUser =
+
+          res.data.user ||
+
+          res.data;
+
+        setUser(updatedUser);
+
+        setBio(
+          updatedUser.bio || ""
         );
 
-        setUser(res.data);
+        setInterests(
+
+          updatedUser.interests
+            ?.join(", ") || ""
+
+        );
+
+        setTravelStyle(
+
+          updatedUser.travelStyle || ""
+
+        );
+
+        setPersonality(
+
+          updatedUser.personality || ""
+
+        );
 
         alert(
           "Profile Updated 🚀"
@@ -134,204 +201,383 @@ function Profile() {
 
         console.log(err);
 
+      } finally {
+
+        setSaving(false);
+
       }
+
   };
 
-  if (!user) {
+  // PROFILE COMPLETION
 
-    return <h1>Loading...</h1>;
+  let completed = 0;
+
+  if (user?.profileImage)
+    completed++;
+
+  if (bio.trim())
+    completed++;
+
+  if (interests.trim())
+    completed++;
+
+  if (travelStyle.trim())
+    completed++;
+
+  if (personality.trim())
+    completed++;
+
+  const completion =
+    Math.floor(
+      (completed / 5) * 100
+    );
+
+  // LOADING
+
+  if (loading) {
+
+    return (
+
+      <div className="dashboard-page min-vh-100 text-light d-flex justify-content-center align-items-center">
+
+        <h2>
+
+          Loading Profile...
+
+        </h2>
+
+      </div>
+
+    );
 
   }
 
   return (
 
-    <div className="min-h-screen bg-gray-100 p-10">
+    <div className="dashboard-page min-vh-100 text-light">
 
-      <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+      <div className="container py-5">
 
-        {/* PROFILE */}
+        <div className="glass-card p-5">
 
-        <div className="flex flex-col items-center">
+          {/* PROFILE HEADER */}
 
-          <img
-            src={
-              user.profileImage ||
-              "https://via.placeholder.com/150"
-            }
-            alt="profile"
-            className="w-40 h-40 rounded-full object-cover mb-4"
-          />
+          <div className="text-center mb-5">
 
-          <h1 className="text-4xl font-bold">
+            <img
 
-            {user.name}
+              src={
 
-          </h1>
+                user?.profileImage ||
 
-          <p className="text-gray-500">
+                "https://i.pravatar.cc/200"
 
-            {user.email}
+              }
 
-          </p>
+              alt="profile"
 
-        </div>
+              className="profile-page-image"
 
-        {/* BIO */}
+            />
 
-        <div className="mt-8">
+            <h1 className="mt-4 fw-bold">
 
-          <label className="font-bold">
+              {user?.name}
 
-            Bio
+            </h1>
 
-          </label>
+            <p className="text-secondary">
 
-          <textarea
-            className="w-full border p-4 rounded-xl mt-2"
-            rows="4"
-            value={bio}
-            onChange={(e) =>
-              setBio(e.target.value)
-            }
-          />
+              {user?.email}
 
-        </div>
+            </p>
 
-        {/* INTERESTS */}
+          </div>
 
-        <div className="mt-6">
+          {/* PROFILE COMPLETION */}
 
-          <label className="font-bold">
+          <div className="mb-5">
 
-            Interests
+            <div className="d-flex justify-content-between align-items-center mb-2">
 
-          </label>
+              <h4>
 
-          <input
-            type="text"
-            className="w-full border p-4 rounded-xl mt-2"
-            placeholder="trekking, beaches, food"
-            value={interests}
-            onChange={(e) =>
-              setInterests(
-                e.target.value
-              )
-            }
-          />
+                Profile Completion
 
-        </div>
+              </h4>
 
-        {/* TRAVEL STYLE */}
+              <span className="text-warning fw-bold">
 
-        <div className="mt-6">
+                {completion}%
 
-          <label className="font-bold">
+              </span>
 
-            Travel Style
+            </div>
 
-          </label>
+            <div className="progress profile-progress-bar">
 
-          <select
-            className="w-full border p-4 rounded-xl mt-2"
-            value={travelStyle}
-            onChange={(e) =>
-              setTravelStyle(
-                e.target.value
-              )
-            }
+              <div
+
+                className="progress-bar bg-warning"
+
+                style={{
+
+                  width:
+                    `${completion}%`
+
+                }}
+
+              />
+
+            </div>
+
+            <div className="mt-4">
+
+              <small className="text-secondary">
+
+                Complete your profile
+                to unlock better travel
+                matches and personalized
+                recommendations.
+
+              </small>
+
+            </div>
+
+          </div>
+
+          {/* BIO */}
+
+          <div className="mb-4">
+
+            <label className="form-label fw-bold">
+
+              Bio
+
+            </label>
+
+            <textarea
+
+              className="form-control profile-input"
+
+              rows="4"
+
+              value={bio}
+
+              onChange={(e) =>
+
+                setBio(
+                  e.target.value
+                )
+
+              }
+
+            />
+
+          </div>
+
+          {/* INTERESTS */}
+
+          <div className="mb-4">
+
+            <label className="form-label fw-bold">
+
+              Interests
+
+            </label>
+
+            <input
+
+              type="text"
+
+              className="form-control profile-input"
+
+              placeholder="trekking, beaches, food"
+
+              value={interests}
+
+              onChange={(e) =>
+
+                setInterests(
+                  e.target.value
+                )
+
+              }
+
+            />
+
+          </div>
+
+          {/* TRAVEL STYLE */}
+
+          <div className="mb-4">
+
+            <label className="form-label fw-bold">
+
+              Travel Style
+
+            </label>
+
+            <select
+
+              className="form-select profile-input"
+
+              value={travelStyle}
+
+              onChange={(e) =>
+
+                setTravelStyle(
+                  e.target.value
+                )
+
+              }
+
+            >
+
+              <option value="">
+
+                Select Travel Style
+
+              </option>
+
+              <option value="Budget">
+
+                Budget
+
+              </option>
+
+              <option value="Luxury">
+
+                Luxury
+
+              </option>
+
+              <option value="Adventure">
+
+                Adventure
+
+              </option>
+
+              <option value="Backpacking">
+
+                Backpacking
+
+              </option>
+
+            </select>
+
+          </div>
+
+          {/* PERSONALITY */}
+
+          <div className="mb-4">
+
+            <label className="form-label fw-bold">
+
+              Personality
+
+            </label>
+
+            <select
+
+              className="form-select profile-input"
+
+              value={personality}
+
+              onChange={(e) =>
+
+                setPersonality(
+                  e.target.value
+                )
+
+              }
+
+            >
+
+              <option value="">
+
+                Select Personality
+
+              </option>
+
+              <option value="Introvert">
+
+                Introvert
+
+              </option>
+
+              <option value="Extrovert">
+
+                Extrovert
+
+              </option>
+
+            </select>
+
+          </div>
+
+          {/* IMAGE */}
+
+          <div className="mb-4">
+
+            <label className="form-label fw-bold">
+
+              Upload Profile Image
+
+            </label>
+
+            <input
+
+              type="file"
+
+              className="form-control profile-input"
+
+              onChange={(e) =>
+
+                setImage(
+                  e.target.files[0]
+                )
+
+              }
+
+            />
+
+          </div>
+
+          {/* BUTTON */}
+
+          <button
+
+            onClick={updateProfile}
+
+            className="btn btn-custom px-5 py-3"
+
+            disabled={saving}
+
           >
 
-            <option value="">
-              Select Travel Style
-            </option>
+            {
 
-            <option value="Budget">
-              Budget
-            </option>
+              saving
 
-            <option value="Luxury">
-              Luxury
-            </option>
+                ? "Saving..."
 
-            <option value="Adventure">
-              Adventure
-            </option>
+                : "Save Profile 🚀"
 
-            <option value="Backpacking">
-              Backpacking
-            </option>
-
-          </select>
-
-        </div>
-
-        {/* PERSONALITY */}
-
-        <div className="mt-6">
-
-          <label className="font-bold">
-
-            Personality
-
-          </label>
-
-          <select
-            className="w-full border p-4 rounded-xl mt-2"
-            value={personality}
-            onChange={(e) =>
-              setPersonality(
-                e.target.value
-              )
             }
-          >
 
-            <option value="">
-              Select Personality
-            </option>
-
-            <option value="Introvert">
-              Introvert
-            </option>
-
-            <option value="Extrovert">
-              Extrovert
-            </option>
-
-          </select>
+          </button>
 
         </div>
-
-        {/* IMAGE */}
-
-        <div className="mt-6">
-
-          <input
-            type="file"
-            onChange={(e) =>
-              setImage(
-                e.target.files[0]
-              )
-            }
-          />
-
-        </div>
-
-        {/* BUTTON */}
-
-        <button
-          onClick={updateProfile}
-          className="mt-8 bg-black text-white px-8 py-3 rounded-xl"
-        >
-
-          Save Profile
-
-        </button>
 
       </div>
 
     </div>
 
   );
+
 }
 
 export default Profile;
+

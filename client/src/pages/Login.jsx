@@ -175,9 +175,7 @@ function Login() {
           </button>
 
         </form>
-
-     
-
+        
         {/* SOCIAL LOGIN */}
 
         <div className="social-login mt-4">
