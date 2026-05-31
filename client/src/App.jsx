@@ -134,7 +134,7 @@ function App() {
           }
         />
 
-        {/* CHAT WITH TRIP ID */}
+        {/* CHAT */}
 
         <Route
           path="/chat/:tripId"
@@ -147,7 +147,7 @@ function App() {
           }
         />
 
-        {/* FALLBACK CHAT ROUTE */}
+        {/* FALLBACK CHAT */}
 
         <Route
           path="/chat"
@@ -211,6 +211,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/expenses"
+  element={
+    <ProtectedRoute>
+
+      <Trips />
+
+    </ProtectedRoute>
+  }
+/>
 
         {/* ITINERARY */}
 

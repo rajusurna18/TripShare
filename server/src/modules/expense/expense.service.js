@@ -3,7 +3,9 @@ import Expense from "./expense.model.js";
 import Trip from "../trip/trip.model.js";
 
 import {
+
   createNotificationService,
+
 } from "../notification/notification.service.js";
 
 // CREATE EXPENSE
@@ -14,13 +16,13 @@ export const createExpenseService =
     const expense =
       await Expense.create(data);
 
-    // 🔔 Notification
+    // NOTIFICATION
 
     await createNotificationService(
 
       data.paidBy,
 
-      "Expense added successfully 💸"
+      `Expense "${data.title}" added 💸`
 
     );
 
@@ -28,7 +30,7 @@ export const createExpenseService =
 
 };
 
-// GET TRIP EXPENSES
+// GET EXPENSES
 
 export const getTripExpensesService =
   async (tripId) => {
@@ -55,12 +57,10 @@ export const getTripExpensesService =
 
 };
 
-// CALCULATE BALANCES
+// BALANCE SYSTEM
 
 export const calculateBalancesService =
   async (tripId) => {
-
-    // GET TRIP
 
     const trip =
       await Trip.findById(tripId)
@@ -70,8 +70,6 @@ export const calculateBalancesService =
           "name profileImage"
         );
 
-    // CHECK TRIP
-
     if (!trip) {
 
       throw new Error(
@@ -79,8 +77,6 @@ export const calculateBalancesService =
       );
 
     }
-
-    // GET EXPENSES
 
     const expenses =
       await Expense.find({
@@ -93,8 +89,6 @@ export const calculateBalancesService =
           "paidBy",
           "name profileImage"
         );
-
-    // EMPTY STATE
 
     if (
       expenses.length === 0
@@ -113,13 +107,11 @@ export const calculateBalancesService =
 
         balances: [],
 
-        recentExpenses: [],
-
       };
 
     }
 
-    // TOTAL EXPENSE
+    // TOTAL
 
     const total =
       expenses.reduce(
@@ -132,17 +124,15 @@ export const calculateBalancesService =
 
       );
 
-    // MEMBER COUNT SAFETY
+    // PER PERSON
 
     const memberCount =
       trip.members.length || 1;
 
-    // PER PERSON SHARE
-
     const perPerson =
       total / memberCount;
 
-    // PAYMENT TRACKER
+    // TRACK
 
     const paidMap = {};
 
@@ -155,8 +145,6 @@ export const calculateBalancesService =
 
       }
     );
-
-    // TRACK PAYMENTS
 
     expenses.forEach(
       (exp) => {
@@ -221,27 +209,6 @@ export const calculateBalancesService =
       }
     );
 
-    // RECENT EXPENSES
-
-    const recentExpenses =
-      expenses
-        .slice(0, 5)
-        .map((exp) => ({
-
-          title:
-            exp.title,
-
-          amount:
-            exp.amount,
-
-          paidBy:
-            exp.paidBy.name,
-
-          createdAt:
-            exp.createdAt,
-
-        }));
-
     return {
 
       total,
@@ -258,8 +225,6 @@ export const calculateBalancesService =
         memberCount,
 
       balances,
-
-      recentExpenses,
 
     };
 

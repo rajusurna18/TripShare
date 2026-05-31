@@ -10,11 +10,33 @@ function TripCard({ trip }) {
 
       <div className="trip-image-wrapper">
 
-        <img
-          src={trip.image}
-          alt={trip.title}
-          className="trip-image"
-        />
+       {
+  trip?.image ? (
+
+    <img
+      src={trip.image}
+      alt={trip.title}
+      className="trip-image"
+    />
+
+  ) : (
+
+    <div
+      className="trip-image d-flex justify-content-center align-items-center text-light"
+      style={{
+        height: "220px",
+        background: "#222",
+        borderRadius: "12px",
+        fontSize: "18px",
+      }}
+    >
+
+      No Image Added 📷
+
+    </div>
+
+  )
+}
 
         <span className="trip-badge">
 
@@ -30,7 +52,7 @@ function TripCard({ trip }) {
 
         <h3 className="trip-title">
 
-          {trip.title}
+          {trip?.title || "Untitled Trip"}
 
         </h3>
 
@@ -40,7 +62,7 @@ function TripCard({ trip }) {
 
             📍
             <span>
-              {trip.destination}
+              {trip?.destination || "Unknown"}
             </span>
 
           </p>
@@ -49,7 +71,7 @@ function TripCard({ trip }) {
 
             💰
             <span>
-              ₹{trip.budget}
+              ₹{trip?.budget || 0}
             </span>
 
           </p>
@@ -58,10 +80,15 @@ function TripCard({ trip }) {
 
             📅
             <span>
+
               {
-                new Date(trip.date)
-                  .toDateString()
+                trip?.date
+                  ? new Date(
+                      trip.date
+                    ).toDateString()
+                  : "No Date"
               }
+
             </span>
 
           </p>
@@ -70,16 +97,35 @@ function TripCard({ trip }) {
 
         {/* BUTTONS */}
 
-        <div className="trip-buttons">
+        <div
+          className="trip-buttons"
+          style={{
+            display: "flex",
+            gap: "10px",
+            flexWrap: "wrap",
+            marginTop: "15px",
+          }}
+        >
 
-          {/* OPEN CHAT */}
+          {/* CHAT */}
 
           <Link
-            to={`/chat/${trip._id}`}
+            to={`/chat/${trip?._id}`}
             className="btn btn-custom"
           >
 
-            Open Chat
+            💬 Chat
+
+          </Link>
+
+          {/* EXPENSES */}
+
+          <Link
+            to={`/expenses/${trip?._id}`}
+            className="btn btn-warning"
+          >
+
+            💸 Expenses
 
           </Link>
 
@@ -90,7 +136,7 @@ function TripCard({ trip }) {
             className="btn btn-outline-warning"
           >
 
-            Matches
+            🤝 Matches
 
           </Link>
 

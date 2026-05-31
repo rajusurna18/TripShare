@@ -4,18 +4,18 @@ import API from "./api";
 
 export const createTrip = (data) =>
   API.post(
-    "/api/trips",
+    "/trips",
     data
   );
 
 // GET TRIPS
 
 export const getTrips = () =>
-  API.get("/api/trips");
+  API.get("/trips");
 
 // JOIN TRIP
 
 export const joinTrip = (id) =>
   API.post(
-    `/api/trips/${id}/join`
+    `/trips/${id}/join`
   );

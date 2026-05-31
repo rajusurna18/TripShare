@@ -12,9 +12,17 @@ export const createExpense =
     try {
 
       const expense =
-        await createExpenseService(
-          req.body
-        );
+        await createExpenseService({
+
+          ...req.body,
+
+          trip:
+            req.params.tripId,
+
+          paidBy:
+            req.user.id,
+
+        });
 
       res.status(201).json({
 
@@ -29,11 +37,14 @@ export const createExpense =
 
     } catch (err) {
 
+      console.log(err);
+
       res.status(400).json({
 
         success: false,
 
-        message: err.message,
+        message:
+          err.message,
 
       });
 
@@ -66,11 +77,14 @@ export const getTripExpenses =
 
     } catch (err) {
 
+      console.log(err);
+
       res.status(400).json({
 
         success: false,
 
-        message: err.message,
+        message:
+          err.message,
 
       });
 
@@ -100,11 +114,14 @@ export const calculateBalances =
 
     } catch (err) {
 
+      console.log(err);
+
       res.status(400).json({
 
         success: false,
 
-        message: err.message,
+        message:
+          err.message,
 
       });
 

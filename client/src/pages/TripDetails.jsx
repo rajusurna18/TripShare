@@ -42,7 +42,7 @@ function TripDetails() {
         const res =
           await API.get(
 
-            `/api/trips/${tripId}`,
+            `/trips/${tripId}`,
 
             {
 

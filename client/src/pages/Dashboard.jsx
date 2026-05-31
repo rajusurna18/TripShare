@@ -400,12 +400,12 @@ function Dashboard() {
                       🤖 AI Planner
                     </Link>
 
-                    <Link
-                      to="/expenses"
-                      className="quick-action-btn"
-                    >
-                      💸 Expenses
-                    </Link>
+                      <Link
+                        to={`/expenses/${trip._id}`}
+                        className="quick-action-btn"
+                         >
+                     💸 Expenses
+                      </Link>
 
                   </div>
 
