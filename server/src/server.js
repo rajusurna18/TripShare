@@ -14,6 +14,9 @@ from "socket.io";
 import connectDB
 from "./config/db.js";
 
+import genAI
+from "./config/gemini.js";
+
 // ROUTES
 
 import authRoutes
@@ -116,6 +119,52 @@ app.get("/", (req, res) => {
   );
 
 });
+
+app.get(
+
+  "/test-ai",
+
+  async (req, res) => {
+
+    try {
+
+      const model =
+        genAI.getGenerativeModel({
+
+          model:
+            "models/gemini-1.5-flash",
+
+        });
+
+      const result =
+        await model.generateContent(
+
+          "Hello"
+
+        );
+
+      const response =
+        result.response.text();
+
+      res.json({
+
+        success: true,
+
+        response,
+
+      });
+
+    } catch (err) {
+
+      console.log(err);
+
+      res.json(err);
+
+    }
+
+  }
+
+);
 
 // HTTP SERVER
 

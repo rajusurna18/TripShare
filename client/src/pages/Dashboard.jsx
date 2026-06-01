@@ -377,6 +377,17 @@ function Dashboard() {
                       ✈️ Create Trip
                     </Link>
 
+                    {/* AI ASSISTANT */}
+
+                    <Link
+                      to="/ai"
+                      className="quick-action-btn"
+                    >
+                      🤖 AI Assistant
+                    </Link>
+
+                    {/* GROUP CHAT */}
+
                     <Link
 
                       to={
@@ -389,23 +400,31 @@ function Dashboard() {
 
                     >
 
-                      💬 Open Chat
+                      💬 Group Chat
 
                     </Link>
+
+                    {/* AI PLANNER */}
 
                     <Link
                       to="/itinerary"
                       className="quick-action-btn"
                     >
-                      🤖 AI Planner
+                      ✨ AI Planner
                     </Link>
 
-                      <Link
-                        to={`/expenses/${trip._id}`}
-                        className="quick-action-btn"
-                         >
-                     💸 Expenses
-                      </Link>
+                    {/* EXPENSES */}
+
+                    <Link
+                      to={
+                        trips.length > 0
+                        ? `/expenses/${trips[0]._id}`
+                        : "/trips"
+                      }
+                      className="quick-action-btn"
+                    >
+                      💸 Expenses
+                    </Link>
 
                   </div>
 
@@ -529,7 +548,7 @@ function Dashboard() {
 
                 </div>
 
-                {/* CHAT */}
+                {/* GROUP CHAT */}
 
                 <div className="col-lg-6">
 
@@ -551,7 +570,7 @@ function Dashboard() {
 
                       <h2>
 
-                        Travel Group Chat
+                        Group Travel Chat
 
                       </h2>
 

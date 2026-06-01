@@ -1,59 +1,77 @@
-import genAI from "../../config/gemini.js";
+import {
+
+  generateItineraryService,
+
+  chatWithAIService,
+
+} from "./ai.service.js";
+
+// ITINERARY
 
 export const generateItinerary =
   async (req, res) => {
 
     try {
 
-      const {
-        destination,
-        budget,
-        days,
-      } = req.body;
+      const response =
+        await generateItineraryService(
 
-      // PROMPT
+          req.body
 
-      const prompt = `
-
-      Create a detailed ${days}-day
-      travel itinerary for ${destination}
-      under ₹${budget}.
-
-      Include:
-
-      - Day-wise travel plan
-      - Hotels
-      - Food suggestions
-      - Tourist attractions
-      - Transportation
-      - Budget breakdown
-
-      `;
-
-      // GEMINI MODEL
-
-      const model =
-        genAI.getGenerativeModel({
-
-          model: "gemini-1.5-flash",
-
-        });
-
-      // GENERATE RESPONSE
-
-      const result =
-        await model.generateContent(
-          prompt
         );
 
-      const response =
-        result.response.text();
+      res.status(200).json({
 
-      // SEND RESPONSE
-
-      res.json({
+        success: true,
 
         itinerary: response,
+
+      });
+
+    } catch (err) {
+
+      console.log(
+        "AI CONTROLLER ERROR:",
+        err
+      );
+
+      res.status(500).json({
+
+        success: false,
+
+        message:
+          err.message ||
+
+          "AI generation failed",
+
+      });
+
+    }
+
+};
+
+// AI CHAT
+
+export const chatWithAI =
+  async (req, res) => {
+
+    try {
+
+      const { question } =
+        req.body;
+
+      const reply =
+        await chatWithAIService(
+
+          question
+
+        );
+
+      res.status(200).json({
+
+        success: true,
+
+        reply,
 
       });
 
@@ -63,11 +81,13 @@ export const generateItinerary =
 
       res.status(500).json({
 
+        success: false,
+
         message:
-          "AI itinerary generation failed",
+          "AI chat failed",
 
       });
 
     }
 
-  };
+};

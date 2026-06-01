@@ -1,9 +1,13 @@
-import { useState } from "react";
-import API from "../services/api";
+import {
+  useState,
+} from "react";
+
+import API
+from "../services/api";
 
 function AI() {
 
-  const [prompt, setPrompt] =
+  const [question, setQuestion] =
     useState("");
 
   const [reply, setReply] =
@@ -12,121 +16,166 @@ function AI() {
   const [loading, setLoading] =
     useState(false);
 
-  const handleAsk = async () => {
+  // ASK AI
 
-    if (!prompt.trim())
-      return;
+  const askAI =
+    async () => {
 
-    try {
+      if (!question.trim())
+        return;
 
-      setLoading(true);
+      try {
 
-      const res = await API.post(
-        "/api/ai/suggest",
-        { prompt }
-      );
+        setLoading(true);
 
-      setReply(
-        res.data.reply
-      );
+        const res =
+          await API.post(
 
-    } catch (err) {
+            "/ai/chat",
 
-      console.log(err);
+            {
 
-    } finally {
+              question,
 
-      setLoading(false);
+            }
 
-    }
+          );
+
+        setReply(
+
+          res.data.reply
+
+        );
+
+      } catch (err) {
+
+        console.log(err);
+
+      } finally {
+
+        setLoading(false);
+
+      }
 
   };
 
   return (
 
-    <div className="ai-page min-vh-100">
+    <div
+      style={{
+        background: "#111",
+        minHeight: "100vh",
+        color: "white",
+        padding: "40px",
+      }}
+    >
 
-      <div className="container py-5">
+      <div
+        style={{
+          maxWidth: "900px",
+          margin: "auto",
+        }}
+      >
 
-        <div className="ai-container">
+        <h1 className="mb-4">
 
-          {/* HEADER */}
+          🤖 AI Travel Assistant
 
-          <div className="ai-header text-center">
+        </h1>
 
-            <h1 className="ai-title">
+        <p className="mb-4">
 
-              ✨ AI Travel Planner
+          Ask anything about travel,
+          destinations, hotels,
+          budgets, food, safety,
+          visas, and hidden gems.
 
-            </h1>
+        </p>
 
-            <p className="ai-subtitle">
+        {/* INPUT */}
 
-              Ask AI about destinations,
-              budgets, hotels,
-              itineraries, and hidden gems.
+        <div
+          style={{
+            background: "#1e1e1e",
+            padding: "25px",
+            borderRadius: "20px",
+            marginBottom: "30px",
+          }}
+        >
 
-            </p>
+          <textarea
 
-          </div>
+            rows="5"
 
-          {/* INPUT */}
+            placeholder="Example: Best places to visit in Goa?"
 
-          <div className="ai-input-box">
+            className="form-control mb-3"
 
-            <textarea
-              className="ai-input-modern"
-              rows="6"
-              placeholder="Example: Plan a 5-day Goa trip under ₹15,000..."
-              value={prompt}
-              onChange={(e) =>
-                setPrompt(
-                  e.target.value
-                )
-              }
-            />
+            value={question}
 
-            <button
-              className="ai-btn"
-              onClick={handleAsk}
-              disabled={loading}
-            >
+            onChange={(e) =>
 
-              {
-                loading
+              setQuestion(
+                e.target.value
+              )
+
+            }
+
+          />
+
+          <button
+
+            className="btn btn-warning"
+
+            onClick={askAI}
+
+            disabled={loading}
+
+          >
+
+            {
+
+              loading
+
                 ? "Thinking..."
+
                 : "Ask AI 🚀"
-              }
 
-            </button>
+            }
 
-          </div>
-
-          {/* RESPONSE */}
-
-          {
-            reply && (
-
-              <div className="ai-reply-box">
-
-                <div className="ai-reply-header">
-
-                  🤖 AI Suggestion
-
-                </div>
-
-                <div className="ai-reply-content">
-
-                  {reply}
-
-                </div>
-
-              </div>
-
-            )
-          }
+          </button>
 
         </div>
+
+        {/* RESPONSE */}
+
+        {
+
+          reply && (
+
+            <div
+              style={{
+                background: "#1e1e1e",
+                padding: "25px",
+                borderRadius: "20px",
+                whiteSpace: "pre-wrap",
+                lineHeight: "1.8",
+              }}
+            >
+
+              <h3 className="mb-4">
+
+                ✨ AI Response
+
+              </h3>
+
+              {reply}
+
+            </div>
+
+          )
+
+        }
 
       </div>
 
