@@ -28,6 +28,8 @@ function AI() {
 
         setLoading(true);
 
+        setReply("");
+
         const res =
           await API.post(
 
@@ -42,9 +44,7 @@ function AI() {
           );
 
         setReply(
-
           res.data.reply
-
         );
 
       } catch (err) {
@@ -72,44 +72,62 @@ function AI() {
 
       <div
         style={{
-          maxWidth: "900px",
+          maxWidth: "1000px",
           margin: "auto",
         }}
       >
 
-        <h1 className="mb-4">
+        {/* HERO */}
 
-          🤖 AI Travel Assistant
+        <div className="text-center mb-5">
 
-        </h1>
+          <h1
+            style={{
+              fontSize: "48px",
+              fontWeight: "700",
+            }}
+          >
 
-        <p className="mb-4">
+            🤖 TripShare AI Assistant
 
-          Ask anything about travel,
-          destinations, hotels,
-          budgets, food, safety,
-          visas, and hidden gems.
+          </h1>
 
-        </p>
+          <p
+            style={{
+              color: "#aaa",
+              marginTop: "15px",
+              fontSize: "18px",
+            }}
+          >
 
-        {/* INPUT */}
+            Ask anything about travel,
+            hotels, food, visas,
+            safety, transport,
+            hidden gems, and more.
+
+          </p>
+
+        </div>
+
+        {/* AI BOX */}
 
         <div
           style={{
             background: "#1e1e1e",
-            padding: "25px",
-            borderRadius: "20px",
-            marginBottom: "30px",
+            padding: "30px",
+            borderRadius: "25px",
+            border:
+              "1px solid #333",
           }}
         >
 
           <textarea
 
-            rows="5"
+            rows="6"
 
-            placeholder="Example: Best places to visit in Goa?"
+            placeholder="Example: Best places to visit in Goa under ₹10,000 budget?"
 
-            className="form-control mb-3"
+            className="form-control mb-4"
 
             value={question}
 
@@ -125,11 +143,16 @@ function AI() {
 
           <button
 
-            className="btn btn-warning"
+            className="btn btn-warning px-5 py-3"
 
             onClick={askAI}
 
             disabled={loading}
+
+            style={{
+              borderRadius: "15px",
+              fontWeight: "600",
+            }}
 
           >
 
@@ -145,37 +168,45 @@ function AI() {
 
           </button>
 
+          {/* RESPONSE */}
+
+          {
+
+            reply && (
+
+              <div
+                style={{
+                  marginTop: "40px",
+                  background: "#151515",
+                  padding: "25px",
+                  borderRadius: "20px",
+                  whiteSpace: "pre-wrap",
+                  lineHeight: "1.9",
+                  border:
+                    "1px solid #333",
+                }}
+              >
+
+                <h3
+                  style={{
+                    color: "#ffc107",
+                    marginBottom: "20px",
+                  }}
+                >
+
+                  ✨ AI Response
+
+                </h3>
+
+                {reply}
+
+              </div>
+
+            )
+
+          }
+
         </div>
-
-        {/* RESPONSE */}
-
-        {
-
-          reply && (
-
-            <div
-              style={{
-                background: "#1e1e1e",
-                padding: "25px",
-                borderRadius: "20px",
-                whiteSpace: "pre-wrap",
-                lineHeight: "1.8",
-              }}
-            >
-
-              <h3 className="mb-4">
-
-                ✨ AI Response
-
-              </h3>
-
-              {reply}
-
-            </div>
-
-          )
-
-        }
 
       </div>
 

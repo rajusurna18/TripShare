@@ -1,3 +1,4 @@
+
 import {
   useEffect,
   useState,
@@ -9,13 +10,15 @@ import {
   Link,
 } from "react-router-dom";
 
-import API
-from "../services/api";
+import API from "../services/api";
 
-import socket
-from "../socket";
+import socket from "../socket";
 
 function Chat() {
+
+  // ======================
+  // STATES
+  // ======================
 
   const [message, setMessage] =
     useState("");
@@ -58,13 +61,29 @@ function Chat() {
   const [audioBlob, setAudioBlob] =
     useState(null);
 
+  // VIDEO CALL
+
+  const [callActive, setCallActive] =
+    useState(false);
+
+  const [localStream, setLocalStream] =
+    useState(null);
+
+  const localVideoRef =
+    useRef(null);
+
+  const remoteVideoRef =
+    useRef(null);
+
+  // REFS
+
   const messagesEndRef =
     useRef(null);
 
   const typingTimeoutRef =
     useRef(null);
 
-  // SAFE USER
+  // USER
 
   const currentUser =
     JSON.parse(
@@ -75,37 +94,32 @@ function Chat() {
 
     );
 
-  // TRIP ID
+  // PARAMS
 
   const { tripId } =
     useParams();
 
-  // NO ACTIVE TRIP
+  // ======================
+  // NO TRIP
+  // ======================
 
   if (!tripId) {
 
     return (
 
-      <div className="chat-page min-vh-100 d-flex justify-content-center align-items-center text-light">
+      <div className="min-vh-100 d-flex justify-content-center align-items-center text-light">
 
         <div className="text-center">
 
-          <h1 className="mb-3">
+          <h1>
 
             💬 No Active Trip
 
           </h1>
 
-          <p className="text-secondary mb-4">
-
-            Create or join a trip
-            to start chatting.
-
-          </p>
-
           <Link
             to="/trips"
-            className="btn btn-warning"
+            className="btn btn-warning mt-3"
           >
 
             Open Trips
@@ -120,7 +134,9 @@ function Chat() {
 
   }
 
+  // ======================
   // FETCH TRIP
+  // ======================
 
   const fetchTrip =
     async () => {
@@ -158,15 +174,13 @@ function Chat() {
 
         console.log(err);
 
-        setError(
-          "Failed to load trip"
-        );
-
       }
 
   };
 
+  // ======================
   // FETCH MESSAGES
+  // ======================
 
   const fetchMessages =
     async () => {
@@ -204,10 +218,6 @@ function Chat() {
 
         console.log(err);
 
-        setError(
-          "Failed to load messages"
-        );
-
       } finally {
 
         setLoading(false);
@@ -216,7 +226,9 @@ function Chat() {
 
   };
 
+  // ======================
   // AUTO SCROLL
+  // ======================
 
   const scrollToBottom =
     () => {
@@ -231,7 +243,9 @@ function Chat() {
 
   };
 
-  // START RECORDING
+  // ======================
+  // RECORD AUDIO
+  // ======================
 
   const startRecording =
     async () => {
@@ -298,8 +312,6 @@ function Chat() {
 
   };
 
-  // STOP RECORDING
-
   const stopRecording =
     () => {
 
@@ -309,7 +321,96 @@ function Chat() {
 
   };
 
+  // ======================
+  // VIDEO CALL
+  // ======================
+
+  const startVideoCall =
+    async () => {
+
+      try {
+
+        const stream =
+          await navigator
+            .mediaDevices
+            .getUserMedia({
+
+              video: true,
+
+              audio: true,
+
+            });
+
+        setLocalStream(stream);
+
+        setCallActive(true);
+
+        if (
+          localVideoRef.current
+        ) {
+
+          localVideoRef.current.srcObject =
+            stream;
+
+        }
+
+        socket.emit(
+
+          "start_video_call",
+
+          {
+
+            tripId,
+
+            caller:
+              currentUser?.name,
+
+          }
+
+        );
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
+
+  };
+
+  const endVideoCall =
+    () => {
+
+      if (localStream) {
+
+        localStream
+          .getTracks()
+          .forEach((track) => {
+
+            track.stop();
+
+          });
+
+      }
+
+      setCallActive(false);
+
+      socket.emit(
+
+        "end_video_call",
+
+        {
+
+          tripId,
+
+        }
+
+      );
+
+  };
+
+  // ======================
   // INITIAL LOAD
+  // ======================
 
   useEffect(() => {
 
@@ -317,13 +418,24 @@ function Chat() {
 
     fetchMessages();
 
-    // SOCKET CONNECT
-
     if (!socket.connected) {
 
       socket.connect();
 
     }
+
+    socket.emit(
+      "join_trip",
+      tripId
+    );
+
+    socket.emit(
+
+      "register_user",
+
+      currentUser?._id
+
+    );
 
     socket.on(
       "connect",
@@ -343,23 +455,6 @@ function Chat() {
       }
     );
 
-    // JOIN ROOM
-
-    socket.emit(
-      "join_trip",
-      tripId
-    );
-
-    // REGISTER USER
-
-    socket.emit(
-
-      "register_user",
-
-      currentUser?._id
-
-    );
-
     // RECEIVE MESSAGE
 
     socket.on(
@@ -368,30 +463,13 @@ function Chat() {
 
       (data) => {
 
-        setMessages((prev) => {
+        setMessages((prev) => [
 
-          const exists =
-            prev.find(
+          ...prev,
 
-              (msg) =>
+          data,
 
-                msg._id ===
-                data._id
-
-            );
-
-          if (exists)
-            return prev;
-
-          return [
-
-            ...prev,
-
-            data,
-
-          ];
-
-        });
+        ]);
 
       }
 
@@ -411,7 +489,7 @@ function Chat() {
 
     );
 
-    // USER TYPING
+    // TYPING
 
     socket.on(
 
@@ -429,8 +507,6 @@ function Chat() {
 
     );
 
-    // STOP TYPING
-
     socket.on(
 
       "user_stop_typing",
@@ -443,33 +519,46 @@ function Chat() {
 
     );
 
-    // MESSAGE SEEN
+    // VIDEO CALL
 
     socket.on(
 
-      "message_seen_update",
+      "incoming_video_call",
 
       (data) => {
 
-        setMessages((prev) =>
+        alert(
 
-          prev.map((msg) =>
+          `${data.caller} started a video call 📞`
 
-            msg._id ===
-            data.messageId
+        );
 
-              ? {
+      }
 
-                  ...msg,
+    );
 
-                  seen: true,
+    socket.on(
 
-                }
+      "video_call_ended",
 
-              : msg
+      () => {
 
-          )
+        setCallActive(false);
 
+        if (localStream) {
+
+          localStream
+            .getTracks()
+            .forEach((track) => {
+
+              track.stop();
+
+            });
+
+        }
+
+        alert(
+          "Call ended 📴"
         );
 
       }
@@ -495,20 +584,20 @@ function Chat() {
       );
 
       socket.off(
-        "message_seen_update"
+        "incoming_video_call"
       );
 
-      socket.off("connect");
-
       socket.off(
-        "disconnect"
+        "video_call_ended"
       );
 
     };
 
   }, [tripId]);
 
+  // ======================
   // AUTO SCROLL
+  // ======================
 
   useEffect(() => {
 
@@ -516,7 +605,9 @@ function Chat() {
 
   }, [messages]);
 
+  // ======================
   // SEND MESSAGE
+  // ======================
 
   const sendMessage =
     async () => {
@@ -533,8 +624,6 @@ function Chat() {
       try {
 
         setSending(true);
-
-        setError("");
 
         const token =
           localStorage.getItem(
@@ -600,14 +689,11 @@ function Chat() {
 
           );
 
-        const savedMessage =
-          res.data.data;
-
         socket.emit(
 
           "send_message",
 
-          savedMessage
+          res.data.data
 
         );
 
@@ -615,7 +701,7 @@ function Chat() {
 
           ...prev,
 
-          savedMessage,
+          res.data.data,
 
         ]);
 
@@ -641,31 +727,13 @@ function Chat() {
 
   };
 
+  // ======================
   // LOADING
+  // ======================
 
   if (loading) {
 
-    return (
-
-      <div className="chat-page min-vh-100 d-flex justify-content-center align-items-center text-light">
-
-        <div className="text-center">
-
-          <div
-            className="spinner-border text-warning mb-3"
-          />
-
-          <h4>
-
-            Loading Messages...
-
-          </h4>
-
-        </div>
-
-      </div>
-
-    );
+    return <h2>Loading...</h2>;
 
   }
 
@@ -682,554 +750,364 @@ function Chat() {
 
       <div className="container py-5">
 
-        <div
-          style={{
-            display: "flex",
-            gap: "20px",
-          }}
-        >
+        {/* TOP */}
 
-          {/* SIDEBAR */}
+        <div className="d-flex justify-content-between align-items-center mb-4">
 
-          <div
-            style={{
-              width: "300px",
-              background: "#1e1e1e",
-              padding: "20px",
-              borderRadius: "20px",
-            }}
-          >
+          <div>
 
             <h2>
 
-              🌍 TripShare
+              {
+
+                trip?.title ||
+
+                "Travel Chat"
+
+              }
 
             </h2>
 
             <p>
 
-              Active Group
+              {
 
-            </p>
-
-            <div
-              style={{
-                background: "#2a2a2a",
-                padding: "15px",
-                borderRadius: "12px",
-              }}
-            >
-
-              ✈ {
-
-                trip?.title ||
-
-                "Travel Group"
+                onlineUsers.length
 
               }
 
-            </div>
+              {" "}online
+
+            </p>
 
           </div>
 
-          {/* MAIN */}
-
           <div
             style={{
-              flex: 1,
-              background: "#1e1e1e",
-              padding: "20px",
-              borderRadius: "20px",
-              minHeight: "80vh",
+              display: "flex",
+              gap: "10px",
             }}
           >
 
-            {/* TOP */}
+            <button
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
+              className="btn btn-success"
 
-              <div>
+              onClick={
+                startVideoCall
+              }
 
-                <h3>
+            >
 
-                  {
+              📞 Video Call
 
-                    trip?.title ||
-
-                    "Travel Group Chat"
-
-                  }
-
-                </h3>
-
-                <span>
-
-                  {
-
-                    trip?.members
-                      ?.length || 0
-
-                  }
-
-                  {" "}
-
-                  travelers connected •
-
-                  <span className="text-success">
-
-                    {" "}
-
-                    {
-
-                      onlineUsers.length
-
-                    }
-
-                    {" "}online
-
-                  </span>
-
-                </span>
-
-              </div>
-
-              <div>
-
-                {
-
-                  connected
-
-                    ? (
-
-                      <span className="text-success">
-
-                        🟢 Live
-
-                      </span>
-
-                    )
-
-                    : (
-
-                      <span className="text-danger">
-
-                        🔴 Offline
-
-                      </span>
-
-                    )
-
-                }
-
-              </div>
-
-            </div>
-
-            {/* ERROR */}
+            </button>
 
             {
 
-              error && (
+              connected
 
-                <div className="alert alert-danger">
+                ? (
 
-                  {error}
+                  <span className="text-success">
+
+                    🟢 Live
+
+                  </span>
+
+                )
+
+                : (
+
+                  <span className="text-danger">
+
+                    🔴 Offline
+
+                  </span>
+
+                )
+
+            }
+
+          </div>
+
+        </div>
+
+        {/* VIDEO */}
+
+        {
+
+          callActive && (
+
+            <div className="mb-4">
+
+              <video
+
+                ref={localVideoRef}
+
+                autoPlay
+
+                muted
+
+                playsInline
+
+                style={{
+                  width: "300px",
+                  borderRadius: "15px",
+                  background: "#000",
+                }}
+
+              />
+
+              <button
+
+                className="btn btn-danger mt-3"
+
+                onClick={
+                  endVideoCall
+                }
+
+              >
+
+                ❌ End Call
+
+              </button>
+
+            </div>
+
+          )
+
+        }
+
+        {/* CHAT */}
+
+        <div
+          style={{
+            height: "500px",
+            overflowY: "auto",
+            background: "#1e1e1e",
+            padding: "20px",
+            borderRadius: "15px",
+            marginBottom: "20px",
+          }}
+        >
+
+          {
+
+            messages.map(
+              (msg) => (
+
+                <div
+                  key={msg._id}
+                  style={{
+                    marginBottom: "15px",
+                  }}
+                >
+
+                  <strong>
+
+                    {
+
+                      msg.sender?.name ||
+
+                      "Traveler"
+
+                    }
+
+                  </strong>
+
+                  <p>
+
+                    {msg.message}
+
+                  </p>
+
+                  {
+
+                    msg.audioUrl && (
+
+                      <audio
+                        controls
+                      >
+
+                        <source
+
+                          src={`http://localhost:5000/${msg.audioUrl}`}
+
+                          type="audio/webm"
+
+                        />
+
+                      </audio>
+
+                    )
+
+                  }
 
                 </div>
 
               )
+            )
 
+          }
+
+          <div
+            ref={
+              messagesEndRef
             }
+          />
 
-            {/* CHAT */}
+        </div>
 
-            <div
-              style={{
-                height: "500px",
-                overflowY: "auto",
-                background: "#151515",
-                borderRadius: "15px",
-                padding: "15px",
-                marginBottom: "15px",
-              }}
-            >
+        {/* TYPING */}
 
-              {
+        {
 
-                messages.length === 0 ? (
+          typingUser && (
 
-                  <div className="text-center mt-5">
+            <p className="text-warning">
 
-                    <h2>
+              {typingUser}
 
-                      💬 No Messages Yet
+            </p>
 
-                    </h2>
+          )
 
-                    <p>
+        }
 
-                      Start the conversation.
+        {/* INPUT */}
 
-                    </p>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+          }}
+        >
 
-                  </div>
+          <textarea
 
-                ) : (
+            rows="1"
 
-                  messages.map(
-                    (msg) => (
+            className="form-control"
 
-                      <div
+            placeholder="Type message..."
 
-                        key={msg._id}
+            value={message}
 
-                        style={{
-                          display: "flex",
-                          justifyContent:
+            onChange={(e) => {
 
-                            msg.sender?._id ===
-                            currentUser?._id
+              setMessage(
+                e.target.value
+              );
 
-                              ? "flex-end"
+              socket.emit(
 
-                              : "flex-start",
+                "typing",
 
-                          marginBottom: "15px",
-                        }}
+                {
 
-                      >
+                  tripId,
 
-                        <div
-                          style={{
-                            background:
+                  name:
+                    currentUser?.name,
 
-                              msg.sender?._id ===
-                              currentUser?._id
-
-                                ? "#ffc107"
-
-                                : "#2a2a2a",
-
-                            color:
-
-                              msg.sender?._id ===
-                              currentUser?._id
-
-                                ? "#000"
-
-                                : "#fff",
-
-                            padding: "12px",
-                            borderRadius: "15px",
-                            maxWidth: "70%",
-                          }}
-                        >
-
-                          <strong>
-
-                            {
-
-                              msg.sender
-                                ?.name ||
-
-                              "Traveler"
-
-                            }
-
-                          </strong>
-
-                          <p className="m-0 mt-2">
-
-                            {
-
-                              msg.message
-
-                            }
-
-                          </p>
-
-                          {/* FILE */}
-
-                          {
-
-                            msg.fileUrl && (
-
-                              <a
-
-                                href={`http://localhost:5000/${msg.fileUrl}`}
-
-                                target="_blank"
-
-                                rel="noreferrer"
-
-                                className="d-block mt-2 text-info"
-
-                              >
-
-                                📎 Open File
-
-                              </a>
-
-                            )
-
-                          }
-
-                          {/* AUDIO */}
-
-                          {
-
-                            msg.audioUrl && (
-
-                              <audio
-                                controls
-                                className="mt-2"
-                              >
-
-                                <source
-
-                                  src={`http://localhost:5000/${msg.audioUrl}`}
-
-                                  type="audio/webm"
-
-                                />
-
-                              </audio>
-
-                            )
-
-                          }
-
-                          {/* SEEN STATUS */}
-
-                          {
-
-                            msg.sender?._id ===
-                            currentUser?._id && (
-
-                              <small
-                                style={{
-                                  fontSize: "12px",
-                                  opacity: 0.7,
-                                }}
-                              >
-
-                                {
-
-                                  msg.seen
-
-                                    ? "✓✓ Seen"
-
-                                    : "✓ Sent"
-
-                                }
-
-                              </small>
-
-                            )
-
-                          }
-
-                        </div>
-
-                      </div>
-
-                    )
-                  )
-
-                )
-
-              }
-
-              <div
-                ref={
-                  messagesEndRef
                 }
-              />
 
-            </div>
+              );
 
-            {/* TYPING */}
+              clearTimeout(
 
-            {
+                typingTimeoutRef.current
 
-              typingUser && (
+              );
 
-                <p className="text-warning mb-2">
-
-                  {typingUser}
-
-                </p>
-
-              )
-
-            }
-
-            {/* INPUT */}
-
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                alignItems: "center",
-              }}
-            >
-
-              <textarea
-
-                rows="1"
-
-                className="form-control"
-
-                placeholder="Type your message..."
-
-                value={message}
-
-                onChange={(e) => {
-
-                  setMessage(
-                    e.target.value
-                  );
+              typingTimeoutRef.current =
+                setTimeout(() => {
 
                   socket.emit(
 
-                    "typing",
+                    "stop_typing",
 
                     {
 
                       tripId,
 
-                      name:
-
-                        currentUser?.name ||
-
-                        "Traveler",
-
                     }
 
                   );
 
-                  clearTimeout(
+                }, 1000);
 
-                    typingTimeoutRef.current
+            }}
 
-                  );
+          />
 
-                  typingTimeoutRef.current =
-                    setTimeout(() => {
+          <input
 
-                      socket.emit(
+            type="file"
 
-                        "stop_typing",
+            className="form-control"
 
-                        {
+            onChange={(e) =>
 
-                          tripId,
+              setFile(
+                e.target.files[0]
+              )
 
-                        }
+            }
 
-                      );
+          />
 
-                    }, 1000);
+          <button
 
-                }}
+            className="btn btn-danger"
 
-                onKeyDown={(e) => {
+            onClick={
 
-                  if (
+              isRecording
 
-                    e.key === "Enter" &&
+                ? stopRecording
 
-                    !e.shiftKey
+                : startRecording
 
-                  ) {
+            }
 
-                    e.preventDefault();
+          >
 
-                    sendMessage();
+            {
 
-                  }
+              isRecording
 
-                }}
+                ? "⏹ Stop"
 
-              />
+                : "🎤 Record"
 
-              {/* FILE */}
+            }
 
-              <input
+          </button>
 
-                type="file"
+          <button
 
-                className="form-control"
+            className="btn btn-warning"
 
-                onChange={(e) =>
+            onClick={
+              sendMessage
+            }
 
-                  setFile(
-                    e.target.files[0]
-                  )
+          >
 
-                }
+            {
 
-              />
+              sending
 
-              {/* RECORD */}
+                ? "Sending..."
 
-              <button
+                : "Send"
 
-                className="btn btn-danger"
+            }
 
-                onClick={
-
-                  isRecording
-
-                    ? stopRecording
-
-                    : startRecording
-
-                }
-
-              >
-
-                {
-
-                  isRecording
-
-                    ? "⏹ Stop"
-
-                    : "🎤 Record"
-
-                }
-
-              </button>
-
-              {/* SEND */}
-
-              <button
-
-                className="btn btn-warning"
-
-                onClick={
-                  sendMessage
-                }
-
-                disabled={
-                  sending
-                }
-
-              >
-
-                {
-
-                  sending
-                    ? "Sending..."
-                    : "Send"
-
-                }
-
-              </button>
-
-            </div>
-
-          </div>
+          </button>
 
         </div>
 
@@ -1242,3 +1120,4 @@ function Chat() {
 }
 
 export default Chat;
+

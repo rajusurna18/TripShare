@@ -38,6 +38,9 @@ import TripDetails from "./pages/TripDetails";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
+import LiveTracking
+from "./pages/LiveTracking";
+
 function App() {
 
   return (
@@ -145,6 +148,19 @@ function App() {
 
             </ProtectedRoute>
           }
+        />
+
+        {/* LIVE TRACKING */}
+
+     <Route
+      path="/live/:tripId"
+       element={
+       <ProtectedRoute>
+
+      <LiveTracking />
+
+       </ProtectedRoute>
+        }
         />
 
         {/* FALLBACK CHAT */}

@@ -129,6 +129,15 @@ function TripCard({ trip }) {
 
           </Link>
 
+          <Link
+          to={`/live/${trip._id}`}
+          className="btn btn-success"
+           >
+
+           Live Tracking
+
+           </Link>
+
           {/* MATCHES */}
 
           <Link

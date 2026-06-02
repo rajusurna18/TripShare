@@ -1,7 +1,8 @@
 import { useState }
 from "react";
 
-import API from "../services/api";
+import API
+from "../services/api";
 
 function Itinerary() {
 
@@ -14,27 +15,63 @@ function Itinerary() {
   const [days, setDays] =
     useState("");
 
+  const [travelers, setTravelers] =
+    useState("");
+
+  const [tripType, setTripType] =
+    useState("");
+
   const [result, setResult] =
     useState("");
 
   const [loading, setLoading] =
     useState(false);
 
+  // GENERATE PLAN
+
   const generatePlan =
     async () => {
+
+      if (
+        !destination ||
+        !budget ||
+        !days
+      ) {
+
+        alert(
+          "Please fill all fields"
+        );
+
+        return;
+
+      }
 
       try {
 
         setLoading(true);
 
-        const res = await API.post(
-          "/api/ai/itinerary",
-          {
-            destination,
-            budget,
-            days,
-          }
-        );
+        setResult("");
+
+        const res =
+          await API.post(
+
+            "/api/ai/itinerary",
+
+            {
+
+              destination,
+
+              budget,
+
+              days,
+
+              travelers,
+
+              tripType,
+
+            }
+
+          );
 
         setResult(
           res.data.itinerary
@@ -54,7 +91,13 @@ function Itinerary() {
 
   return (
 
-    <div className="dashboard-page min-vh-100 text-light">
+    <div
+      style={{
+        background: "#111",
+        minHeight: "100vh",
+        color: "white",
+      }}
+    >
 
       <div className="container py-5">
 
@@ -62,89 +105,246 @@ function Itinerary() {
 
         <div className="text-center mb-5">
 
-          <h1 className="section-title">
+          <h1
+            style={{
+              fontSize: "48px",
+              fontWeight: "700",
+            }}
+          >
 
-            AI Itinerary Generator ✨
+            🌍 AI Trip Planner
 
           </h1>
 
-          <p className="dashboard-subtitle">
+          <p
+            style={{
+              color: "#aaa",
+              marginTop: "15px",
+              fontSize: "18px",
+            }}
+          >
 
             Generate smart AI-powered
-            travel plans instantly.
+            itineraries with hotels,
+            food, transport & budgets.
 
           </p>
 
         </div>
 
-        {/* MAIN BOX */}
+        {/* MAIN CARD */}
 
-        <div className="itinerary-box glass-card">
+        <div
+          style={{
+            background: "#1e1e1e",
+            borderRadius: "25px",
+            padding: "35px",
+            border:
+              "1px solid #333",
+          }}
+        >
 
           {/* INPUTS */}
 
           <div className="row g-4">
 
-            <div className="col-md-4">
+            {/* DESTINATION */}
 
-              <label className="form-label">
+            <div className="col-md-6">
+
+              <label className="mb-2">
 
                 Destination
 
               </label>
 
               <input
+
                 type="text"
+
                 placeholder="Goa"
-                className="form-control itinerary-input"
+
+                className="form-control"
+
+                value={destination}
+
                 onChange={(e) =>
+
                   setDestination(
                     e.target.value
                   )
+
                 }
+
               />
 
             </div>
 
-            <div className="col-md-4">
+            {/* BUDGET */}
 
-              <label className="form-label">
+            <div className="col-md-6">
+
+              <label className="mb-2">
 
                 Budget
 
               </label>
 
               <input
+
                 type="number"
-                placeholder="5000"
-                className="form-control itinerary-input"
+
+                placeholder="15000"
+
+                className="form-control"
+
+                value={budget}
+
                 onChange={(e) =>
+
                   setBudget(
                     e.target.value
                   )
+
                 }
+
               />
 
             </div>
 
+            {/* DAYS */}
+
             <div className="col-md-4">
 
-              <label className="form-label">
+              <label className="mb-2">
 
                 Days
 
               </label>
 
               <input
+
                 type="number"
+
                 placeholder="3"
-                className="form-control itinerary-input"
+
+                className="form-control"
+
+                value={days}
+
                 onChange={(e) =>
+
                   setDays(
                     e.target.value
                   )
+
                 }
+
               />
+
+            </div>
+
+            {/* TRAVELERS */}
+
+            <div className="col-md-4">
+
+              <label className="mb-2">
+
+                Travelers
+
+              </label>
+
+              <input
+
+                type="number"
+
+                placeholder="2"
+
+                className="form-control"
+
+                value={travelers}
+
+                onChange={(e) =>
+
+                  setTravelers(
+                    e.target.value
+                  )
+
+                }
+
+              />
+
+            </div>
+
+            {/* TRIP TYPE */}
+
+            <div className="col-md-4">
+
+              <label className="mb-2">
+
+                Trip Type
+
+              </label>
+
+              <select
+
+                className="form-control"
+
+                value={tripType}
+
+                onChange={(e) =>
+
+                  setTripType(
+                    e.target.value
+                  )
+
+                }
+
+              >
+
+                <option value="">
+
+                  Select
+
+                </option>
+
+                <option>
+
+                  Adventure
+
+                </option>
+
+                <option>
+
+                  Family
+
+                </option>
+
+                <option>
+
+                  Friends
+
+                </option>
+
+                <option>
+
+                  Couple
+
+                </option>
+
+                <option>
+
+                  Solo
+
+                </option>
+
+                <option>
+
+                  Luxury
+
+                </option>
+
+              </select>
 
             </div>
 
@@ -152,18 +352,34 @@ function Itinerary() {
 
           {/* BUTTON */}
 
-          <div className="mt-5 text-center">
+          <div className="text-center mt-5">
 
             <button
-              onClick={generatePlan}
+
+              onClick={
+                generatePlan
+              }
+
               disabled={loading}
-              className="premium-ai-btn border-0"
+
+              className="btn btn-warning px-5 py-3"
+
+              style={{
+                borderRadius: "15px",
+                fontWeight: "600",
+                fontSize: "18px",
+              }}
+
             >
 
               {
+
                 loading
-                ? "Generating Plan..."
-                : "Generate AI Plan 🚀"
+
+                  ? "Generating AI Plan..."
+
+                  : "Generate AI Trip 🚀"
+
               }
 
             </button>
@@ -173,29 +389,39 @@ function Itinerary() {
           {/* RESULT */}
 
           {
+
             result && (
 
-              <div className="itinerary-result mt-5">
+              <div
+                style={{
+                  marginTop: "50px",
+                  background: "#151515",
+                  padding: "30px",
+                  borderRadius: "20px",
+                  whiteSpace: "pre-wrap",
+                  lineHeight: "1.9",
+                  border:
+                    "1px solid #333",
+                }}
+              >
 
-                <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h2
+                  style={{
+                    color: "#ffc107",
+                    marginBottom: "25px",
+                  }}
+                >
 
-                  <h2 className="text-warning m-0">
+                  ✨ Your AI Travel Plan
 
-                    Your AI Travel Plan ✨
+                </h2>
 
-                  </h2>
-
-                </div>
-
-                <div className="itinerary-content">
-
-                  {result}
-
-                </div>
+                {result}
 
               </div>
 
             )
+
           }
 
         </div>

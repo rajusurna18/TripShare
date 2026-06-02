@@ -2,14 +2,24 @@ import express from "express";
 
 import {
 
-  generateItinerary,
+  generateAIReply,
 
-  chatWithAI,
+  generateItinerary,
 
 } from "./ai.controller.js";
 
 const router =
   express.Router();
+
+// AI CHAT
+
+router.post(
+
+  "/chat",
+
+  generateAIReply
+
+);
 
 // AI ITINERARY
 
@@ -18,16 +28,6 @@ router.post(
   "/itinerary",
 
   generateItinerary
-
-);
-
-// AI CHAT
-
-router.post(
-
-  "/chat",
-
-  chatWithAI
 
 );
 

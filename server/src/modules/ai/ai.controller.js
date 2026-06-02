@@ -1,69 +1,22 @@
 import {
 
-  generateItineraryService,
+  generateAIReplyService,
 
-  chatWithAIService,
+  generateItineraryService,
 
 } from "./ai.service.js";
 
-// ITINERARY
-
-export const generateItinerary =
-  async (req, res) => {
-
-    try {
-
-      const response =
-        await generateItineraryService(
-
-          req.body
-
-        );
-
-      res.status(200).json({
-
-        success: true,
-
-        itinerary: response,
-
-      });
-
-    } catch (err) {
-
-      console.log(
-        "AI CONTROLLER ERROR:",
-        err
-      );
-
-      res.status(500).json({
-
-        success: false,
-
-        message:
-          err.message ||
-
-          "AI generation failed",
-
-      });
-
-    }
-
-};
-
 // AI CHAT
 
-export const chatWithAI =
+export const generateAIReply =
   async (req, res) => {
 
     try {
 
-      const { question } =
-        req.body;
-
       const reply =
-        await chatWithAIService(
+        await generateAIReplyService(
 
-          question
+          req.body.question
 
         );
 
@@ -77,14 +30,65 @@ export const chatWithAI =
 
     } catch (err) {
 
-      console.log(err);
+      console.log(
+
+        "AI CHAT ERROR:",
+
+        err
+
+      );
 
       res.status(500).json({
 
         success: false,
 
         message:
-          "AI chat failed",
+          "AI response failed",
+
+      });
+
+    }
+
+};
+
+// AI ITINERARY
+
+export const generateItinerary =
+  async (req, res) => {
+
+    try {
+
+      const itinerary =
+        await generateItineraryService(
+
+          req.body
+
+        );
+
+      res.status(200).json({
+
+        success: true,
+
+        itinerary,
+
+      });
+
+    } catch (err) {
+
+      console.log(
+
+        "AI ITINERARY ERROR:",
+
+        err
+
+      );
+
+      res.status(500).json({
+
+        success: false,
+
+        message:
+          "AI itinerary failed",
 
       });
 

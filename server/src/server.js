@@ -120,6 +120,8 @@ app.get("/", (req, res) => {
 
 });
 
+// TEST AI
+
 app.get(
 
   "/test-ai",
@@ -158,7 +160,13 @@ app.get(
 
       console.log(err);
 
-      res.json(err);
+      res.status(500).json({
+
+        success: false,
+
+        error: err.message,
+
+      });
 
     }
 
@@ -197,6 +205,10 @@ const io = new Server(
 
 const onlineUsers =
   new Map();
+
+// LIVE LOCATIONS
+
+let liveLocations = [];
 
 // SOCKET CONNECTION
 
@@ -267,6 +279,54 @@ io.on(
 
     );
 
+    // LIVE LOCATION
+
+    socket.on(
+
+      "live_location",
+
+      (data) => {
+
+        const existingUser =
+          liveLocations.find(
+
+            (user) =>
+
+              user.userId ===
+              data.userId
+
+          );
+
+        if (existingUser) {
+
+          existingUser.lat =
+            data.lat;
+
+          existingUser.lng =
+            data.lng;
+
+        } else {
+
+          liveLocations.push(
+            data
+          );
+
+        }
+
+        io.to(data.tripId)
+
+          .emit(
+
+            "update_locations",
+
+            liveLocations
+
+          );
+
+      }
+
+    );
+
     // SEND MESSAGE
 
     socket.on(
@@ -274,8 +334,6 @@ io.on(
       "send_message",
 
       (data) => {
-
-        // LIVE MESSAGE
 
         io.to(data.trip)
 
@@ -286,8 +344,6 @@ io.on(
             data
 
           );
-
-        // LIVE NOTIFICATION
 
         socket.to(data.trip)
 
@@ -304,7 +360,6 @@ io.on(
                 `${data.sender?.name || "Traveler"} sent a message`,
 
               tripId:
-
                 data.trip,
 
             }
@@ -388,6 +443,124 @@ io.on(
                 data.userId,
 
             }
+
+          );
+
+      }
+
+    );
+
+    // =========================
+    // VIDEO CALL FEATURE
+    // =========================
+
+    // START VIDEO CALL
+
+    socket.on(
+
+      "start_video_call",
+
+      (data) => {
+
+        socket.to(data.tripId)
+
+          .emit(
+
+            "incoming_video_call",
+
+            data
+
+          );
+
+        console.log(
+
+          `${data.caller} started video call`
+
+        );
+
+      }
+
+    );
+
+    // END VIDEO CALL
+
+    socket.on(
+
+      "end_video_call",
+
+      (data) => {
+
+        socket.to(data.tripId)
+
+          .emit(
+
+            "video_call_ended"
+
+          );
+
+      }
+
+    );
+
+    // WEBRTC OFFER
+
+    socket.on(
+
+      "webrtc_offer",
+
+      (data) => {
+
+        socket.to(data.tripId)
+
+          .emit(
+
+            "webrtc_offer",
+
+            data
+
+          );
+
+      }
+
+    );
+
+    // WEBRTC ANSWER
+
+    socket.on(
+
+      "webrtc_answer",
+
+      (data) => {
+
+        socket.to(data.tripId)
+
+          .emit(
+
+            "webrtc_answer",
+
+            data
+
+          );
+
+      }
+
+    );
+
+    // ICE CANDIDATES
+
+    socket.on(
+
+      "ice_candidate",
+
+      (data) => {
+
+        socket.to(data.tripId)
+
+          .emit(
+
+            "ice_candidate",
+
+            data
 
           );
 
