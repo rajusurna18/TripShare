@@ -5,6 +5,20 @@ from "react";
 import API
 from "../services/api";
 
+// COMPONENTS
+
+import ProfileHero
+from "../components/profile/ProfileHero";
+
+import InterestTags
+from "../components/profile/InterestTags";
+
+import TravelerBadges
+from "../components/profile/TravelerBadges";
+
+import ProfileForm
+from "../components/profile/ProfileForm";
+
 function Profile() {
 
   const [user, setUser] =
@@ -259,317 +273,72 @@ function Profile() {
 
       <div className="container py-5">
 
-        <div className="glass-card p-5">
+        {/* HERO */}
 
-          {/* PROFILE HEADER */}
+        <ProfileHero
 
-          <div className="text-center mb-5">
+          user={user}
 
-            <img
+          completion={completion}
 
-              src={
+        />
 
-                user?.profileImage ||
+        {/* BADGES */}
 
-                "https://i.pravatar.cc/200"
+        <TravelerBadges
 
-              }
+          travelStyle={travelStyle}
 
-              alt="profile"
+          personality={personality}
 
-              className="profile-page-image"
+        />
 
-            />
+        {/* INTEREST TAGS */}
 
-            <h1 className="mt-4 fw-bold">
+        <InterestTags
 
-              {user?.name}
+          interests={
 
-            </h1>
+            interests
+              .split(",")
 
-            <p className="text-secondary">
+              .map((i) =>
+                i.trim()
+              )
 
-              {user?.email}
+              .filter(Boolean)
 
-            </p>
+          }
 
-          </div>
+        />
 
-          {/* PROFILE COMPLETION */}
+        {/* PROFILE FORM */}
 
-          <div className="mb-5">
+        <ProfileForm
 
-            <div className="d-flex justify-content-between align-items-center mb-2">
+          bio={bio}
 
-              <h4>
+          setBio={setBio}
 
-                Profile Completion
+          interests={interests}
 
-              </h4>
+          setInterests={setInterests}
 
-              <span className="text-warning fw-bold">
+          travelStyle={travelStyle}
 
-                {completion}%
+          setTravelStyle={setTravelStyle}
 
-              </span>
+          personality={personality}
 
-            </div>
+          setPersonality={setPersonality}
 
-            <div className="progress profile-progress-bar">
+          setImage={setImage}
 
-              <div
+          updateProfile={updateProfile}
 
-                className="progress-bar bg-warning"
+          saving={saving}
 
-                style={{
-
-                  width:
-                    `${completion}%`
-
-                }}
-
-              />
-
-            </div>
-
-            <div className="mt-4">
-
-              <small className="text-secondary">
-
-                Complete your profile
-                to unlock better travel
-                matches and personalized
-                recommendations.
-
-              </small>
-
-            </div>
-
-          </div>
-
-          {/* BIO */}
-
-          <div className="mb-4">
-
-            <label className="form-label fw-bold">
-
-              Bio
-
-            </label>
-
-            <textarea
-
-              className="form-control profile-input"
-
-              rows="4"
-
-              value={bio}
-
-              onChange={(e) =>
-
-                setBio(
-                  e.target.value
-                )
-
-              }
-
-            />
-
-          </div>
-
-          {/* INTERESTS */}
-
-          <div className="mb-4">
-
-            <label className="form-label fw-bold">
-
-              Interests
-
-            </label>
-
-            <input
-
-              type="text"
-
-              className="form-control profile-input"
-
-              placeholder="trekking, beaches, food"
-
-              value={interests}
-
-              onChange={(e) =>
-
-                setInterests(
-                  e.target.value
-                )
-
-              }
-
-            />
-
-          </div>
-
-          {/* TRAVEL STYLE */}
-
-          <div className="mb-4">
-
-            <label className="form-label fw-bold">
-
-              Travel Style
-
-            </label>
-
-            <select
-
-              className="form-select profile-input"
-
-              value={travelStyle}
-
-              onChange={(e) =>
-
-                setTravelStyle(
-                  e.target.value
-                )
-
-              }
-
-            >
-
-              <option value="">
-
-                Select Travel Style
-
-              </option>
-
-              <option value="Budget">
-
-                Budget
-
-              </option>
-
-              <option value="Luxury">
-
-                Luxury
-
-              </option>
-
-              <option value="Adventure">
-
-                Adventure
-
-              </option>
-
-              <option value="Backpacking">
-
-                Backpacking
-
-              </option>
-
-            </select>
-
-          </div>
-
-          {/* PERSONALITY */}
-
-          <div className="mb-4">
-
-            <label className="form-label fw-bold">
-
-              Personality
-
-            </label>
-
-            <select
-
-              className="form-select profile-input"
-
-              value={personality}
-
-              onChange={(e) =>
-
-                setPersonality(
-                  e.target.value
-                )
-
-              }
-
-            >
-
-              <option value="">
-
-                Select Personality
-
-              </option>
-
-              <option value="Introvert">
-
-                Introvert
-
-              </option>
-
-              <option value="Extrovert">
-
-                Extrovert
-
-              </option>
-
-            </select>
-
-          </div>
-
-          {/* IMAGE */}
-
-          <div className="mb-4">
-
-            <label className="form-label fw-bold">
-
-              Upload Profile Image
-
-            </label>
-
-            <input
-
-              type="file"
-
-              className="form-control profile-input"
-
-              onChange={(e) =>
-
-                setImage(
-                  e.target.files[0]
-                )
-
-              }
-
-            />
-
-          </div>
-
-          {/* BUTTON */}
-
-          <button
-
-            onClick={updateProfile}
-
-            className="btn btn-custom px-5 py-3"
-
-            disabled={saving}
-
-          >
-
-            {
-
-              saving
-
-                ? "Saving..."
-
-                : "Save Profile 🚀"
-
-            }
-
-          </button>
-
-        </div>
+        />
 
       </div>
 
@@ -580,4 +349,3 @@ function Profile() {
 }
 
 export default Profile;
-

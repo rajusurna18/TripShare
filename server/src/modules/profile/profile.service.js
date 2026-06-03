@@ -1,19 +1,17 @@
 import User from "../auth/auth.model.js";
 
-// CALCULATE PROFILE COMPLETION
+// PROFILE COMPLETION
 
 const calculateProfileCompletion =
   (user) => {
 
     let completedFields = 0;
 
-    const totalFields = 6;
+    const totalFields = 11;
 
     // PROFILE IMAGE
 
-    if (
-      user.profileImage
-    ) {
+    if (user.profileImage) {
 
       completedFields++;
 
@@ -22,8 +20,10 @@ const calculateProfileCompletion =
     // BIO
 
     if (
+
       user.bio &&
       user.bio.trim() !== ""
+
     ) {
 
       completedFields++;
@@ -33,8 +33,10 @@ const calculateProfileCompletion =
     // INTERESTS
 
     if (
+
       user.interests &&
       user.interests.length > 0
+
     ) {
 
       completedFields++;
@@ -44,8 +46,10 @@ const calculateProfileCompletion =
     // TRAVEL STYLE
 
     if (
+
       user.travelStyle &&
       user.travelStyle.trim() !== ""
+
     ) {
 
       completedFields++;
@@ -55,8 +59,75 @@ const calculateProfileCompletion =
     // PERSONALITY
 
     if (
+
       user.personality &&
       user.personality.trim() !== ""
+
+    ) {
+
+      completedFields++;
+
+    }
+
+    // LOCATION
+
+    if (
+
+      user.location &&
+      user.location.trim() !== ""
+
+    ) {
+
+      completedFields++;
+
+    }
+
+    // LANGUAGES
+
+    if (
+
+      user.languages &&
+      user.languages.length > 0
+
+    ) {
+
+      completedFields++;
+
+    }
+
+    // VISITED PLACES
+
+    if (
+
+      user.visitedPlaces &&
+      user.visitedPlaces.length > 0
+
+    ) {
+
+      completedFields++;
+
+    }
+
+    // INSTAGRAM
+
+    if (
+
+      user.instagram &&
+      user.instagram.trim() !== ""
+
+    ) {
+
+      completedFields++;
+
+    }
+
+    // WEBSITE
+
+    if (
+
+      user.website &&
+      user.website.trim() !== ""
+
     ) {
 
       completedFields++;
@@ -66,8 +137,10 @@ const calculateProfileCompletion =
     // NAME
 
     if (
+
       user.name &&
       user.name.trim() !== ""
+
     ) {
 
       completedFields++;
@@ -92,7 +165,23 @@ export const getProfileService =
 
     const user =
       await User.findById(userId)
-        .select("-password");
+
+        .select("-password")
+
+        .populate(
+          "friends",
+          "name profileImage"
+        )
+
+        .populate(
+          "followers",
+          "name profileImage"
+        )
+
+        .populate(
+          "following",
+          "name profileImage"
+        );
 
     // CHECK USER
 
@@ -137,7 +226,24 @@ export const updateProfileService =
           new: true,
         }
 
-      ).select("-password");
+      )
+
+        .select("-password")
+
+        .populate(
+          "friends",
+          "name profileImage"
+        )
+
+        .populate(
+          "followers",
+          "name profileImage"
+        )
+
+        .populate(
+          "following",
+          "name profileImage"
+        );
 
     // CHECK USER
 
@@ -165,3 +271,4 @@ export const updateProfileService =
     };
 
 };
+

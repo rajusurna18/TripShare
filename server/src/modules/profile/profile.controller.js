@@ -1,8 +1,9 @@
-
 import {
   getProfileService,
   updateProfileService,
 } from "./profile.service.js";
+
+// GET PROFILE
 
 export const getProfile =
   async (req, res) => {
@@ -19,12 +20,16 @@ export const getProfile =
     } catch (err) {
 
       res.status(400).json({
+
         message: err.message,
+
       });
 
     }
 
 };
+
+// UPDATE PROFILE
 
 export const updateProfile =
   async (req, res) => {
@@ -40,19 +45,65 @@ export const updateProfile =
 
       }
 
-      // HANDLE INTERESTS ARRAY
+      // INTERESTS ARRAY
 
       if (req.body.interests) {
 
         if (
+
           !Array.isArray(
             req.body.interests
           )
+
         ) {
 
           req.body.interests = [
 
             req.body.interests,
+
+          ];
+
+        }
+
+      }
+
+      // LANGUAGES ARRAY
+
+      if (req.body.languages) {
+
+        if (
+
+          !Array.isArray(
+            req.body.languages
+          )
+
+        ) {
+
+          req.body.languages = [
+
+            req.body.languages,
+
+          ];
+
+        }
+
+      }
+
+      // VISITED PLACES ARRAY
+
+      if (req.body.visitedPlaces) {
+
+        if (
+
+          !Array.isArray(
+            req.body.visitedPlaces
+          )
+
+        ) {
+
+          req.body.visitedPlaces = [
+
+            req.body.visitedPlaces,
 
           ];
 
@@ -82,4 +133,3 @@ export const updateProfile =
     }
 
 };
-

@@ -40,6 +40,12 @@ from "./modules/messages/message.routes.js";
 import notificationRoutes
 from "./modules/notification/notification.routes.js";
 
+import friendRoutes
+from "./modules/friend/friend.routes.js";
+
+import reviewRoutes
+from "./modules/review/review.routes.js";
+
 const app = express();
 
 // MIDDLEWARES
@@ -108,6 +114,16 @@ app.use(
 app.use(
   "/api/notifications",
   notificationRoutes
+);
+
+app.use(
+  "/api/friends",
+  friendRoutes
+);
+
+app.use(
+  "/api/reviews",
+  reviewRoutes
 );
 
 // TEST ROUTE

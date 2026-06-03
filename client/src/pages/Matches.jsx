@@ -106,21 +106,21 @@ function Matches() {
 
         {/* HEADER */}
 
-        <div className="mb-5">
+        <div className="mb-5 text-center">
 
-          <h1 className="fw-bold display-6">
+          <h1 className="fw-bold display-5">
 
-            Smart Travel Matches 🌍
+            🤖 Smart AI Travel Matches
 
           </h1>
 
-          <p className="dashboard-subtitle">
+          <p className="dashboard-subtitle mt-3">
 
-            Discover travelers
-            compatible with your
-            interests,
-            personality,
-            and travel style.
+            Discover travelers with
+            matching personalities,
+            travel styles,
+            destinations,
+            and interests.
 
           </p>
 
@@ -140,7 +140,7 @@ function Matches() {
 
               <h4>
 
-                Finding Smart Matches...
+                AI is finding your best matches...
 
               </h4>
 
@@ -245,7 +245,7 @@ function Matches() {
 
                       <div className="glass-card p-4 h-100 text-center match-card-modern">
 
-                        {/* PROFILE */}
+                        {/* PROFILE IMAGE */}
 
                         <img
 
@@ -262,11 +262,26 @@ function Matches() {
 
                           className="match-profile-img"
 
+                          style={{
+
+                            width: "120px",
+
+                            height: "120px",
+
+                            borderRadius: "50%",
+
+                            objectFit: "cover",
+
+                            border:
+                              "4px solid #ffb703",
+
+                          }}
+
                         />
 
                         {/* NAME */}
 
-                        <h2 className="match-name mt-4">
+                        <h2 className="match-name mt-4 fw-bold">
 
                           {
 
@@ -280,7 +295,12 @@ function Matches() {
 
                         <div className="match-score-circle mt-3 mb-3">
 
-                          <span>
+                          <span
+                            className="fw-bold text-warning"
+                            style={{
+                              fontSize: "40px",
+                            }}
+                          >
 
                             {
 
@@ -290,9 +310,9 @@ function Matches() {
 
                           </span>
 
-                          <small>
+                          <small className="d-block text-secondary">
 
-                            Match
+                            Compatibility
 
                           </small>
 
@@ -373,7 +393,7 @@ function Matches() {
                                       .commonInterests
                                       .join(", ")
 
-                                  : "Explore together"
+                                  : "Explore Together"
 
                               }
 
@@ -388,7 +408,19 @@ function Matches() {
                         <div className="d-flex gap-2 mt-4">
 
                           <button
+
                             className="btn btn-custom flex-fill"
+
+                            onClick={() =>
+
+                              alert(
+
+                                `Friend request sent to ${item.user?.name} 🤝`
+
+                              )
+
+                            }
+
                           >
 
                             Connect 🤝
@@ -396,7 +428,19 @@ function Matches() {
                           </button>
 
                           <button
+
                             className="btn btn-outline-warning flex-fill"
+
+                            onClick={() =>
+
+                              navigate(
+
+                                `/profile/${item.user?._id}`
+
+                              )
+
+                            }
+
                           >
 
                             Profile 👤

@@ -257,7 +257,7 @@ function Navbar() {
 
                 🔔
 
-              </Link>
+              </Link> 
 
               {
 

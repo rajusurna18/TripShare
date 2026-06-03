@@ -38,8 +38,14 @@ import TripDetails from "./pages/TripDetails";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
+import Friends
+from "./pages/Friends";
+
 import LiveTracking
 from "./pages/LiveTracking";
+
+import Reviews
+from "./pages/Reviews";
 
 function App() {
 
@@ -152,16 +158,16 @@ function App() {
 
         {/* LIVE TRACKING */}
 
-     <Route
-      path="/live/:tripId"
-       element={
-       <ProtectedRoute>
+        <Route
+         path="/live/:tripId"
+         element={
+          <ProtectedRoute>
 
-      <LiveTracking />
+            <LiveTracking />
 
-       </ProtectedRoute>
-        }
-        />
+          </ProtectedRoute>
+         }
+         />
 
         {/* FALLBACK CHAT */}
 
@@ -187,6 +193,17 @@ function App() {
 
             </ProtectedRoute>
           }
+        />
+
+        <Route
+        path="/friends"
+        element={
+          <ProtectedRoute>
+
+              <Friends />
+
+          </ProtectedRoute>
+         }
         />
 
         {/* TRIPS */}
@@ -228,15 +245,15 @@ function App() {
           }
         />
         <Route
-  path="/expenses"
-  element={
-    <ProtectedRoute>
+         path="/expenses"
+            element={
+          <ProtectedRoute>
 
-      <Trips />
+             <Trips />
 
-    </ProtectedRoute>
-  }
-/>
+            </ProtectedRoute>
+           }
+          />
 
         {/* ITINERARY */}
 
@@ -263,6 +280,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+        path="/reviews/:userId"
+         element={
+          <ProtectedRoute>
+
+             <Reviews />
+
+          </ProtectedRoute>
+           }
+         />
 
       </Routes>
 
