@@ -10,6 +10,15 @@ import {
 import API
 from "../services/api";
 
+import AddExpenseModal
+from "../components/expense/AddExpenseModal";
+
+import ExpenseCard
+from "../components/expense/ExpenseCard";
+
+import BalanceCard
+from "../components/expense/BalanceCard";
+
 function Expenses() {
 
   const { tripId } =
@@ -21,20 +30,8 @@ function Expenses() {
   const [expenses, setExpenses] =
     useState([]);
 
-  const [title, setTitle] =
-    useState("");
-
-  const [amount, setAmount] =
-    useState("");
-
-  const currentUser =
-    JSON.parse(
-
-      localStorage.getItem(
-        "user"
-      ) || "{}"
-
-    );
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
 
@@ -44,7 +41,9 @@ function Expenses() {
 
   }, []);
 
+  // =====================
   // FETCH BALANCES
+  // =====================
 
   const fetchBalances =
     async () => {
@@ -74,7 +73,9 @@ function Expenses() {
 
           );
 
-        setBalances(res.data);
+        setBalances(
+          res.data
+        );
 
       } catch (err) {
 
@@ -84,7 +85,9 @@ function Expenses() {
 
   };
 
+  // =====================
   // FETCH EXPENSES
+  // =====================
 
   const fetchExpenses =
     async () => {
@@ -115,26 +118,29 @@ function Expenses() {
           );
 
         setExpenses(
+
           res.data.expenses || []
+
         );
 
       } catch (err) {
 
         console.log(err);
 
+      } finally {
+
+        setLoading(false);
+
       }
 
   };
 
+  // =====================
   // ADD EXPENSE
+  // =====================
 
   const addExpense =
-    async () => {
-
-      if (
-        !title ||
-        !amount
-      ) return;
+    async (data) => {
 
       try {
 
@@ -147,16 +153,7 @@ function Expenses() {
 
           `/expenses/${tripId}`,
 
-          {
-
-            title,
-
-            amount,
-
-            paidBy:
-              currentUser._id,
-
-          },
+          data,
 
           {
 
@@ -171,10 +168,6 @@ function Expenses() {
 
         );
 
-        setTitle("");
-
-        setAmount("");
-
         fetchBalances();
 
         fetchExpenses();
@@ -187,264 +180,283 @@ function Expenses() {
 
   };
 
-  return (
+  // =====================
+  // LOADING
+  // =====================
 
-    <div
-      style={{
-        background: "#111",
-        minHeight: "100vh",
-        color: "white",
-        padding: "40px",
-      }}
-    >
+  if (loading) {
 
-      <h1 className="mb-4">
-
-        💳 Trip Expenses
-
-      </h1>
-
-      {/* ADD EXPENSE */}
+    return (
 
       <div
-        style={{
-          background: "#1e1e1e",
-          padding: "20px",
-          borderRadius: "20px",
-          marginBottom: "30px",
-        }}
+        className="dashboard-page min-vh-100 text-light d-flex justify-content-center align-items-center"
       >
 
-        <h3>
+        <h2>
 
-          Add Expense
+          Loading Expenses...
 
-        </h3>
-
-        <input
-
-          type="text"
-
-          placeholder="Expense title"
-
-          className="form-control mb-3"
-
-          value={title}
-
-          onChange={(e) =>
-
-            setTitle(
-              e.target.value
-            )
-
-          }
-
-        />
-
-        <input
-
-          type="number"
-
-          placeholder="Amount"
-
-          className="form-control mb-3"
-
-          value={amount}
-
-          onChange={(e) =>
-
-            setAmount(
-              e.target.value
-            )
-
-          }
-
-        />
-
-        <button
-
-          className="btn btn-warning"
-
-          onClick={addExpense}
-
-        >
-
-          Add Expense
-
-        </button>
+        </h2>
 
       </div>
 
-      {/* SUMMARY */}
+    );
 
-      {
+  }
 
-        balances && (
+  return (
 
-          <div
-            style={{
-              background: "#1e1e1e",
-              padding: "20px",
-              borderRadius: "20px",
-              marginBottom: "30px",
-            }}
-          >
+    <div
+      className="dashboard-page min-vh-100 text-light"
+    >
 
-            <h2>
+      <div className="container py-5">
 
-              Expense Summary 📊
+        {/* PAGE TITLE */}
 
-            </h2>
+        <div className="mb-5">
 
-            <p>
-              Total:
-              ₹{balances.total}
-            </p>
+          <h1 className="fw-bold">
 
-            <p>
-              Per Person:
-              ₹{balances.perPerson}
-            </p>
+            💳 Trip Expenses
 
-            <p>
-              Travelers:
-              {
-                balances.totalTravelers
-              }
-            </p>
+          </h1>
 
-          </div>
+          <p className="dashboard-subtitle">
 
-        )
+            Track spending,
+            balances,
+            and settlements.
 
-      }
+          </p>
 
-      {/* BALANCES */}
+        </div>
 
-      {
+        {/* ADD EXPENSE */}
 
-        balances?.balances?.map(
+        <div className="mb-5">
 
-          (item, index) => (
+          <AddExpenseModal
+            onSubmit={
+              addExpense
+            }
+          />
+
+        </div>
+
+        {/* SUMMARY */}
+
+        {
+
+          balances && (
 
             <div
-
-              key={index}
-
-              style={{
-                background: "#1e1e1e",
-                padding: "20px",
-                borderRadius: "20px",
-                marginBottom: "15px",
-              }}
-
+              className="glass-card p-4 mb-5"
             >
 
-              <h4>
+              <h2 className="mb-4">
 
-                {item.user}
+                Expense Summary 📊
 
-              </h4>
+              </h2>
 
-              <p>
-                Paid:
-                ₹{item.paid}
-              </p>
+              <div className="row text-center">
 
-              <p>
-                Balance:
-                ₹{item.balance}
-              </p>
+                <div className="col-md-4">
 
-              <p>
+                  <h2 className="text-warning">
 
-                Status:
+                    ₹
 
-                <span
-                  className={
+                    {
 
-                    item.status ===
-                    "gets back"
+                      balances.total
 
-                      ? "text-success"
+                    }
 
-                      : item.status ===
-                        "owes"
+                  </h2>
 
-                      ? "text-danger"
+                  <p>
 
-                      : "text-warning"
+                    Total Spent
 
-                  }
-                >
+                  </p>
 
-                  {" "}
-                  {item.status}
+                </div>
 
-                </span>
+                <div className="col-md-4">
 
-              </p>
+                  <h2 className="text-success">
+
+                    ₹
+
+                    {
+
+                      balances.perPerson
+
+                    }
+
+                  </h2>
+
+                  <p>
+
+                    Per Person
+
+                  </p>
+
+                </div>
+
+                <div className="col-md-4">
+
+                  <h2 className="text-info">
+
+                    {
+
+                      balances.totalTravelers
+
+                    }
+
+                  </h2>
+
+                  <p>
+
+                    Travelers
+
+                  </p>
+
+                </div>
+
+              </div>
 
             </div>
 
           )
 
-        )
+        }
 
-      }
+        {/* BALANCES */}
 
-      {/* EXPENSE HISTORY */}
+        <div className="mb-5">
 
-      <div className="mt-5">
+          <h2 className="mb-4">
 
-        <h2>
+            Traveler Balances 💰
 
-          Recent Expenses 🧾
+          </h2>
 
-        </h2>
+          <div className="row g-4">
 
-        {
+            {
 
-          expenses.map(
-            (exp) => (
+              balances?.balances?.map(
+
+                (
+
+                  item,
+
+                  index
+
+                ) => (
+
+                  <div
+
+                    className="col-lg-4 col-md-6"
+
+                    key={index}
+
+                  >
+
+                    <BalanceCard
+
+                      balance={item}
+
+                    />
+
+                  </div>
+
+                )
+
+              )
+
+            }
+
+          </div>
+
+        </div>
+
+        {/* EXPENSE HISTORY */}
+
+        <div>
+
+          <h2 className="mb-4">
+
+            Recent Expenses 🧾
+
+          </h2>
+
+          {
+
+            expenses.length === 0 ? (
 
               <div
-
-                key={exp._id}
-
-                style={{
-                  background: "#1e1e1e",
-                  padding: "15px",
-                  borderRadius: "15px",
-                  marginBottom: "10px",
-                }}
-
+                className="glass-card p-5 text-center"
               >
 
-                <h5>
+                <h4>
 
-                  {exp.title}
+                  No expenses added yet
 
-                </h5>
+                </h4>
 
-                <p>
-                  ₹{exp.amount}
-                </p>
+              </div>
 
-                <p>
-                  Paid By:
-                  {
-                    exp.paidBy
-                      ?.name
-                  }
-                </p>
+            ) : (
+
+              <div className="row g-4">
+
+                {
+
+                  expenses.map(
+
+                    (
+
+                      expense
+
+                    ) => (
+
+                      <div
+
+                        className="col-lg-6"
+
+                        key={
+                          expense._id
+                        }
+
+                      >
+
+                        <ExpenseCard
+
+                          expense={
+                            expense
+                          }
+
+                        />
+
+                      </div>
+
+                    )
+
+                  )
+
+                }
 
               </div>
 
             )
-          )
 
-        }
+          }
+
+        </div>
 
       </div>
 

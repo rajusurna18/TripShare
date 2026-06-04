@@ -1,6 +1,7 @@
 import {
   getProfileService,
   updateProfileService,
+  getPublicProfileService,
 } from "./profile.service.js";
 
 // GET PROFILE
@@ -21,7 +22,35 @@ export const getProfile =
 
       res.status(400).json({
 
-        message: err.message,
+        message:
+          err.message,
+
+      });
+
+    }
+
+};
+
+// PUBLIC PROFILE
+
+export const getPublicProfile =
+  async (req, res) => {
+
+    try {
+
+      const user =
+        await getPublicProfileService(
+          req.params.userId
+        );
+
+      res.json(user);
+
+    } catch (err) {
+
+      res.status(400).json({
+
+        message:
+          err.message,
 
       });
 
@@ -126,7 +155,8 @@ export const updateProfile =
 
       res.status(400).json({
 
-        message: err.message,
+        message:
+          err.message,
 
       });
 

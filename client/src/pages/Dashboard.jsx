@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 
 import API from "../services/api";
 
+import StatCard
+from "../components/dashboard/StatCard";
+
+//import DashboardCharts
+//from "../components/dashboard/DashboardCharts";
+
 function Dashboard() {
 
   const [trips, setTrips] =
@@ -15,11 +21,16 @@ function Dashboard() {
   const [user, setUser] =
     useState(null);
 
+    const [dashboardStats, setDashboardStats] =
+  useState(null);
+
   useEffect(() => {
 
     fetchTrips();
 
     fetchProfile();
+
+     fetchDashboardStats();
 
   }, []);
 
@@ -88,6 +99,50 @@ function Dashboard() {
     }
 
   };
+
+//fetch dashboardstats
+
+  const fetchDashboardStats =
+  async () => {
+
+    try {
+
+      const token =
+        localStorage.getItem(
+          "token"
+        );
+
+      const res =
+        await API.get(
+
+          "/dashboard",
+
+          {
+
+            headers: {
+
+              Authorization:
+                `Bearer ${token}`,
+
+            },
+
+          }
+
+        );
+
+      setDashboardStats(
+
+        res.data.stats
+
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+};
 
   // STATS
 
@@ -503,7 +558,7 @@ function Dashboard() {
               {/* FEATURES */}
 
               <div className="row g-4 mb-5">
-
+                
                 {/* SMART MATCHES */}
 
                 <div className="col-lg-6">
@@ -605,6 +660,106 @@ function Dashboard() {
                 </div>
 
               </div>
+
+              {/* ANALYTICS */}
+
+                {
+
+              dashboardStats && (
+
+               <>
+
+                  <div className="mb-5">
+
+                  <h2 className="fw-bold mb-4">
+
+                   📊 Analytics Dashboard
+
+                 </h2>
+
+               <div className="row g-4">
+
+          <StatCard
+
+            title="Trips Created"
+
+            value={
+              dashboardStats.tripsCreated
+            }
+
+            icon="✈️"
+
+          />
+
+          <StatCard
+
+            title="Trips Joined"
+
+            value={
+              dashboardStats.tripsJoined
+            }
+
+            icon="🌍"
+
+          />
+
+          <StatCard
+
+            title="Friends"
+
+            value={
+              dashboardStats.totalFriends
+            }
+
+            icon="❤️"
+
+          />
+
+          <StatCard
+
+            title="Reviews"
+
+            value={
+              dashboardStats.totalReviews
+            }
+
+            icon="⭐"
+
+          />
+
+          <StatCard
+
+            title="Trust Score"
+
+            value={`${dashboardStats.trustScore}%`}
+
+            icon="🏆"
+
+          />
+
+          <StatCard
+
+            title="Expenses"
+
+            value={`₹${dashboardStats.totalExpenses}`}
+
+            icon="💸"
+
+           />
+
+          </div>
+
+         </div>
+
+         //temporary comment
+
+        {/* <DashboardCharts stats={stats} /> */}
+
+           </>
+
+            )
+
+            }
 
             </>
 

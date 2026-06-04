@@ -46,6 +46,9 @@ from "./modules/friend/friend.routes.js";
 import reviewRoutes
 from "./modules/review/review.routes.js";
 
+import dashboardRoutes
+from "./modules/dashboard/dashboard.routes.js";
+
 const app = express();
 
 // MIDDLEWARES
@@ -124,6 +127,11 @@ app.use(
 app.use(
   "/api/reviews",
   reviewRoutes
+);
+
+app.use(
+  "/api/dashboard",
+  dashboardRoutes
 );
 
 // TEST ROUTE

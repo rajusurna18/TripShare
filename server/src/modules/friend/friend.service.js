@@ -1,41 +1,97 @@
-import Friend
-from "./friend.model.js";
+import Friend from "./friend.model.js";
+import User from "../auth/auth.model.js";
 
-// SEND REQUEST
+// ========================
+// SEND FRIEND REQUEST
+// ========================
 
 export const sendFriendRequestService =
-  async (sender, receiver) => {
+  async (
+    sender,
+    receiver
+  ) => {
 
-    // CHECK EXISTING
+    if (
+      sender.toString() ===
+      receiver.toString()
+    ) {
+
+      throw new Error(
+        "You cannot send a friend request to yourself"
+      );
+
+    }
+
+    const senderUser =
+      await User.findById(
+        sender
+      );
+
+    const receiverUser =
+      await User.findById(
+        receiver
+      );
+
+    if (
+      !senderUser ||
+      !receiverUser
+    ) {
+
+      throw new Error(
+        "User not found"
+      );
+
+    }
 
     const existing =
       await Friend.findOne({
 
-        sender,
+        $or: [
 
-        receiver,
+          {
+            sender,
+            receiver,
+          },
+
+          {
+            sender:
+              receiver,
+
+            receiver:
+              sender,
+          },
+
+        ],
 
       });
 
     if (existing) {
 
       throw new Error(
-        "Request already sent"
+        "Friend request already exists"
       );
 
     }
 
-    return await Friend.create({
+    const request =
+      await Friend.create({
 
-      sender,
+        sender,
 
-      receiver,
+        receiver,
 
-    });
+        status:
+          "pending",
+
+      });
+
+    return request;
 
 };
 
+// ========================
 // ACCEPT REQUEST
+// ========================
 
 export const acceptFriendRequestService =
   async (requestId) => {
@@ -53,16 +109,85 @@ export const acceptFriendRequestService =
 
     }
 
+    if (
+      request.status ===
+      "accepted"
+    ) {
+
+      throw new Error(
+        "Already accepted"
+      );
+
+    }
+
     request.status =
       "accepted";
 
     await request.save();
 
-    return request;
+    // SENDER
+
+    await User.findByIdAndUpdate(
+
+      request.sender,
+
+      {
+
+        $addToSet: {
+
+          friends:
+            request.receiver,
+
+          following:
+            request.receiver,
+
+        },
+
+      }
+
+    );
+
+    // RECEIVER
+
+    await User.findByIdAndUpdate(
+
+      request.receiver,
+
+      {
+
+        $addToSet: {
+
+          friends:
+            request.sender,
+
+          followers:
+            request.sender,
+
+        },
+
+      }
+
+    );
+
+    return await Friend.findById(
+      requestId
+    )
+
+      .populate(
+        "sender",
+        "name email profileImage"
+      )
+
+      .populate(
+        "receiver",
+        "name email profileImage"
+      );
 
 };
 
+// ========================
 // REJECT REQUEST
+// ========================
 
 export const rejectFriendRequestService =
   async (requestId) => {
@@ -89,7 +214,9 @@ export const rejectFriendRequestService =
 
 };
 
+// ========================
 // GET FRIENDS
+// ========================
 
 export const getFriendsService =
   async (userId) => {
@@ -99,16 +226,19 @@ export const getFriendsService =
       $or: [
 
         {
-          sender: userId,
+          sender:
+            userId,
         },
 
         {
-          receiver: userId,
+          receiver:
+            userId,
         },
 
       ],
 
-      status: "accepted",
+      status:
+        "accepted",
 
     })
 
@@ -128,16 +258,20 @@ export const getFriendsService =
 
 };
 
+// ========================
 // GET PENDING REQUESTS
+// ========================
 
 export const getPendingRequestsService =
   async (userId) => {
 
     return await Friend.find({
 
-      receiver: userId,
+      receiver:
+        userId,
 
-      status: "pending",
+      status:
+        "pending",
 
     })
 

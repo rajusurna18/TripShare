@@ -47,6 +47,9 @@ from "./pages/LiveTracking";
 import Reviews
 from "./pages/Reviews";
 
+import PublicProfile
+from "./pages/PublicProfile";
+
 function App() {
 
   return (
@@ -280,7 +283,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+         {/*review*/}
         <Route
         path="/reviews/:userId"
          element={
@@ -291,6 +294,25 @@ function App() {
           </ProtectedRoute>
            }
          />
+
+         <Route
+           path="/profile/:userId"
+           element={
+            <ProtectedRoute>
+            <PublicProfile />
+           </ProtectedRoute>
+            }
+          />
+
+      
+         <Route
+           path="/reviews/:userId"
+           element={
+             <ProtectedRoute>
+               <Reviews />
+              </ProtectedRoute>
+            }
+           />    
 
       </Routes>
 

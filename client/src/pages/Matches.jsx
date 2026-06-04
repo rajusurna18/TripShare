@@ -403,51 +403,69 @@ function Matches() {
 
                         </div>
 
-                        {/* ACTION BUTTONS */}
+                  {/* ACTION BUTTONS */}
 
-                        <div className="d-flex gap-2 mt-4">
+                  <div className="d-flex gap-2 mt-4 flex-wrap">
 
-                          <button
+                       <button
 
-                            className="btn btn-custom flex-fill"
-
-                            onClick={() =>
-
-                              alert(
-
-                                `Friend request sent to ${item.user?.name} 🤝`
-
-                              )
-
-                            }
-
-                          >
-
-                            Connect 🤝
-
-                          </button>
-
-                          <button
-
-                            className="btn btn-outline-warning flex-fill"
+                           className="btn btn-custom flex-fill"
 
                             onClick={() =>
 
-                              navigate(
+                              sendFriendRequest(
+                              item.user?._id
+                            )
 
-                                `/profile/${item.user?._id}`
+                           }
 
-                              )
+                           >
 
-                            }
+                          Connect 🤝
 
-                          >
+                     </button>
 
-                            Profile 👤
+                    <button
 
-                          </button>
+                      className="btn btn-outline-warning flex-fill"
 
-                        </div>
+                      onClick={() =>
+
+                          navigate(
+
+                         `/profile/${item.user?._id}`
+
+                         )
+
+                       }
+
+                    >
+
+                      Profile 👤
+
+                    </button>
+
+                   <button
+
+                className="btn btn-outline-light flex-fill"
+
+               onClick={() =>
+
+                 navigate(
+
+                  `/reviews/${item.user?._id}`
+           
+                    )
+
+                       }
+
+                      >
+
+                       Reviews ⭐
+
+                      </button>
+
+                       </div>
 
                       </div>
 

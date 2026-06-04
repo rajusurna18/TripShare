@@ -4,18 +4,19 @@ const userSchema =
   new mongoose.Schema(
 
     {
-
       // BASIC INFO
 
       name: {
         type: String,
         required: true,
+        trim: true,
       },
 
       email: {
         type: String,
         required: true,
         unique: true,
+        lowercase: true,
       },
 
       password: {
@@ -40,13 +41,10 @@ const userSchema =
         default: "",
       },
 
-      interests: [
-
-        {
-          type: String,
-        }
-
-      ],
+      interests: {
+        type: [String],
+        default: [],
+      },
 
       travelStyle: {
         type: String,
@@ -70,21 +68,15 @@ const userSchema =
         default: "",
       },
 
-      languages: [
+      languages: {
+        type: [String],
+        default: [],
+      },
 
-        {
-          type: String,
-        }
-
-      ],
-
-      visitedPlaces: [
-
-        {
-          type: String,
-        }
-
-      ],
+      visitedPlaces: {
+        type: [String],
+        default: [],
+      },
 
       instagram: {
         type: String,
@@ -108,9 +100,14 @@ const userSchema =
         default: 0,
       },
 
-      rating: {
+      averageRating: {
         type: Number,
         default: 5,
+      },
+
+      totalReviews: {
+        type: Number,
+        default: 0,
       },
 
       trustScore: {
@@ -121,60 +118,29 @@ const userSchema =
       // FRIEND SYSTEM
 
       friends: [
-
         {
           type:
             mongoose.Schema.Types.ObjectId,
-
           ref: "User",
-        }
-
-      ],
-
-      friendRequests: [
-
-        {
-          type:
-            mongoose.Schema.Types.ObjectId,
-
-          ref: "User",
-        }
-
-      ],
-
-      sentRequests: [
-
-        {
-          type:
-            mongoose.Schema.Types.ObjectId,
-
-          ref: "User",
-        }
-
+        },
       ],
 
       // FOLLOW SYSTEM
 
       followers: [
-
         {
           type:
             mongoose.Schema.Types.ObjectId,
-
           ref: "User",
-        }
-
+        },
       ],
 
       following: [
-
         {
           type:
             mongoose.Schema.Types.ObjectId,
-
           ref: "User",
-        }
-
+        },
       ],
 
       // ACCOUNT
@@ -184,7 +150,7 @@ const userSchema =
         default: false,
       },
 
-      // FORGOT PASSWORD OTP
+      // RESET PASSWORD
 
       resetOTP: {
         type: String,
@@ -194,7 +160,6 @@ const userSchema =
       resetOTPExpire: {
         type: Date,
       },
-
     },
 
     {
