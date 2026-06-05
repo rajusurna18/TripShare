@@ -1,5 +1,12 @@
 import Friend from "./friend.model.js";
+
 import User from "../auth/auth.model.js";
+
+import {
+
+  createNotificationService,
+
+} from "../notification/notification.service.js";
 
 // ========================
 // SEND FRIEND REQUEST
@@ -85,6 +92,20 @@ export const sendFriendRequestService =
 
       });
 
+    // NOTIFICATION
+
+    await createNotificationService(
+
+      receiver,
+
+      `${senderUser.name} sent you a friend request 🤝`,
+
+      "friend",
+
+      "/friends"
+
+    );
+
     return request;
 
 };
@@ -125,8 +146,6 @@ export const acceptFriendRequestService =
 
     await request.save();
 
-    // SENDER
-
     await User.findByIdAndUpdate(
 
       request.sender,
@@ -147,8 +166,6 @@ export const acceptFriendRequestService =
 
     );
 
-    // RECEIVER
-
     await User.findByIdAndUpdate(
 
       request.receiver,
@@ -166,6 +183,25 @@ export const acceptFriendRequestService =
         },
 
       }
+
+    );
+
+    const receiver =
+      await User.findById(
+        request.receiver
+      );
+
+    // NOTIFICATION
+
+    await createNotificationService(
+
+      request.sender,
+
+      `${receiver.name} accepted your friend request 🎉`,
+
+      "friend",
+
+      "/friends"
 
     );
 

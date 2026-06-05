@@ -46,6 +46,15 @@ function TripDetails() {
     setMembersLocations] =
     useState([]);
 
+    const currentUser =
+  JSON.parse(
+
+    localStorage.getItem(
+      "user"
+    ) || "{}"
+
+  );
+
   // FETCH TRIP
 
   useEffect(() => {
@@ -418,33 +427,27 @@ function TripDetails() {
 
       {/* ACTIONS */}
 
-      <div className="mt-4 d-flex gap-3">
+         <div className="mt-4 d-flex gap-3">
 
-        <Link
-
+         <Link
           to={`/chat/${tripId}`}
-
           className="btn btn-warning"
+          >
 
-        >
+           Open Chat 💬
 
-          Open Chat 💬
+          </Link>
 
-        </Link>
+           <Link
+            to={`/expenses/${tripId}`}
+            className="btn btn-outline-warning"
+            >
 
-        <Link
+            Expenses 💳
 
-          to={`/expenses/${tripId}`}
+         </Link>
 
-          className="btn btn-outline-warning"
-
-        >
-
-          Expenses 💳
-
-        </Link>
-
-      </div>
+       </div>
 
     </div>
 

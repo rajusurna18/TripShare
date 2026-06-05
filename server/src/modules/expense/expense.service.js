@@ -22,7 +22,11 @@ export const createExpenseService =
 
       data.paidBy,
 
-      `Expense "${data.title}" added 💸`
+      `Expense "${data.title}" added 💸`,
+
+      "expense",
+
+      `/expenses/${data.trip}`
 
     );
 

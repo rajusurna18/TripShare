@@ -1,6 +1,46 @@
 import { Link } from "react-router-dom";
+import API from "../../services/api";
 
 function TripCard({ trip }) {
+
+  const currentUser =
+  JSON.parse(
+
+    localStorage.getItem(
+      "user"
+    ) || "{}"
+
+  );
+
+const sendJoinRequest =
+  async () => {
+
+    try {
+
+      await API.post(
+
+        `/join-requests/${trip._id}`
+
+      );
+
+      alert(
+        "Join request sent ✈️"
+      );
+
+    } catch (err) {
+
+      alert(
+
+        err?.response?.data
+          ?.message ||
+
+        "Failed to send request"
+
+      );
+
+    }
+
+};
 
   return (
 
@@ -137,6 +177,29 @@ function TripCard({ trip }) {
            Live Tracking
 
            </Link>
+
+         {
+
+           trip?.createdBy !==
+          currentUser?._id && (
+
+           <button
+
+             className="btn btn-outline-light"
+
+             onClick={
+            sendJoinRequest
+            }
+
+          >
+
+            ✈️ Request Join
+
+           </button>
+
+          )
+
+         }
 
           {/* MATCHES */}
 

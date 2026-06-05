@@ -1,10 +1,15 @@
 import Notification
 from "./notification.model.js";
 
-// CREATE NOTIFICATION
+// CREATE
 
 export const createNotificationService =
-  async (userId, message) => {
+  async (
+    userId,
+    message,
+    type = "general",
+    link = ""
+  ) => {
 
     return await Notification.create({
 
@@ -12,11 +17,15 @@ export const createNotificationService =
 
       message,
 
+      type,
+
+      link,
+
     });
 
 };
 
-// GET NOTIFICATIONS
+// GET
 
 export const getNotificationsService =
   async (userId) => {
@@ -25,15 +34,15 @@ export const getNotificationsService =
 
       user: userId,
 
-    })
+    }).sort({
 
-      .sort({
-        createdAt: -1,
-      });
+      createdAt: -1,
+
+    });
 
 };
 
-// MARK NOTIFICATION AS READ
+// MARK READ
 
 export const markNotificationReadService =
   async (id) => {

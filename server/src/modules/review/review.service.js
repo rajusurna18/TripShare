@@ -1,16 +1,19 @@
-
 import Review
 from "./review.model.js";
 
 import User
 from "../auth/auth.model.js";
 
+import {
+
+  createNotificationService,
+
+} from "../notification/notification.service.js";
+
 // CREATE REVIEW
 
 export const createReviewService =
   async (data) => {
-
-    // CHECK EXISTING REVIEW
 
     const alreadyReviewed =
       await Review.findOne({
@@ -36,6 +39,20 @@ export const createReviewService =
 
     const review =
       await Review.create(data);
+
+    // NOTIFICATION
+
+    await createNotificationService(
+
+      data.reviewFor,
+
+      "You received a new review ⭐",
+
+      "review",
+
+      `/reviews/${data.reviewFor}`
+
+    );
 
     return review;
 
@@ -67,8 +84,6 @@ export const getUserReviewsService =
           createdAt: -1,
         });
 
-    // AVERAGE RATING
-
     const total =
       reviews.reduce(
 
@@ -90,8 +105,6 @@ export const getUserReviewsService =
           ).toFixed(1)
 
         : 0;
-
-    // TRUST SCORE
 
     const trustScore =
       Math.min(

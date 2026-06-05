@@ -7,9 +7,6 @@ import API from "../services/api";
 import StatCard
 from "../components/dashboard/StatCard";
 
-//import DashboardCharts
-//from "../components/dashboard/DashboardCharts";
-
 function Dashboard() {
 
   const [trips, setTrips] =
@@ -750,10 +747,6 @@ function Dashboard() {
           </div>
 
          </div>
-
-         //temporary comment
-
-        {/* <DashboardCharts stats={stats} /> */}
 
            </>
 

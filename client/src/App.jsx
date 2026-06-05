@@ -50,6 +50,9 @@ from "./pages/Reviews";
 import PublicProfile
 from "./pages/PublicProfile";
 
+import JoinRequests
+from "./pages/JoinRequests";
+
 function App() {
 
   return (
@@ -312,7 +315,18 @@ function App() {
                <Reviews />
               </ProtectedRoute>
             }
-           />    
+           />  
+
+          <Route
+            path="/join-requests/:tripId"
+            element={
+             <ProtectedRoute>
+
+              <JoinRequests />
+
+            </ProtectedRoute>
+            }
+          />  
 
       </Routes>
 

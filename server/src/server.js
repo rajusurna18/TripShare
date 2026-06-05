@@ -49,6 +49,9 @@ from "./modules/review/review.routes.js";
 import dashboardRoutes
 from "./modules/dashboard/dashboard.routes.js";
 
+import joinRequestRoutes
+from "./modules/joinRequest/joinRequest.routes.js";
+
 const app = express();
 
 // MIDDLEWARES
@@ -132,6 +135,11 @@ app.use(
 app.use(
   "/api/dashboard",
   dashboardRoutes
+);
+
+app.use(
+  "/api/join-requests",
+  joinRequestRoutes
 );
 
 // TEST ROUTE

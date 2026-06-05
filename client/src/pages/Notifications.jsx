@@ -1,9 +1,13 @@
-
-import { useEffect, useState }
-from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import API
 from "../services/api";
+
+import NotificationCard
+from "../components/notification/NotificationCard";
 
 function Notifications() {
 
@@ -20,73 +24,122 @@ function Notifications() {
 
   // FETCH NOTIFICATIONS
 
-  useEffect(() => {
+  const fetchNotifications =
+    async () => {
 
-    const fetchNotifications =
-      async () => {
+      try {
 
-        try {
-
-          const res =
-            await API.get(
-              "/notifications"
-            );
-
-          setNotifications(
-
-            res.data.notifications ||
-
-            res.data
-
+        const res =
+          await API.get(
+            "/notifications"
           );
 
-        } catch (err) {
+        setNotifications(
 
-          console.log(err);
+          res.data.notifications ||
 
-        } finally {
+          res.data ||
 
-          setLoading(false);
+          []
 
-        }
+        );
 
-    };
+      } catch (err) {
+
+        console.log(err);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+  };
+
+  useEffect(() => {
 
     fetchNotifications();
 
   }, []);
 
-  // NOTIFICATION ICONS
+  // MARK READ
 
-  const getNotificationIcon =
-    (message) => {
+  const markAsRead =
+    async (id) => {
 
-      const text =
-        message.toLowerCase();
+      try {
 
-      if (
-        text.includes("expense")
-      ) return "💸";
+        await API.put(
 
-      if (
-        text.includes("message")
-      ) return "💬";
+          `/notifications/${id}/read`
 
-      if (
-        text.includes("trip")
-      ) return "✈️";
+        );
 
-      if (
-        text.includes("joined")
-      ) return "👥";
+        setNotifications(
 
-      if (
-        text.includes("profile")
-      ) return "🧑";
+          notifications.map(
 
-      return "🔔";
+            (item) =>
+
+              item._id === id
+
+                ? {
+
+                    ...item,
+
+                    read: true,
+
+                  }
+
+                : item
+
+          )
+
+        );
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
 
   };
+
+  // UNREAD COUNT
+
+  const unreadCount =
+
+    notifications.filter(
+
+      (n) => !n.read
+
+    ).length;
+
+  // LOADING
+
+  if (loading) {
+
+    return (
+
+      <div className="dashboard-page min-vh-100 text-light d-flex justify-content-center align-items-center">
+
+        <div className="text-center">
+
+          <div className="spinner-border text-warning mb-3" />
+
+          <h4>
+
+            Loading Notifications...
+
+          </h4>
+
+        </div>
+
+      </div>
+
+    );
+
+  }
 
   return (
 
@@ -94,49 +147,39 @@ function Notifications() {
 
       <div className="container py-5">
 
-        {/* HEADER */}
+        <div className="glass-card p-5 mb-5">
 
-        <div className="mb-5">
+          <div className="d-flex justify-content-between align-items-center flex-wrap">
 
-          <h1 className="fw-bold display-6">
+            <div>
 
-            Notifications 🔔
+              <h1 className="fw-bold">
 
-          </h1>
+                Notifications 🔔
 
-          <p className="dashboard-subtitle">
+              </h1>
 
-            Stay updated with
-            your latest travel
-            activities and alerts.
+              <p className="text-secondary mb-0">
 
-          </p>
+                Stay updated with your latest travel activity.
 
-        </div>
-
-        {/* LOADING */}
-
-        {
-
-          loading ? (
-
-            <div className="glass-card p-5 text-center">
-
-              <div
-                className="spinner-border text-warning mb-3"
-              />
-
-              <h4>
-
-                Loading Notifications...
-
-              </h4>
+              </p>
 
             </div>
 
-          ) : notifications.length === 0 ? (
+            <span className="badge bg-warning text-dark fs-6">
 
-            // EMPTY STATE
+              {unreadCount} Unread
+
+            </span>
+
+          </div>
+
+        </div>
+
+        {
+
+          notifications.length === 0 ? (
 
             <div className="glass-card p-5 text-center">
 
@@ -146,13 +189,11 @@ function Notifications() {
 
               </h2>
 
-              <p className="dashboard-text">
+              <p className="text-secondary">
 
-                Your latest travel updates,
-                expenses,
-                chats,
-                and activities
-                will appear here.
+                Friend requests, reviews, expenses,
+
+                chats and trip updates will appear here.
 
               </p>
 
@@ -160,119 +201,29 @@ function Notifications() {
 
           ) : (
 
-            // NOTIFICATIONS LIST
-
             <div className="d-flex flex-column gap-4">
 
               {
 
                 notifications.map(
 
-                  (item) => (
+                  (notification) => (
 
-                    <div
+                    <NotificationCard
 
-                      key={item._id}
+                      key={
+                        notification._id
+                      }
 
-                      className={`glass-card p-4 notification-card ${
-                        !item.read
-                          ? "border border-warning"
-                          : ""
-                      }`}
+                      notification={
+                        notification
+                      }
 
-                    >
+                      onRead={
+                        markAsRead
+                      }
 
-                      <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-
-                        {/* LEFT */}
-
-                        <div className="d-flex gap-3 align-items-start">
-
-                          <div className="notification-icon">
-
-                            {
-
-                              getNotificationIcon(
-                                item.message
-                              )
-
-                            }
-
-                          </div>
-
-                          <div>
-
-                            <h5 className="mb-2">
-
-                              {
-
-                                item.message
-
-                              }
-
-                            </h5>
-
-                            <small className="text-secondary">
-
-                              {
-
-                                new Date(
-
-                                  item.createdAt
-
-                                ).toLocaleDateString(
-
-                                  [],
-
-                                  {
-
-                                    day: "numeric",
-
-                                    month: "short",
-
-                                    hour: "2-digit",
-
-                                    minute: "2-digit",
-
-                                  }
-
-                                )
-
-                              }
-
-                            </small>
-
-                          </div>
-
-                        </div>
-
-                        {/* STATUS */}
-
-                        <span
-                          className={`badge rounded-pill ${
-                            item.read
-
-                              ? "bg-secondary"
-
-                              : "bg-warning text-dark"
-                          }`}
-                        >
-
-                          {
-
-                            item.read
-
-                              ? "Read"
-
-                              : "New"
-
-                          }
-
-                        </span>
-
-                      </div>
-
-                    </div>
+                    />
 
                   )
 
