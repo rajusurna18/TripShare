@@ -447,6 +447,13 @@ function TripDetails() {
 
          </Link>
 
+         <Link
+          to={`/memories/${tripId}`}
+          className="btn btn-outline-light"
+    >   
+           📸 Memories
+        </Link>
+
        </div>
 
     </div>

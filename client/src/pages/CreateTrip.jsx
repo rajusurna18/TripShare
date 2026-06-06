@@ -16,10 +16,16 @@ function CreateTrip() {
       destination: "",
       budget: "",
       date: "",
+
+      travelStyle: "",
+      tags: "",
+      maxMembers: 10,
+
       travelers: "",
       category: "",
       transport: "",
       visibility: "",
+
       description: "",
 
     });
@@ -106,10 +112,16 @@ function CreateTrip() {
           destination: "",
           budget: "",
           date: "",
+
+          travelStyle: "",
+          tags: "",
+          maxMembers: 10,
+
           travelers: "",
           category: "",
           transport: "",
           visibility: "",
+
           description: "",
 
         });
@@ -119,8 +131,11 @@ function CreateTrip() {
       } catch (err) {
 
         toast.error(
+
           err.response?.data?.message ||
+
           "Trip Creation Failed"
+
         );
 
       } finally {
@@ -177,7 +192,7 @@ function CreateTrip() {
                   name="title"
                   value={tripData.title}
                   className="form-control trip-input"
-                  placeholder="please enter trip title"
+                  placeholder="Please enter trip title"
                   onChange={handleChange}
                   minLength="3"
                   required
@@ -200,7 +215,7 @@ function CreateTrip() {
                   name="destination"
                   value={tripData.destination}
                   className="form-control trip-input"
-                  placeholder="please enter destination"
+                  placeholder="Please enter destination"
                   onChange={handleChange}
                   required
                 />
@@ -222,7 +237,7 @@ function CreateTrip() {
                   name="budget"
                   value={tripData.budget}
                   className="form-control trip-input"
-                  placeholder="please enter budget"
+                  placeholder="Please enter budget"
                   onChange={handleChange}
                   min="100"
                   required
@@ -251,22 +266,64 @@ function CreateTrip() {
 
               </div>
 
-              {/* TRAVELERS */}
+              {/* TRAVEL STYLE */}
 
               <div className="col-md-6">
 
                 <label className="form-label">
 
-                  Travelers
+                  Travel Style
+
+                </label>
+
+                <select
+                  name="travelStyle"
+                  value={tripData.travelStyle}
+                  className="form-control trip-input"
+                  onChange={handleChange}
+                  required
+                >
+
+                  <option value="">
+                    Select Travel Style
+                  </option>
+
+                  <option value="Budget">
+                    Budget
+                  </option>
+
+                  <option value="Luxury">
+                    Luxury
+                  </option>
+
+                  <option value="Adventure">
+                    Adventure
+                  </option>
+
+                  <option value="Backpacking">
+                    Backpacking
+                  </option>
+
+                </select>
+
+              </div>
+
+              {/* MAX MEMBERS */}
+
+              <div className="col-md-6">
+
+                <label className="form-label">
+
+                  Max Travelers
 
                 </label>
 
                 <input
                   type="number"
-                  name="travelers"
-                  value={tripData.travelers}
+                  name="maxMembers"
+                  value={tripData.maxMembers}
                   className="form-control trip-input"
-                  placeholder="number of travelers"
+                  placeholder="Maximum travelers"
                   onChange={handleChange}
                   min="1"
                   max="50"
@@ -400,6 +457,33 @@ function CreateTrip() {
 
               </div>
 
+              {/* TAGS */}
+
+              <div className="col-md-12">
+
+                <label className="form-label">
+
+                  Tags
+
+                </label>
+
+                <input
+                  type="text"
+                  name="tags"
+                  value={tripData.tags}
+                  className="form-control trip-input"
+                  placeholder="Beach, Trekking, Nature"
+                  onChange={handleChange}
+                />
+
+                <small className="text-secondary">
+
+                  Separate tags with commas
+
+                </small>
+
+              </div>
+
               {/* IMAGE */}
 
               <div className="col-md-12">
@@ -463,9 +547,13 @@ function CreateTrip() {
                 >
 
                   {
+
                     loading
-                    ? "Creating Trip..."
-                    : "Create Trip 🚀"
+
+                      ? "Creating Trip..."
+
+                      : "Create Trip 🚀"
+
                   }
 
                 </button>

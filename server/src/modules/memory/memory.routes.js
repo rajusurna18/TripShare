@@ -1,11 +1,14 @@
 import express from "express";
 
 import {
-  createTrip,
-  getTrips,
-  joinTrip,
-  getTripById,
-} from "./trip.controller.js";
+
+  createMemory,
+
+  getTripMemories,
+
+  likeMemory,
+
+} from "./memory.controller.js";
 
 import { protect }
 from "../../middleware/auth.middleware.js";
@@ -13,31 +16,39 @@ from "../../middleware/auth.middleware.js";
 import upload
 from "../../middleware/upload.middleware.js";
 
-const router = express.Router();
+const router =
+  express.Router();
 
 router.post(
-  "/",
+
+  "/:tripId",
+
   protect,
+
   upload.single("image"),
-  createTrip
+
+  createMemory
+
 );
 
 router.get(
-  "/",
+
+  "/:tripId",
+
   protect,
-  getTrips
+
+  getTripMemories
+
 );
 
-router.get(
-  "/:id",
-  protect,
-  getTripById
-);
+router.put(
 
-router.post(
-  "/:id/join",
+  "/like/:id",
+
   protect,
-  joinTrip
+
+  likeMemory
+
 );
 
 export default router;

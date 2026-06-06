@@ -1,0 +1,140 @@
+import API
+from "../../services/api";
+
+function MemoryCard({
+
+  memory,
+
+  fetchMemories,
+
+}) {
+
+  const likeMemory =
+    async () => {
+
+      try {
+
+        await API.put(
+
+          `/memories/like/${memory._id}`
+
+        );
+
+        fetchMemories();
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
+
+  };
+
+  return (
+
+    <div className="glass-card p-4 mb-4">
+
+      <div className="d-flex align-items-center gap-3 mb-3">
+
+        <img
+
+          src={
+
+            memory?.user
+              ?.profileImage ||
+
+            "https://i.pravatar.cc/150"
+
+          }
+
+          alt="user"
+
+          className="rounded-circle"
+
+          style={{
+
+            width: "60px",
+
+            height: "60px",
+
+            objectFit: "cover",
+
+          }}
+
+        />
+
+        <div>
+
+          <h5 className="m-0">
+
+            {
+
+              memory?.user?.name
+
+            }
+
+          </h5>
+
+          <small className="text-secondary">
+
+            {
+
+              new Date(
+
+                memory.createdAt
+
+              ).toLocaleDateString()
+
+            }
+
+          </small>
+
+        </div>
+
+      </div>
+
+      <img
+
+        src={memory.image}
+
+        alt="memory"
+
+        className="img-fluid rounded mb-3"
+
+      />
+
+      <p>
+
+        {
+
+          memory.caption
+
+        }
+
+      </p>
+
+      <button
+
+        className="btn btn-outline-warning"
+
+        onClick={
+          likeMemory
+        }
+
+      >
+
+        ❤️ {
+
+          memory.likes?.length || 0
+
+        }
+
+      </button>
+
+    </div>
+
+  );
+
+}
+
+export default MemoryCard;

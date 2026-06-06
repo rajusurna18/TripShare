@@ -5,62 +5,174 @@ const tripSchema =
 
     {
 
+      // BASIC INFO
+
       title: {
+
         type: String,
+
         required: true,
+
+        trim: true,
+
       },
 
       destination: {
+
         type: String,
-        required: true,
-      },
 
-      budget: {
-        type: Number,
         required: true,
-      },
 
-      image: {
-        type: String,
-        default: "",
-      },
+        trim: true,
 
-      date: {
-        type: Date,
-        required: true,
       },
 
       description: {
+
         type: String,
+
         default: "",
+
       },
 
-      createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+      image: {
+
+        type: String,
+
+        default: "",
+
+      },
+
+      // TRIP DETAILS
+
+      date: {
+
+        type: Date,
+
         required: true,
+
+      },
+
+      budget: {
+
+        type: Number,
+
+        required: true,
+
+        min: 0,
+
+      },
+
+      travelStyle: {
+
+        type: String,
+
+        default: "",
+
+      },
+
+      tags: [
+
+        {
+
+          type: String,
+
+          trim: true,
+
+        },
+
+      ],
+
+      // MEMBERS
+
+      createdBy: {
+
+        type:
+          mongoose.Schema.Types.ObjectId,
+
+        ref: "User",
+
+        required: true,
+
       },
 
       members: [
 
         {
+
           type:
             mongoose.Schema.Types.ObjectId,
 
           ref: "User",
-        }
+
+        },
 
       ],
+
+      // EXTRA FEATURES
+
+      maxMembers: {
+
+        type: Number,
+
+        default: 10,
+
+      },
+
+      status: {
+
+        type: String,
+
+        enum: [
+
+          "upcoming",
+
+          "active",
+
+          "completed",
+
+          "cancelled",
+
+        ],
+
+        default: "upcoming",
+
+      },
 
     },
 
     {
+
       timestamps: true,
+
     }
 
   );
 
+// INDEXES
+
+tripSchema.index({
+
+  destination: 1,
+
+});
+
+tripSchema.index({
+
+  travelStyle: 1,
+
+});
+
+tripSchema.index({
+
+  status: 1,
+
+});
+
 export default mongoose.model(
+
   "Trip",
+
   tripSchema
+
 );

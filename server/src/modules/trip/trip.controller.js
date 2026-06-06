@@ -21,10 +21,41 @@ export const createTrip =
 
       }
 
+      // TAGS ARRAY
+
+      if (req.body.tags) {
+
+        if (
+
+          !Array.isArray(
+            req.body.tags
+          )
+
+        ) {
+
+          req.body.tags =
+
+            req.body.tags
+
+              .split(",")
+
+              .map((tag) =>
+                tag.trim()
+              )
+
+              .filter(Boolean);
+
+        }
+
+      }
+
       const trip =
         await createTripService(
+
           req.body,
+
           req.user.id
+
         );
 
       res.status(201).json({
@@ -44,7 +75,8 @@ export const createTrip =
 
         success: false,
 
-        message: err.message,
+        message:
+          err.message,
 
       });
 
@@ -81,7 +113,8 @@ export const getTrips =
 
         success: false,
 
-        message: err.message,
+        message:
+          err.message,
 
       });
 
@@ -121,7 +154,8 @@ export const joinTrip =
 
         success: false,
 
-        message: err.message,
+        message:
+          err.message,
 
       });
 
@@ -155,7 +189,8 @@ export const getTripById =
 
         success: false,
 
-        message: err.message,
+        message:
+          err.message,
 
       });
 

@@ -438,24 +438,6 @@ function Dashboard() {
                       🤖 AI Assistant
                     </Link>
 
-                    {/* GROUP CHAT */}
-
-                    <Link
-
-                      to={
-                        trips.length > 0
-                          ? `/chat/${trips[0]._id}`
-                          : "/trips"
-                      }
-
-                      className="quick-action-btn"
-
-                    >
-
-                      💬 Group Chat
-
-                    </Link>
-
                     {/* AI PLANNER */}
 
                     <Link
@@ -477,6 +459,13 @@ function Dashboard() {
                     >
                       💸 Expenses
                     </Link>
+
+                    <Link
+                      to="/recommendations"
+                      className="quick-action-btn"
+                    >
+                        🤖 AI Trips
+                     </Link>
 
                   </div>
 

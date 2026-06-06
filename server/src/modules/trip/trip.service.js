@@ -10,9 +10,27 @@ export const createTripService =
 
         ...tripData,
 
-        createdBy: userId,
+        createdBy:
+          userId,
 
-        members: [userId],
+        members: [
+          userId,
+        ],
+
+        travelStyle:
+          tripData.travelStyle ||
+          "",
+
+        tags:
+          tripData.tags || [],
+
+        maxMembers:
+          tripData.maxMembers ||
+          10,
+
+        status:
+          tripData.status ||
+          "upcoming",
 
       });
 
@@ -39,7 +57,19 @@ export const getTripsService =
 
     return await Trip.find({
 
-      createdBy: userId,
+      $or: [
+
+        {
+          createdBy:
+            userId,
+        },
+
+        {
+          members:
+            userId,
+        },
+
+      ],
 
     })
 
@@ -94,7 +124,22 @@ export const joinTripService =
 
     }
 
-    trip.members.push(userId);
+    if (
+
+      trip.members.length >=
+      trip.maxMembers
+
+    ) {
+
+      throw new Error(
+        "Trip is full"
+      );
+
+    }
+
+    trip.members.push(
+      userId
+    );
 
     await trip.save();
 
@@ -145,11 +190,18 @@ export const getTripByIdService =
     const totalMembers =
       trip.members.length;
 
+    const seatsLeft =
+
+      trip.maxMembers -
+      totalMembers;
+
     return {
 
       ...trip.toObject(),
 
       totalMembers,
+
+      seatsLeft,
 
     };
 

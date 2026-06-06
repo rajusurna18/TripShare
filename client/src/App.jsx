@@ -53,6 +53,12 @@ from "./pages/PublicProfile";
 import JoinRequests
 from "./pages/JoinRequests";
 
+import TripMemories
+from "./pages/TripMemories";
+
+import Recommendations
+from "./pages/Recommendations";
+
 function App() {
 
   return (
@@ -327,7 +333,32 @@ function App() {
             </ProtectedRoute>
             }
           />  
+          <Route
+            path="/memories/:tripId"
+            element={
+              <ProtectedRoute>
 
+                <TripMemories />
+
+              </ProtectedRoute>
+            }
+          />
+
+        <Route
+
+          path="/recommendations"
+
+          element={
+
+          <ProtectedRoute>
+
+              <Recommendations />
+
+         </ProtectedRoute>
+
+         }
+
+        />
       </Routes>
 
     </>

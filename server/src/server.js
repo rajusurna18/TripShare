@@ -52,6 +52,12 @@ from "./modules/dashboard/dashboard.routes.js";
 import joinRequestRoutes
 from "./modules/joinRequest/joinRequest.routes.js";
 
+import memoryRoutes
+from "./modules/memory/memory.routes.js";
+
+import recommendationRoutes
+from "./modules/recommendation/recommendation.routes.js";
+
 const app = express();
 
 // MIDDLEWARES
@@ -140,6 +146,19 @@ app.use(
 app.use(
   "/api/join-requests",
   joinRequestRoutes
+);
+
+app.use(
+  "/api/memories",
+  memoryRoutes
+);
+
+
+app.use(
+  "/api/recommendations",
+
+  recommendationRoutes
+
 );
 
 // TEST ROUTE
