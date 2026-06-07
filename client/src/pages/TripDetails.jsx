@@ -301,7 +301,7 @@ function TripDetails() {
                 key={member.userId}
 
                 style={{
-                  display: "flex",
+                  flexWrap:"wrap",
                   alignItems: "center",
                   gap: "10px",
                   marginBottom: "10px",
@@ -365,15 +365,13 @@ function TripDetails() {
 
             zoom={13}
 
-            style={{
-
-              height: "500px",
-
-              width: "100%",
-
-              borderRadius: "20px",
-
-            }}
+           style={{
+                height: window.innerWidth < 768
+                ? "350px"
+               : "500px",
+                width: "100%",
+               borderRadius: "20px",
+               }}
 
           >
 

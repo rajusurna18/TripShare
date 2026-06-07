@@ -203,8 +203,9 @@ body {
 
   gap: 10px;
 
-}
+  margin-left: auto;
 
+}
 
 .navbar {
 
@@ -286,17 +287,41 @@ body {
 
 }
 
-@media (max-width: 768px) {
+@media (max-width: 991px) {
 
   .navbar-collapse {
 
-    margin-top: 20px;
+    margin-top: 15px;
+
+    text-align: right;
 
   }
 
   .navbar-nav {
 
-    align-items: flex-start !important;
+    align-items: flex-end !important;
+
+    width: 100%;
+
+  }
+
+  .navbar-nav .nav-item {
+
+    width: auto;
+
+  }
+
+  .navbar-nav .nav-link {
+
+    text-align: right;
+
+  }
+
+  .dropdown-menu {
+
+    right: 0 !important;
+
+    left: auto !important;
 
   }
 
@@ -4157,5 +4182,363 @@ button,
   border-radius: 12px;
 
   font-size: 14px;
+
+}
+
+/* =========================================
+   DASHBOARD MOBILE FIXES
+========================================= */
+
+@media (max-width: 768px) {
+
+  .dashboard-header {
+
+    text-align: center;
+
+  }
+
+  .dashboard-header h1 {
+
+    font-size: 2rem;
+
+  }
+
+  .dashboard-subtitle {
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+  }
+
+  .quick-actions {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 12px;
+
+  }
+
+  .quick-action-btn {
+
+    width: 100%;
+
+    text-align: center;
+
+    padding: 14px;
+
+  }
+
+  .mini-trip-item {
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    text-align: center;
+
+  }
+
+  .stats-row {
+
+    font-size: 14px;
+
+    padding: 14px;
+
+  }
+
+  .profile-card-modern {
+
+    flex-direction: column;
+
+    text-align: center;
+
+    padding: 20px;
+
+  }
+
+  .profile-card-modern img {
+
+    width: 70px;
+
+    height: 70px;
+
+  }
+
+}
+
+@media (max-width:768px){
+
+  .trip-buttons{
+
+    flex-direction:column;
+
+  }
+
+  .trip-buttons .btn{
+
+    width:100%;
+
+  }
+
+  .trip-title{
+
+    font-size:20px;
+
+  }
+
+  .trip-image{
+
+    height:180px !important;
+
+  }
+
+}
+
+@media (max-width:768px){
+
+  .notification-card{
+
+    padding:16px !important;
+
+  }
+
+  .notification-icon{
+
+    font-size:24px;
+
+  }
+
+}
+
+@media (max-width:768px){
+
+  .profile-page-image{
+
+    width:120px !important;
+
+    height:120px !important;
+
+  }
+
+  .glass-card{
+
+    padding:20px !important;
+
+  }
+
+}
+
+@media (max-width:768px){
+
+  .match-card-modern{
+
+    text-align:center;
+
+  }
+
+  .match-profile-img{
+
+    width:90px !important;
+
+    height:90px !important;
+
+  }
+
+}
+
+/* ==========================
+   EXPENSES MOBILE
+========================== */
+
+@media (max-width:768px){
+
+  .dashboard-page{
+
+    padding-left:12px;
+
+    padding-right:12px;
+
+  }
+
+  .glass-card{
+
+    padding:16px !important;
+
+  }
+
+  .btn{
+
+    width:100%;
+
+  }
+
+}
+
+/* ===================================
+   CHAT MOBILE
+=================================== */
+
+@media (max-width:768px){
+
+  .chat-input-container{
+
+    flex-direction:column;
+
+    align-items:stretch !important;
+
+  }
+
+  .chat-input-container textarea{
+
+    width:100%;
+
+  }
+
+  .chat-input-container input[type="file"]{
+
+    width:100%;
+
+  }
+
+  .chat-input-container button{
+
+    width:100%;
+
+  }
+
+}
+
+/* ===================================
+   TRIPS PAGE MOBILE
+=================================== */
+
+.trip-search-input{
+
+  height:55px;
+
+  border-radius:14px;
+
+}
+
+@media (max-width:768px){
+
+  .section-title{
+
+    font-size:2rem !important;
+
+  }
+
+  .trip-search-input{
+
+    font-size:15px;
+
+  }
+
+}
+
+/* ==========================
+   TRIP CARD MOBILE
+========================== */
+
+@media (max-width:768px){
+
+  .trip-buttons-mobile{
+
+    flex-direction:column;
+
+  }
+
+  .trip-buttons-mobile .btn{
+
+    width:100%;
+
+  }
+
+}
+
+/* ==========================
+   NOTIFICATIONS MOBILE
+========================== */
+
+@media (max-width:768px){
+
+  .glass-card h1{
+
+    font-size:1.8rem;
+
+  }
+
+}
+
+/* ==========================
+   FRIENDS PAGE MOBILE
+========================== */
+
+@media (max-width:768px){
+
+  .glass-card{
+
+    padding:20px !important;
+
+  }
+
+}
+
+/* ==========================
+   FRIEND CARD MOBILE
+========================== */
+
+.friend-card{
+
+  border-radius:20px;
+
+}
+
+@media (max-width:768px){
+
+  .friend-card-content{
+
+    flex-direction:column;
+
+    text-align:center;
+
+  }
+
+  .friend-avatar{
+
+    width:90px !important;
+
+    height:90px !important;
+
+  }
+
+  .friend-actions{
+
+    flex-direction:column;
+
+  }
+
+  .friend-actions .btn{
+
+    width:100%;
+
+  }
+
+}
+
+/* ==========================
+   JOIN REQUESTS MOBILE
+========================== */
+
+@media (max-width:768px){
+
+  .dashboard-subtitle{
+
+    font-size:14px;
+
+  }
 
 }

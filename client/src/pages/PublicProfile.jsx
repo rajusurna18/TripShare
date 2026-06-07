@@ -117,7 +117,7 @@ function PublicProfile() {
 
       <div className="container py-5">
 
-        <div className="glass-card p-5">
+       <div className="glass-card p-4 p-md-5">
 
           <div className="text-center">
 
@@ -143,6 +143,9 @@ function PublicProfile() {
 
                 objectFit: "cover",
 
+                border: "4px solid #ffc107",
+
+
               }}
 
             />
@@ -162,7 +165,7 @@ function PublicProfile() {
           </div>
 
           <div
-            className="d-flex justify-content-center gap-5 mt-4"
+           className="d-flex justify-content-center flex-wrap gap-4 mt-4 text-center"
           >
 
             <div>
@@ -407,8 +410,9 @@ function PublicProfile() {
           </div>
 
           <div
-            className="d-flex gap-3 mt-4"
-          >
+  className="d-flex flex-wrap gap-3 mt-4"
+        >
+          
 
             {
 
@@ -460,7 +464,7 @@ function PublicProfile() {
 
           </div>
 
-          <div className="mt-5 d-flex gap-3">
+          <div className="mt-5 d-flex flex-column flex-md-row gap-3">
 
             <button
 

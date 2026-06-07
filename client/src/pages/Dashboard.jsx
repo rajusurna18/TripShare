@@ -663,7 +663,7 @@ function Dashboard() {
 
                  </h2>
 
-               <div className="row g-4">
+               <div className="row g-3">
 
           <StatCard
 
@@ -732,6 +732,30 @@ function Dashboard() {
             icon="💸"
 
            />
+
+           <StatCard
+           title="Pending Requests"
+         value={
+          dashboardStats.pendingRequests
+         }
+           icon="📨"
+          />
+
+          <StatCard
+           title="Memories"
+           value={
+              dashboardStats.totalMemories
+          }
+           icon="📸"
+          />
+
+            <StatCard
+              title="Notifications"
+              value={
+                dashboardStats.unreadNotifications
+               }
+               icon="🔔"
+              />
 
           </div>
 

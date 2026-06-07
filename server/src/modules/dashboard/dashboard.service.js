@@ -3,11 +3,11 @@ import Trip from "../trip/trip.model.js";
 import Review from "../review/review.model.js";
 import Expense from "../expense/expense.model.js";
 import Friend from "../friend/friend.model.js";
+import Notification from "../notification/notification.model.js";
+import Memory from "../memory/memory.model.js";
 
 export const getDashboardStatsService =
   async (userId) => {
-
-    // USER
 
     const user =
       await User.findById(userId);
@@ -59,7 +59,18 @@ export const getDashboardStatsService =
 
       });
 
-    // REVIEWS RECEIVED
+    // PENDING REQUESTS
+
+    const pendingRequests =
+      await Friend.countDocuments({
+
+        receiver: userId,
+
+        status: "pending",
+
+      });
+
+    // REVIEWS
 
     const reviews =
       await Review.find({
@@ -88,32 +99,33 @@ export const getDashboardStatsService =
 
         );
 
-      const avgRating =
-        totalRating /
-        reviews.length;
-
       trustScore =
         Math.min(
 
           100,
 
           Math.round(
-            avgRating * 20
+            (totalRating /
+              reviews.length) *
+              20
           )
 
         );
 
     }
 
-    // TOTAL EXPENSES PAID (OPTIMIZED)
+    // EXPENSES
 
     const expenseResult =
       await Expense.aggregate([
 
         {
           $match: {
+
             paidBy: user._id,
+
           },
+
         },
 
         {
@@ -136,6 +148,26 @@ export const getDashboardStatsService =
     const totalExpenses =
       expenseResult[0]?.total || 0;
 
+    // MEMORIES
+
+    const totalMemories =
+      await Memory.countDocuments({
+
+        user: userId,
+
+      });
+
+    // NOTIFICATIONS
+
+    const unreadNotifications =
+      await Notification.countDocuments({
+
+        user: userId,
+
+        read: false,
+
+      });
+
     return {
 
       tripsCreated,
@@ -144,11 +176,17 @@ export const getDashboardStatsService =
 
       totalFriends,
 
+      pendingRequests,
+
       totalReviews,
 
       trustScore,
 
       totalExpenses,
+
+      totalMemories,
+
+      unreadNotifications,
 
     };
 

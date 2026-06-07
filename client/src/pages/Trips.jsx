@@ -26,16 +26,22 @@ function Trips() {
 
   useEffect(() => {
 
-    const filtered =
-      trips.filter((trip) =>
+  const filtered =
+  trips.filter((trip) =>
 
-        trip.destination
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          )
+    trip.destination
+      ?.toLowerCase()
+      .includes(
+        search.toLowerCase()
+      ) ||
 
-      );
+    trip.title
+      ?.toLowerCase()
+      .includes(
+        search.toLowerCase()
+      )
+
+  );
 
     setFilteredTrips(filtered);
 
@@ -87,13 +93,18 @@ function Trips() {
               Explore Trips ✈️
 
             </h1>
+           <p className="dashboard-subtitle">
 
-            <p className="dashboard-subtitle">
+             Discover adventures from
+             travelers around the world.
 
-              Discover adventures from
-              travelers around the world.
+             </p>
 
-            </p>
+            <small className="text-secondary">
+
+             {filteredTrips.length} Trips Found
+
+           </small>
 
           </div>
 
@@ -101,7 +112,12 @@ function Trips() {
 
         {/* SEARCH */}
 
-        <div className="mb-5">
+            <div
+             className="mb-5"
+             style={{
+             maxWidth: "600px",
+             }}
+            >
 
           <input
             type="text"
@@ -169,7 +185,7 @@ function Trips() {
                   filteredTrips.map((trip) => (
 
                     <div
-                      className="col-sm-12 col-md-6 col-lg-4"
+                      className="col-12 col-md-6 col-lg-4"
                       key={trip._id}
                     >
 

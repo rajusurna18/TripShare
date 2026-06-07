@@ -752,7 +752,9 @@ function Chat() {
 
         {/* TOP */}
 
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        <div
+  className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"
+>
 
           <div>
 
@@ -786,6 +788,7 @@ function Chat() {
             style={{
               display: "flex",
               gap: "10px",
+               flexWrap: "wrap",
             }}
           >
 
@@ -853,6 +856,7 @@ function Chat() {
 
                 style={{
                   width: "300px",
+                  maxWidth: "300px",
                   borderRadius: "15px",
                   background: "#000",
                 }}
@@ -883,7 +887,9 @@ function Chat() {
 
         <div
           style={{
-            height: "500px",
+            height: window.innerWidth < 768
+            ? "350px"
+            : "500px" ,
             overflowY: "auto",
             background: "#1e1e1e",
             padding: "20px",
@@ -901,6 +907,7 @@ function Chat() {
                   key={msg._id}
                   style={{
                     marginBottom: "15px",
+                    wordBreak: "break-word",
                   }}
                 >
 
@@ -977,14 +984,15 @@ function Chat() {
 
         {/* INPUT */}
 
-        <div
+     <div
+       className="chat-input-container"
           style={{
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-          }}
-        >
-
+          display: "flex",
+          gap: "10px",
+         alignItems: "center",
+         flexWrap: "wrap",
+      }}
+    >
           <textarea
 
             rows="1"

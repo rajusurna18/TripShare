@@ -12,18 +12,17 @@ function JoinRequestCard({
 
     <div className="glass-card p-4 mb-4">
 
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4">
 
-        {/* USER */}
+        {/* USER INFO */}
 
-        <div className="d-flex align-items-center gap-3">
+        <div className="d-flex flex-column flex-sm-row align-items-center text-center text-sm-start gap-3">
 
           <img
 
             src={
 
-              request?.user
-                ?.profileImage ||
+              request?.user?.profileImage ||
 
               "https://i.pravatar.cc/150"
 
@@ -35,11 +34,13 @@ function JoinRequestCard({
 
             style={{
 
-              width: "70px",
+              width: "80px",
 
-              height: "70px",
+              height: "80px",
 
               objectFit: "cover",
+
+              border: "3px solid #ffc107",
 
             }}
 
@@ -47,23 +48,15 @@ function JoinRequestCard({
 
           <div>
 
-            <h4 className="m-0">
+            <h4 className="m-0 fw-bold">
 
-              {
-
-                request?.user?.name
-
-              }
+              {request?.user?.name}
 
             </h4>
 
             <small className="text-secondary">
 
-              {
-
-                request?.user?.email
-
-              }
+              {request?.user?.email}
 
             </small>
 
@@ -73,7 +66,7 @@ function JoinRequestCard({
 
         {/* ACTIONS */}
 
-        <div className="d-flex gap-2">
+        <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
 
           <button
 
@@ -81,9 +74,7 @@ function JoinRequestCard({
 
             onClick={() =>
 
-              onAccept(
-                request._id
-              )
+              onAccept(request._id)
 
             }
 
@@ -99,9 +90,7 @@ function JoinRequestCard({
 
             onClick={() =>
 
-              onReject(
-                request._id
-              )
+              onReject(request._id)
 
             }
 

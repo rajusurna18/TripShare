@@ -147,9 +147,9 @@ function Notifications() {
 
       <div className="container py-5">
 
-        <div className="glass-card p-5 mb-5">
+        <div className="glass-card p-4 p-md-5 mb-5">
 
-          <div className="d-flex justify-content-between align-items-center flex-wrap">
+    <div className="d-flex justify-content-between align-items-center gap-3 flex-wrap">
 
             <div>
 

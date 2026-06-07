@@ -138,7 +138,7 @@ const sendJoinRequest =
         {/* BUTTONS */}
 
         <div
-          className="trip-buttons"
+           className="trip-buttons trip-buttons-mobile"
           style={{
             display: "flex",
             gap: "10px",

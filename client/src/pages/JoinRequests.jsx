@@ -137,7 +137,7 @@ function JoinRequests() {
 
       <div className="container py-5">
 
-        <div className="mb-5">
+        <div className="glass-card p-4 p-md-5 mb-5">
 
           <h1 className="fw-bold">
 
@@ -153,6 +153,12 @@ function JoinRequests() {
 
           </p>
 
+          <small className="text-secondary">
+
+           {requests.length} Pending Request(s)
+
+          </small>
+
         </div>
 
         {
@@ -163,9 +169,15 @@ function JoinRequests() {
 
               <h3>
 
-                No Pending Requests
+                No Pending Requests 📭
 
               </h3>
+
+              <p className="text-secondary">
+
+               New traveler requests will appear here.
+
+              </p>
 
             </div>
 

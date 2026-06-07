@@ -98,21 +98,22 @@ function Reviews() {
 
     <div className="dashboard-page min-vh-100 text-light">
 
-      <div className="container py-5">
+
+    <div className="container py-4 py-md-5">
 
         {/* HEADER */}
 
-        <div className="glass-card p-5 mb-5 text-center">
+        <div className="glass-card p-4 p-md-5 mb-5 text-center">
 
-          <h1 className="fw-bold mb-4">
+          <h1 className="fw-bold mb-4 display-6">
 
             Traveler Reviews ⭐
 
           </h1>
 
-          <div className="row">
-
-            <div className="col-md-4">
+          <div className="row g-4">
+           
+           <div className="col-12 col-md-4">
 
               <h2 className="text-warning">
 

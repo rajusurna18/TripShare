@@ -12,7 +12,7 @@ function StatCard({
 
   return (
 
-    <div className="col-xl-4 col-lg-6 col-md-6">
+    <div className="col-lg-4 col-md-6 col-12">
 
       <div
         className="glass-card p-4 h-100 position-relative overflow-hidden"

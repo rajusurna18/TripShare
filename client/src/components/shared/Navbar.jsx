@@ -184,7 +184,7 @@ function Navbar() {
           id="navbarNav"
         >
 
-          <ul className="navbar-nav ms-auto align-items-center gap-3">
+          <ul className="navbar-nav ms-auto gap-3">
 
             {/* HOME */}
 

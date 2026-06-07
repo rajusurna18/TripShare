@@ -209,13 +209,13 @@ function Friends() {
         background: "#111",
         minHeight: "100vh",
         color: "white",
-        padding: "40px",
+        padding: "20px",
       }}
     >
 
       <div className="container">
 
-        <h1 className="mb-5">
+        <h1 className="fw-bold mb-5">
 
           ❤️ Friends & Requests
 
@@ -223,7 +223,7 @@ function Friends() {
 
         {/* REQUESTS */}
 
-        <div className="mb-5">
+        <div className="glass-card p-4 mb-5">
 
           <h2 className="mb-4">
 
@@ -239,7 +239,7 @@ function Friends() {
 
                 <p>
 
-                  No pending requests
+                  No pending requests 📭
 
                 </p>
 
@@ -287,7 +287,7 @@ function Friends() {
 
         {/* FRIENDS */}
 
-        <div>
+        <div className="glass-card p-4">
 
           <h2 className="mb-4">
 
@@ -303,7 +303,7 @@ function Friends() {
 
                 <p>
 
-                  No friends yet
+                  No friends yet 🤝
 
                 </p>
 

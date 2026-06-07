@@ -108,7 +108,7 @@ function Matches() {
 
         <div className="mb-5 text-center">
 
-          <h1 className="fw-bold display-5">
+         <h1 className="fw-bold display-6 display-md-5">
 
             🤖 Smart AI Travel Matches
 
@@ -239,7 +239,7 @@ function Matches() {
                   (item) => (
 
                     <div
-                      className="col-lg-4 col-md-6"
+                     className="col-12 col-sm-6 col-lg-4"
                       key={item.user?._id}
                     >
 
@@ -262,26 +262,18 @@ function Matches() {
 
                           className="match-profile-img"
 
-                          style={{
-
-                            width: "120px",
-
-                            height: "120px",
-
+                            style={{
+                            width: "100px",
+                            height: "100px",
                             borderRadius: "50%",
-
                             objectFit: "cover",
-
-                            border:
-                              "4px solid #ffb703",
-
-                          }}
-
+                            border: "4px solid #ffb703",
+                            }}
                         />
 
                         {/* NAME */}
 
-                        <h2 className="match-name mt-4 fw-bold">
+                        <h2 className="match-name mt-3 fw-bold">
 
                           {
 
@@ -298,7 +290,7 @@ function Matches() {
                           <span
                             className="fw-bold text-warning"
                             style={{
-                              fontSize: "40px",
+                              fontSize: "32px",
                             }}
                           >
 
@@ -404,9 +396,8 @@ function Matches() {
                         </div>
 
                   {/* ACTION BUTTONS */}
-
-                  <div className="d-flex gap-2 mt-4 flex-wrap">
-
+                  
+                  <div className="d-grid gap-2 mt-4">
                        <button
 
                            className="btn btn-custom flex-fill"
@@ -435,7 +426,8 @@ function Matches() {
 
                          `/profile/${item.user?._id}`
 
-                         )
+          
+                        )
 
                        }
 
