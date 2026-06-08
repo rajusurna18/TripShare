@@ -1,67 +1,67 @@
 import {
-
   registerUser,
-
   loginUser,
-
   forgotPasswordService,
-
   verifyOTPService,
-
   resetPasswordService,
-
 } from "./auth.service.js";
 
 // REGISTER
 
-export const register =
-  async (req, res) => {
+export const register = async (
+  req,
+  res
+) => {
+  try {
 
-    try {
+    const user =
+      await registerUser(
+        req.body
+      );
 
-      const user =
-        await registerUser(
-          req.body
-        );
+    res.status(201).json({
+      success: true,
+      message:
+        "Account created successfully",
+      user,
+    });
 
-      res.json(user);
+  } catch (err) {
 
-    } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
 
-      res.status(400).json({
-
-        message: err.message,
-
-      });
-
-    }
-
+  }
 };
 
 // LOGIN
 
-export const login =
-  async (req, res) => {
+export const login = async (
+  req,
+  res
+) => {
+  try {
 
-    try {
+    const data =
+      await loginUser(
+        req.body
+      );
 
-      const data =
-        await loginUser(
-          req.body
-        );
+    res.status(200).json({
+      success: true,
+      ...data,
+    });
 
-      res.json(data);
+  } catch (err) {
 
-    } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
 
-      res.status(400).json({
-
-        message: err.message,
-
-      });
-
-    }
-
+  }
 };
 
 // FORGOT PASSWORD
@@ -76,14 +76,16 @@ export const forgotPassword =
           req.body.email
         );
 
-      res.json(result);
+      res.status(200).json({
+        success: true,
+        ...result,
+      });
 
     } catch (err) {
 
       res.status(400).json({
-
+        success: false,
         message: err.message,
-
       });
 
     }
@@ -99,21 +101,20 @@ export const verifyOTP =
 
       const result =
         await verifyOTPService(
-
           req.body.email,
-
           req.body.otp
-
         );
 
-      res.json(result);
+      res.status(200).json({
+        success: true,
+        ...result,
+      });
 
     } catch (err) {
 
       res.status(400).json({
-
+        success: false,
         message: err.message,
-
       });
 
     }
@@ -129,23 +130,21 @@ export const resetPassword =
 
       const result =
         await resetPasswordService(
-
           req.body.email,
-
           req.body.otp,
-
           req.body.newPassword
-
         );
 
-      res.json(result);
+      res.status(200).json({
+        success: true,
+        ...result,
+      });
 
     } catch (err) {
 
       res.status(400).json({
-
+        success: false,
         message: err.message,
-
       });
 
     }

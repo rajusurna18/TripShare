@@ -260,9 +260,9 @@ function Expenses() {
 
               </h2>
 
-              <div className="row text-center">
+              <div className="row text-center g-4">
 
-                <div className="col-md-4">
+                <div className="col-12 col-md-4">
 
                   <h2 className="text-warning">
 
@@ -284,7 +284,7 @@ function Expenses() {
 
                 </div>
 
-                <div className="col-md-4">
+                <div className="col-12 col-md-4">
 
                   <h2 className="text-success">
 
@@ -306,7 +306,7 @@ function Expenses() {
 
                 </div>
 
-                <div className="col-md-4">
+                <div className="col-12 col-md-4">
 
                   <h2 className="text-info">
 

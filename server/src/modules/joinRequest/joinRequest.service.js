@@ -1,13 +1,11 @@
-import JoinRequest
-from "./joinRequest.model.js";
+import JoinRequest from "./joinRequest.model.js";
 
-import Trip
-from "../trip/trip.model.js";
+import Trip from "../trip/trip.model.js";
+
+import User from "../auth/auth.model.js";
 
 import {
-
   createNotificationService,
-
 } from "../notification/notification.service.js";
 
 // SEND REQUEST
@@ -44,13 +42,16 @@ export const sendJoinRequestService =
     const trip =
       await Trip.findById(tripId);
 
+    const user =
+      await User.findById(userId);
+
     if (trip?.createdBy) {
 
       await createNotificationService(
 
         trip.createdBy,
 
-        "New trip join request received ✈️"
+        `${user.name} requested to join ${trip.title} ✈️`
 
       );
 
@@ -74,22 +75,17 @@ export const getTripRequestsService =
     })
 
       .populate(
-
         "user",
-
         "name email profileImage"
-
       )
 
       .sort({
-
         createdAt: -1,
-
       });
 
 };
 
-// ACCEPT
+// ACCEPT REQUEST
 
 export const acceptJoinRequestService =
   async (requestId) => {
@@ -129,11 +125,16 @@ export const acceptJoinRequestService =
 
     );
 
+    const trip =
+      await Trip.findById(
+        request.trip
+      );
+
     await createNotificationService(
 
       request.user,
 
-      "Your trip request was accepted 🎉"
+      `Your request to join ${trip.title} was accepted 🎉`
 
     );
 
@@ -141,7 +142,7 @@ export const acceptJoinRequestService =
 
 };
 
-// REJECT
+// REJECT REQUEST
 
 export const rejectJoinRequestService =
   async (requestId) => {
@@ -164,11 +165,16 @@ export const rejectJoinRequestService =
 
     await request.save();
 
+    const trip =
+      await Trip.findById(
+        request.trip
+      );
+
     await createNotificationService(
 
       request.user,
 
-      "Your trip request was rejected"
+      `Your request to join ${trip.title} was rejected ❌`
 
     );
 

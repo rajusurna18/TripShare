@@ -18,21 +18,39 @@ function ForgotPassword() {
   const [loading, setLoading] =
     useState(false);
 
-  const handleSubmit =
-    async (e) => {
+   const isValidEmail =
+  (email) => {
 
-      e.preventDefault();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      .test(email);
 
-      try {
+}; 
 
-        setLoading(true);
+const handleSubmit =
+  async (e) => {
 
-        const res =
-          await API.post(
+    e.preventDefault();
 
-            "/api/auth/forgot-password",
+    if (!isValidEmail(email)) {
 
-            { email }
+      toast.error(
+        "Enter valid email address"
+      );
+
+      return;
+
+    }
+
+    try {
+
+      setLoading(true);
+
+      const res =
+        await API.post(
+
+            "/auth/forgot-password",
+
+            {   email: email.trim(), }
 
           );
 

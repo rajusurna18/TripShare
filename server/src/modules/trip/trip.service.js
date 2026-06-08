@@ -1,4 +1,9 @@
 import Trip from "./trip.model.js";
+import User from "../auth/auth.model.js";
+
+import {
+  createNotificationService,
+} from "../notification/notification.service.js";
 
 // CREATE TRIP
 
@@ -142,6 +147,19 @@ export const joinTripService =
     );
 
     await trip.save();
+
+    const joinedUser =
+  await User.findById(
+    userId
+  );
+
+await createNotificationService(
+
+  trip.createdBy,
+
+  `${joinedUser.name} joined ${trip.title} 🌍`
+
+);
 
     return await Trip.findById(
       trip._id

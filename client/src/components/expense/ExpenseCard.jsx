@@ -6,25 +6,31 @@ function ExpenseCard({
 
   return (
 
-    <div className="glass-card p-4 mb-3">
+    <div className="glass-card p-4 h-100">
 
-      <div className="d-flex justify-content-between">
+      {/* TOP */}
+
+      <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
 
         <div>
 
-          <h5>
+          <h5 className="fw-bold">
 
             {expense.title}
 
           </h5>
 
-          <small>
+          <span className="badge bg-secondary">
 
-            Category:
-            {" "}
-            {expense.category}
+            {
 
-          </small>
+              expense.category ||
+
+              "General"
+
+            }
+
+          </span>
 
         </div>
 
@@ -38,37 +44,61 @@ function ExpenseCard({
 
       <hr />
 
-      <p>
+      {/* DETAILS */}
 
-        Paid by:
-        {" "}
-        <strong>
+      <div className="d-flex flex-column gap-2">
+
+        <p className="mb-0">
+
+          👤 Paid By:
+
+          {" "}
+
+          <strong>
+
+            {
+
+              expense.paidBy?.name ||
+
+              "Unknown"
+
+            }
+
+          </strong>
+
+        </p>
+
+        <p className="mb-0">
+
+          💳 Payment:
+
+          {" "}
 
           {
-            expense.paidBy?.name
+
+            expense.paymentMethod ||
+
+            "Cash"
+
           }
 
-        </strong>
-
-      </p>
-
-      <p>
-
-        Method:
-        {" "}
-        {
-          expense.paymentMethod
-        }
-
-      </p>
-
-      <p>
+        </p>
 
         {
-          expense.note
+
+          expense.note && (
+
+            <p className="mb-0 text-secondary">
+
+              📝 {expense.note}
+
+            </p>
+
+          )
+
         }
 
-      </p>
+      </div>
 
     </div>
 

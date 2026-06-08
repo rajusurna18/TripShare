@@ -3,20 +3,15 @@ import {
   useState,
 } from "react";
 
-import API
-from "../services/api";
+import API from "../services/api";
 
-import RecommendationCard
-from "../components/recommendation/RecommendationCard";
+import RecommendationCard from "../components/recommendation/RecommendationCard";
 
 function Recommendations() {
 
   const [
-
     recommendations,
-
-    setRecommendations
-
+    setRecommendations,
   ] = useState([]);
 
   const [loading, setLoading] =
@@ -29,16 +24,11 @@ function Recommendations() {
 
         const res =
           await API.get(
-
             "/recommendations"
-
           );
 
         setRecommendations(
-
-          res.data
-            .recommendations || []
-
+          res.data.recommendations || []
         );
 
       } catch (err) {
@@ -51,7 +41,7 @@ function Recommendations() {
 
       }
 
-  };
+    };
 
   useEffect(() => {
 
@@ -65,11 +55,19 @@ function Recommendations() {
 
       <div className="dashboard-page min-vh-100 text-light d-flex justify-content-center align-items-center">
 
-        <h2>
+        <div className="text-center">
 
-          AI is finding trips... 🤖
+          <div className="spinner-border text-warning mb-3" />
 
-        </h2>
+          <h3>
+            AI is finding your perfect trips...
+          </h3>
+
+          <p className="text-secondary">
+            Matching destinations, interests and travel style.
+          </p>
+
+        </div>
 
       </div>
 
@@ -83,24 +81,40 @@ function Recommendations() {
 
       <div className="container py-5">
 
-        {/* HEADER */}
+        {/* HERO */}
 
-        <div className="mb-5 text-center">
+        <div className="glass-card p-4 p-md-5 mb-5">
 
-          <h1 className="fw-bold">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-            AI Trip Recommendations 🤖
+            <div>
 
-          </h1>
+              <h1 className="fw-bold mb-2">
 
-          <p className="dashboard-subtitle">
+                🤖 AI Trip Recommendations
 
-            Trips selected specifically
-            for your travel profile.
+              </h1>
 
-          </p>
+              <p className="dashboard-subtitle mb-0">
+
+                Personalized travel suggestions based on your
+                interests, personality and travel history.
+
+              </p>
+
+            </div>
+
+            <span className="badge bg-warning text-dark fs-6">
+
+              {recommendations.length} Recommendations
+
+            </span>
+
+          </div>
 
         </div>
+
+        {/* EMPTY STATE */}
 
         {
 
@@ -108,17 +122,17 @@ function Recommendations() {
 
             <div className="glass-card p-5 text-center">
 
-              <h3>
+              <h2 className="text-warning mb-3">
 
                 No Recommendations Yet
 
-              </h3>
+              </h2>
 
-              <p>
+              <p className="text-secondary">
 
-                Complete your profile
-                and interests to improve
-                AI suggestions.
+                Complete your profile, interests,
+                travel style and personality to unlock
+                smarter AI suggestions.
 
               </p>
 
@@ -131,31 +145,20 @@ function Recommendations() {
               {
 
                 recommendations.map(
-
                   (item) => (
 
                     <div
-
-                      key={
-                        item.trip?._id
-                      }
-
-                      className="col-lg-4 col-md-6"
-
+                      key={item.trip?._id}
+                      className="col-12 col-md-6 col-xl-4"
                     >
 
                       <RecommendationCard
-
-                        recommendation={
-                          item
-                        }
-
+                        recommendation={item}
                       />
 
                     </div>
 
                   )
-
                 )
 
               }

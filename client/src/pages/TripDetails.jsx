@@ -302,6 +302,7 @@ function TripDetails() {
 
                 style={{
                   flexWrap:"wrap",
+                   display: "flex",
                   alignItems: "center",
                   gap: "10px",
                   marginBottom: "10px",
@@ -366,9 +367,7 @@ function TripDetails() {
             zoom={13}
 
            style={{
-                height: window.innerWidth < 768
-                ? "350px"
-               : "500px",
+                height: "450px",
                 width: "100%",
                borderRadius: "20px",
                }}
@@ -425,7 +424,7 @@ function TripDetails() {
 
       {/* ACTIONS */}
 
-         <div className="mt-4 d-flex gap-3">
+         <div className="mt-4 d-flex gap-3 flex-wrap">
 
          <Link
           to={`/chat/${tripId}`}

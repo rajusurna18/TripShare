@@ -5,25 +5,23 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import {
-
   generateOTP,
-
   sendOTPEmail,
-
 } from "../../utils/auth.utils.js";
 
-// REGISTER USER
+// REGISTER
 
 export const registerUser =
   async (data) => {
 
-    // CHECK EXISTING EMAIL
+    const email =
+      data.email
+        .trim()
+        .toLowerCase();
 
     const existingUser =
       await User.findOne({
-
-        email: data.email,
-
+        email,
       });
 
     if (existingUser) {
@@ -34,7 +32,15 @@ export const registerUser =
 
     }
 
-    // HASH PASSWORD
+    if (
+      data.password.length < 6
+    ) {
+
+      throw new Error(
+        "Password must be at least 6 characters"
+      );
+
+    }
 
     const hashedPassword =
       await bcrypt.hash(
@@ -42,23 +48,28 @@ export const registerUser =
         10
       );
 
-    // CREATE USER
-
     const user =
       await User.create({
 
         ...data,
+
+        email,
 
         password:
           hashedPassword,
 
       });
 
-    return user;
+    const safeUser =
+      user.toObject();
+
+    delete safeUser.password;
+
+    return safeUser;
 
 };
 
-// LOGIN USER
+// LOGIN
 
 export const loginUser =
   async (data) => {
@@ -66,7 +77,10 @@ export const loginUser =
     const user =
       await User.findOne({
 
-        email: data.email,
+        email:
+          data.email
+            .trim()
+            .toLowerCase(),
 
       });
 
@@ -78,15 +92,10 @@ export const loginUser =
 
     }
 
-    // CHECK PASSWORD
-
     const isMatch =
       await bcrypt.compare(
-
         data.password,
-
         user.password
-
       );
 
     if (!isMatch) {
@@ -97,13 +106,12 @@ export const loginUser =
 
     }
 
-    // JWT TOKEN
-
     const token =
       jwt.sign(
 
         {
           id: user._id,
+          email: user.email,
         },
 
         process.env.JWT_SECRET,
@@ -114,12 +122,14 @@ export const loginUser =
 
       );
 
+    const safeUser =
+      user.toObject();
+
+    delete safeUser.password;
+
     return {
-
-      user,
-
+      user: safeUser,
       token,
-
     };
 
 };
@@ -132,7 +142,10 @@ export const forgotPasswordService =
     const user =
       await User.findOne({
 
-        email,
+        email:
+          email
+            .trim()
+            .toLowerCase(),
 
       });
 
@@ -144,32 +157,25 @@ export const forgotPasswordService =
 
     }
 
-    // GENERATE OTP
-
     const otp =
       generateOTP();
-
-    // SAVE OTP
 
     user.resetOTP = otp;
 
     user.resetOTPExpire =
-      Date.now() + 10 * 60 * 1000;
+      Date.now() +
+      10 * 60 * 1000;
 
     await user.save();
 
-    // SEND EMAIL
-
     await sendOTPEmail(
-      email,
+      user.email,
       otp
     );
 
     return {
-
       message:
         "OTP sent successfully",
-
     };
 
 };
@@ -177,12 +183,18 @@ export const forgotPasswordService =
 // VERIFY OTP
 
 export const verifyOTPService =
-  async (email, otp) => {
+  async (
+    email,
+    otp
+  ) => {
 
     const user =
       await User.findOne({
 
-        email,
+        email:
+          email
+            .trim()
+            .toLowerCase(),
 
       });
 
@@ -194,14 +206,11 @@ export const verifyOTPService =
 
     }
 
-    // CHECK OTP
-
     if (
-
       user.resetOTP !== otp ||
-
-      user.resetOTPExpire < Date.now()
-
+      !user.resetOTPExpire ||
+      user.resetOTPExpire <
+        Date.now()
     ) {
 
       throw new Error(
@@ -211,10 +220,8 @@ export const verifyOTPService =
     }
 
     return {
-
       message:
         "OTP verified successfully",
-
     };
 
 };
@@ -231,7 +238,10 @@ export const resetPasswordService =
     const user =
       await User.findOne({
 
-        email,
+        email:
+          email
+            .trim()
+            .toLowerCase(),
 
       });
 
@@ -243,14 +253,11 @@ export const resetPasswordService =
 
     }
 
-    // VERIFY OTP
-
     if (
-
       user.resetOTP !== otp ||
-
-      user.resetOTPExpire < Date.now()
-
+      !user.resetOTPExpire ||
+      user.resetOTPExpire <
+        Date.now()
     ) {
 
       throw new Error(
@@ -259,7 +266,15 @@ export const resetPasswordService =
 
     }
 
-    // HASH NEW PASSWORD
+    if (
+      newPassword.length < 6
+    ) {
+
+      throw new Error(
+        "Password must be at least 6 characters"
+      );
+
+    }
 
     const hashedPassword =
       await bcrypt.hash(
@@ -270,11 +285,10 @@ export const resetPasswordService =
     user.password =
       hashedPassword;
 
-    // CLEAR OTP
+    user.resetOTP = null;
 
-    user.resetOTP = "";
-
-    user.resetOTPExpire = null;
+    user.resetOTPExpire =
+      null;
 
     await user.save();
 

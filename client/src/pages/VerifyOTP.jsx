@@ -22,10 +22,28 @@ function VerifyOTP() {
       "resetEmail"
     );
 
+    if (!email) {
+
+  navigate(
+    "/forgot-password"
+  );
+
+}
+
   const handleSubmit =
     async (e) => {
 
       e.preventDefault();
+
+      if (otp.length !== 6) {
+
+      toast.error(
+      "OTP must be 6 digits"
+     );
+
+    return;
+
+    }
 
       try {
 
@@ -34,7 +52,7 @@ function VerifyOTP() {
         const res =
           await API.post(
 
-            "/api/auth/verify-otp",
+            "/auth/verify-otp",
 
             {
               email,
@@ -48,8 +66,8 @@ function VerifyOTP() {
         );
 
         localStorage.setItem(
-          "verifiedOTP",
-          otp
+          "resetToken",
+          res.data.resetToken
         );
 
         navigate(
@@ -82,7 +100,7 @@ function VerifyOTP() {
         className="card bg-dark text-light p-4 shadow-lg"
         style={{
           width: "100%",
-          maxWidth: "450px",
+          maxWidth: "500px",
           borderRadius: "20px",
           border: "1px solid #facc15",
         }}
@@ -104,16 +122,25 @@ function VerifyOTP() {
 
             </label>
 
-            <input
-              type="text"
-              className="form-control"
-              placeholder="6-digit OTP"
-              value={otp}
-              onChange={(e) =>
-                setOTP(e.target.value)
-              }
-              required
-            />
+          <input
+            type="text"
+             className="form-control"
+             placeholder="6-digit OTP"
+            maxLength={6}
+             value={otp}
+           onChange={(e) =>
+
+            setOTP(
+
+                e.target.value
+                .replace(/\D/g, "")
+               .slice(0, 6)
+
+              )
+
+            }
+           required
+             />
 
           </div>
 

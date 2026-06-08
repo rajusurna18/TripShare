@@ -1,13 +1,9 @@
-import Review
-from "./review.model.js";
+import Review from "./review.model.js";
 
-import User
-from "../auth/auth.model.js";
+import User from "../auth/auth.model.js";
 
 import {
-
   createNotificationService,
-
 } from "../notification/notification.service.js";
 
 // CREATE REVIEW
@@ -40,13 +36,16 @@ export const createReviewService =
     const review =
       await Review.create(data);
 
-    // NOTIFICATION
+    const reviewer =
+      await User.findById(
+        data.reviewer
+      );
 
     await createNotificationService(
 
       data.reviewFor,
 
-      "You received a new review ⭐",
+      `${reviewer.name} reviewed your profile ⭐`,
 
       "review",
 

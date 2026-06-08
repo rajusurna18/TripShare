@@ -1,12 +1,8 @@
-import API
-from "../../services/api";
+import API from "../../services/api";
 
 function MemoryCard({
-
   memory,
-
   fetchMemories,
-
 }) {
 
   const likeMemory =
@@ -15,9 +11,7 @@ function MemoryCard({
       try {
 
         await API.put(
-
           `/memories/like/${memory._id}`
-
         );
 
         fetchMemories();
@@ -27,66 +21,39 @@ function MemoryCard({
         console.log(err);
 
       }
-
   };
 
   return (
 
-    <div className="glass-card p-4 mb-4">
+    <div className="glass-card p-4 h-100">
 
       <div className="d-flex align-items-center gap-3 mb-3">
 
         <img
-
           src={
-
             memory?.user
               ?.profileImage ||
-
             "https://i.pravatar.cc/150"
-
           }
-
           alt="user"
-
           className="rounded-circle"
-
           style={{
-
             width: "60px",
-
             height: "60px",
-
             objectFit: "cover",
-
           }}
-
         />
 
         <div>
 
           <h5 className="m-0">
-
-            {
-
-              memory?.user?.name
-
-            }
-
+            {memory?.user?.name}
           </h5>
 
           <small className="text-secondary">
-
-            {
-
-              new Date(
-
-                memory.createdAt
-
-              ).toLocaleDateString()
-
-            }
-
+            {new Date(
+              memory.createdAt
+            ).toLocaleString()}
           </small>
 
         </div>
@@ -94,47 +61,29 @@ function MemoryCard({
       </div>
 
       <img
-
         src={memory.image}
-
         alt="memory"
-
         className="img-fluid rounded mb-3"
-
+        style={{
+          width: "100%",
+          maxHeight: "450px",
+          objectFit: "cover",
+        }}
       />
 
-      <p>
-
-        {
-
-          memory.caption
-
-        }
-
+      <p className="mb-3">
+        {memory.caption}
       </p>
 
       <button
-
         className="btn btn-outline-warning"
-
-        onClick={
-          likeMemory
-        }
-
+        onClick={likeMemory}
       >
-
-        ❤️ {
-
-          memory.likes?.length || 0
-
-        }
-
+        ❤️ {memory.likes?.length || 0}
       </button>
 
     </div>
-
   );
-
 }
 
 export default MemoryCard;

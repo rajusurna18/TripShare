@@ -88,6 +88,16 @@ const userSchema =
         default: "",
       },
 
+      github: {
+      type: String,
+     default: "",
+     },
+
+    linkedin: {
+    type: String,
+    default: "",
+   },
+
       // TRAVEL STATS
 
       totalTrips: {
@@ -110,10 +120,15 @@ const userSchema =
         default: 0,
       },
 
-      trustScore: {
-        type: Number,
-        default: 100,
-      },
+     completedTrips: {
+     type: Number,
+     default: 0,
+    },
+
+   joinedTrips: {
+    type: Number,
+    default: 0,
+   },
 
       // FRIEND SYSTEM
 
@@ -167,6 +182,10 @@ const userSchema =
     }
 
   );
+
+userSchema.index({
+  email: 1,
+});
 
 export default mongoose.model(
   "User",
