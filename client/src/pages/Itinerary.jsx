@@ -416,7 +416,80 @@ function Itinerary() {
 
                 </h2>
 
-                {result}
+                {<div>
+
+                <button
+
+                 className="btn btn-outline-warning mb-3"
+
+                 onClick={() => {
+
+                  navigator.clipboard.writeText(
+                   result
+                   );
+
+                  alert(
+                  "Copied!"
+                   );
+
+                  }}
+
+                 >
+
+                 Copy Plan 📋
+
+              </button>
+
+              <button
+
+               className="btn btn-outline-light mb-3 ms-2"
+
+               onClick={() => {
+
+               const blob =
+               new Blob(
+ 
+              [result],
+
+               {
+                type:
+               "text/plain",
+               }
+
+               );
+
+             const url =
+             URL.createObjectURL(
+                blob
+            );
+
+            const a =
+           document.createElement(
+           "a"
+            );
+
+          a.href = url;
+
+          a.download =
+          "trip-plan.txt";
+
+          a.click();
+
+             }}
+
+             >
+
+               Download 📥
+
+              </button>
+
+               <div>
+
+              {result}
+
+            </div>
+    
+            </div>}
 
               </div>
 

@@ -20,7 +20,7 @@ export const saveMessageService =
 
       .populate(
         "trip",
-        "title destination"
+        "title destination members"
       );
 
 };
@@ -30,23 +30,22 @@ export const saveMessageService =
 export const getMessagesService =
   async (tripId) => {
 
-    const messages =
-      await Message.find({
+    return await Message.find({
 
-        trip: tripId,
+      trip: tripId,
 
-      })
+    })
 
-        .populate(
-          "sender",
-          "name profileImage"
-        )
+      .populate(
+        "sender",
+        "name profileImage"
+      )
 
-        .sort({
-          createdAt: 1,
-        });
+      .lean()
 
-    return messages;
+      .sort({
+        createdAt: 1,
+      });
 
 };
 

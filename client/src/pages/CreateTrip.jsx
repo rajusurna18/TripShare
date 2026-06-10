@@ -245,6 +245,31 @@ function CreateTrip() {
 
               </div>
 
+              {
+                 tripData.budget &&
+                 tripData.maxMembers && (
+
+                 <small
+                 className="text-warning"
+                 >
+
+                  Approx ₹
+
+                 {Math.floor(
+    
+                   tripData.budget /
+
+                 tripData.maxMembers
+
+                )}
+
+                {" "}per traveler
+
+              </small>
+
+             )
+             }
+
               {/* DATE */}
 
               <div className="col-md-6">
@@ -480,38 +505,81 @@ function CreateTrip() {
 
                   Separate tags with commas
 
+                  <div className="mt-2">
+
+             {
+                  tripData.tags
+
+                ?.split(",")
+
+                .map((tag,index)=>(
+
+                <span
+
+                key={index}
+
+                  className="badge bg-warning text-dark me-2"
+
+                     >
+
+                   {tag.trim()}
+
+                </span>
+
+                ))
+               }
+
+                </div>
+
                 </small>
 
               </div>
 
               {/* IMAGE */}
 
-              <div className="col-md-12">
+               <div className="col-md-12">
 
-                <label className="form-label">
+               <label className="form-label">
 
-                  Upload Trip Image
+               Upload Trip Image
 
-                </label>
+              </label>
 
-                <input
-                  type="file"
-                  className="form-control trip-input"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setImage(
-                      e.target.files[0]
-                    )
-                  }
-                />
+               <input
+               type="file"
+               className="form-control trip-input"
+               accept="image/*"
+               onChange={(e) =>
+               setImage(
+               e.target.files[0]
+                )
+              }
+              />
 
-                <small className="text-secondary">
+               {/* IMAGE PREVIEW */}
 
-                  Upload travel destination image
+               {
+             image && (
 
-                </small>
+           <img
+               src={URL.createObjectURL(image)}
+               alt="preview"
+                className="img-fluid mt-3 rounded"
+             style={{
+              maxHeight: "250px",
+            }}
+            />
 
-              </div>
+             )
+            }
+
+            <small className="text-secondary">
+
+                 Upload travel destination image
+
+                 </small>
+
+                 </div>
 
               {/* DESCRIPTION */}
 

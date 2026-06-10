@@ -1,5 +1,4 @@
 import User from "../auth/auth.model.js";
-
 import Trip from "../trip/trip.model.js";
 
 export const getRecommendationsService =
@@ -9,100 +8,64 @@ export const getRecommendationsService =
       await User.findById(userId);
 
     if (!user) {
-
-      throw new Error(
-        "User not found"
-      );
-
+      throw new Error("User not found");
     }
 
     const trips =
-      await Trip.find()
-
-        .populate(
-          "createdBy",
-          "name profileImage"
-        );
+      await Trip.find({
+        createdBy: { $ne: userId }
+      }).populate(
+        "createdBy",
+        "name profileImage"
+      );
 
     const recommendations =
-      trips.map((trip) => {
+      trips
+        .map((trip) => {
 
-        let score = 0;
+          let score = 0;
 
-        // INTEREST MATCH
+          const commonTags =
+            trip.tags?.filter(
+              tag =>
+                user.interests?.includes(tag)
+            ) || [];
 
-        if (
-          trip.tags &&
-          user.interests
-        ) {
+          score += commonTags.length * 15;
 
-          const common =
-            trip.tags.filter(
-              (tag) =>
+          if (
+            user.destinationPreference &&
+            trip.destination ===
+              user.destinationPreference
+          ) {
+            score += 30;
+          }
 
-                user.interests.includes(
-                  tag
-                )
-            );
+          if (
+            user.travelStyle &&
+            trip.travelStyle ===
+              user.travelStyle
+          ) {
+            score += 25;
+          }
 
-          score +=
-            common.length * 15;
+          if (
+            user.budgetPreference &&
+            trip.budget <=
+              user.budgetPreference
+          ) {
+            score += 20;
+          }
 
-        }
-
-        // DESTINATION
-
-        if (
-
-          user.destinationPreference &&
-
-          trip.destination ===
-          user.destinationPreference
-
-        ) {
-
-          score += 30;
-
-        }
-
-        // TRAVEL STYLE
-
-        if (
-
-          user.travelStyle &&
-
-          trip.travelStyle ===
-          user.travelStyle
-
-        ) {
-
-          score += 25;
-
-        }
-
-        if (score > 100) {
-
-          score = 100;
-
-        }
-
-        return {
-
-          trip,
-
-          score,
-
-        };
-
-      });
-
-    recommendations.sort(
-
-      (a, b) =>
-        b.score - a.score
-
-    );
+          return {
+            trip,
+            score: Math.min(score, 100),
+            commonTags,
+          };
+        })
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 20);
 
     return recommendations;
-
 };

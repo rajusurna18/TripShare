@@ -1,26 +1,21 @@
-import Memory
-from "./memory.model.js";
-
-// CREATE MEMORY
+import Memory from "./memory.model.js";
+import User from "../auth/auth.model.js";
+import {
+  createNotificationService,
+} from "../notification/notification.service.js";
 
 export const createMemoryService =
   async (data) => {
 
-    return await Memory.create(
-      data
-    );
+    return await Memory.create(data);
 
 };
-
-// GET MEMORIES
 
 export const getTripMemoriesService =
   async (tripId) => {
 
     return await Memory.find({
-
       trip: tripId,
-
     })
 
       .populate(
@@ -34,8 +29,6 @@ export const getTripMemoriesService =
 
 };
 
-// LIKE MEMORY
-
 export const likeMemoryService =
   async (
     memoryId,
@@ -43,44 +36,63 @@ export const likeMemoryService =
   ) => {
 
     const memory =
-      await Memory.findById(
-        memoryId
-      );
+      await Memory.findById(memoryId);
 
     if (!memory) {
-
       throw new Error(
         "Memory not found"
       );
-
     }
 
     const alreadyLiked =
-
-      memory.likes.includes(
-        userId
+      memory.likes.some(
+        id =>
+          id.toString() ===
+          userId.toString()
       );
 
     if (alreadyLiked) {
 
       memory.likes =
         memory.likes.filter(
-          (id) =>
-
+          id =>
             id.toString() !==
-            userId
+            userId.toString()
         );
 
     } else {
 
-      memory.likes.push(
-        userId
-      );
+      memory.likes.push(userId);
+
+      if (
+        memory.user.toString() !==
+        userId.toString()
+      ) {
+
+        const user =
+          await User.findById(userId);
+
+        await createNotificationService(
+
+          memory.user,
+
+          `${user.name} liked your memory ❤️`,
+
+          "memory"
+
+        );
+
+      }
 
     }
 
     await memory.save();
 
-    return memory;
+    return await Memory.findById(
+      memoryId
+    ).populate(
+      "user",
+      "name profileImage"
+    );
 
 };

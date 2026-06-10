@@ -61,6 +61,9 @@ function Chat() {
   const [audioBlob, setAudioBlob] =
     useState(null);
 
+  const [recordTime,setRecordTime] =
+  useState(0); 
+
   // VIDEO CALL
 
   const [callActive, setCallActive] =
@@ -310,7 +313,19 @@ function Chat() {
 
       }
 
-  };
+      const interval =
+      setInterval(() => {
+
+     setRecordTime(
+      (prev) => prev + 1
+      );
+
+      }, 1000);
+
+    window.recordTimer =
+    interval;
+
+   };
 
   const stopRecording =
     () => {
@@ -318,6 +333,12 @@ function Chat() {
       mediaRecorder.stop();
 
       setIsRecording(false);
+
+      clearInterval(
+    window.recordTimer
+    );
+
+     setRecordTime(0);
 
   };
 
@@ -929,6 +950,17 @@ function Chat() {
 
                   </p>
 
+                  <small
+                   style={{
+                   color: "#999",
+                   fontSize: "12px",
+                   }}
+                    >
+                 {new Date(
+                  msg.createdAt
+                 ).toLocaleTimeString()}
+               </small>
+
                   {
 
                     msg.audioUrl && (
@@ -1093,7 +1125,33 @@ function Chat() {
 
             }
 
+            {
+        isRecording && (
+
+          <span
+           className="text-danger"
+           >
+ 
+          🎙 {recordTime}s
+
+         </span>
+
+         )
+        } 
+
           </button>
+
+          {
+          file && (
+         <div className="w-100">
+
+           <small>
+           📎 {file.name}
+           </small>
+
+         </div>
+       )
+    }
 
           <button
 
