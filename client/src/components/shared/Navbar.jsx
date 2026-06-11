@@ -1,5 +1,6 @@
 
 import { Link } from "react-router-dom";
+import socket from "../../socket";
 
 import {
   useEffect,
@@ -113,13 +114,33 @@ function Navbar() {
 
   };
 
-  useEffect(() => {
+useEffect(() => {
 
-    fetchProfile();
+  fetchProfile();
 
-    fetchNotifications();
+  fetchNotifications();
 
-  }, []);
+  socket.on(
+
+    "new_notification",
+
+    () => {
+
+      fetchNotifications();
+
+    }
+
+  );
+
+  return () => {
+
+    socket.off(
+      "new_notification"
+    );
+
+  };
+
+}, []);
 
   // LOGOUT
 

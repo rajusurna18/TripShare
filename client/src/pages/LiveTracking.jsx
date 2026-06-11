@@ -19,15 +19,13 @@ import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
 
-import socket
-from "../socket";
+import socket from "../socket";
 
 // FIX MARKER ICON
 
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
-
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
 
@@ -36,88 +34,91 @@ L.Icon.Default.mergeOptions({
 
   shadowUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-
 });
 
 function LiveTracking() {
 
-  const { tripId } =
-    useParams();
+  const { tripId } = useParams();
 
   const [users, setUsers] =
     useState([]);
 
   const currentUser =
     JSON.parse(
-
-      localStorage.getItem(
-        "user"
-      ) || "{}"
-
+      localStorage.getItem("user") || "{}"
     );
 
-  // GET LIVE LOCATION
+  // =========================
+  // SEND LIVE LOCATION
+  // =========================
 
   useEffect(() => {
 
-    if (
-      navigator.geolocation
-    ) {
+    let watchId;
 
-      navigator.geolocation.watchPosition(
+    if (!socket.connected) {
+      socket.connect();
+    }
 
-        (position) => {
+    if (navigator.geolocation) {
 
-          const data = {
+      watchId =
+        navigator.geolocation.watchPosition(
 
-            tripId,
+          (position) => {
 
-            userId:
-              currentUser._id,
+            socket.emit(
+              "live_location",
+              {
+                tripId,
+                userId:
+                  currentUser._id,
+                name:
+                  currentUser.name,
+                lat:
+                  position.coords.latitude,
+                lng:
+                  position.coords.longitude,
+              }
+            );
 
-            name:
-              currentUser.name,
+          },
 
-            lat:
-              position.coords.latitude,
+          (err) => {
+            console.log(err);
+          },
 
-            lng:
-              position.coords.longitude,
+          {
+            enableHighAccuracy: true,
+          }
 
-          };
-
-          socket.emit(
-
-            "live_location",
-
-            data
-
-          );
-
-        },
-
-        (err) => {
-
-          console.log(err);
-
-        },
-
-        {
-
-          enableHighAccuracy:
-            true,
-
-        }
-
-      );
+        );
 
     }
 
-  }, []);
+    return () => {
 
-  // RECEIVE USERS
+      if (watchId) {
+
+        navigator.geolocation.clearWatch(
+          watchId
+        );
+
+      }
+
+    };
+
+  }, [tripId]);
+
+  // =========================
+  // RECEIVE LOCATIONS
+  // =========================
 
   useEffect(() => {
+
+    if (!socket.connected) {
+      socket.connect();
+    }
 
     socket.emit(
       "join_trip",
@@ -125,15 +126,12 @@ function LiveTracking() {
     );
 
     socket.on(
-
       "update_locations",
-
       (data) => {
 
         setUsers(data);
 
       }
-
     );
 
     return () => {
@@ -144,7 +142,7 @@ function LiveTracking() {
 
     };
 
-  }, []);
+  }, [tripId]);
 
   return (
 
@@ -158,9 +156,7 @@ function LiveTracking() {
     >
 
       <h1 className="mb-4">
-
         🌍 Trip Live Tracking
-
       </h1>
 
       {/* TEAMMATES */}
@@ -174,120 +170,81 @@ function LiveTracking() {
         }}
       >
 
-        <h3>
+        <h3>Teammates</h3>
 
-          Teammates
+        {users.map((user) => (
 
-        </h3>
+          <div
+            key={user.userId}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "10px",
+            }}
+          >
 
-        {
+            <span
+              style={{
+                color: "lime",
+                fontSize: "20px",
+              }}
+            >
+              ●
+            </span>
 
-          users.map(
-            (user) => (
+            <span>
+              {user.name}
+            </span>
 
-              <div
+            <span
+              style={{
+                color: "#aaa",
+              }}
+            >
+              ({user.lat.toFixed(3)},
+              {" "}
+              {user.lng.toFixed(3)})
+            </span>
 
-                key={user.userId}
+          </div>
 
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  marginBottom: "10px",
-                }}
-
-              >
-
-                <span
-                  style={{
-                    color: "lime",
-                    fontSize: "20px",
-                  }}
-                >
-
-                  ●
-
-                </span>
-
-                <span>
-
-                  {user.name}
-
-                </span>
-
-                <span
-                  style={{
-                    color: "#aaa",
-                  }}
-                >
-
-                  ({user.lat.toFixed(3)},
-                  {" "}
-                  {user.lng.toFixed(3)})
-
-                </span>
-
-              </div>
-
-            )
-          )
-
-        }
+        ))}
 
       </div>
 
       {/* MAP */}
 
       <MapContainer
-
         center={[17.385, 78.4867]}
-
         zoom={12}
-
         style={{
-
           height: "500px",
-
           borderRadius: "20px",
-
         }}
-
       >
 
         <TileLayer
-
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-
         />
 
-        {
+        {users.map((user) => (
 
-          users.map(
-            (user) => (
+          <Marker
+            key={user.userId}
+            position={[
+              user.lat,
+              user.lng,
+            ]}
+          >
 
-              <Marker
+            <Popup>
+              🟢 {user.name}
+            </Popup>
 
-                key={user.userId}
+          </Marker>
 
-                position={[
-                  user.lat,
-                  user.lng,
-                ]}
-
-              >
-
-                <Popup>
-
-                  🟢 {user.name}
-
-                </Popup>
-
-              </Marker>
-
-            )
-          )
-
-        }
+        ))}
 
       </MapContainer>
 
@@ -299,18 +256,14 @@ function LiveTracking() {
           to={`/chat/${tripId}`}
           className="btn btn-warning"
         >
-
           Open Chat
-
         </Link>
 
         <Link
           to={`/expenses/${tripId}`}
           className="btn btn-outline-warning"
         >
-
           Expenses
-
         </Link>
 
       </div>

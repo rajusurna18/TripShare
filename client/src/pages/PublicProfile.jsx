@@ -39,7 +39,7 @@ function PublicProfile() {
         const res =
           await API.get(
 
-            `/api/profile/${userId}`
+            `/api/profile/public/${userId}`
 
           );
 
@@ -64,10 +64,10 @@ function PublicProfile() {
 
         await API.post(
 
-          "/api/friends/request",
+          "/api/friends/send",
 
           {
-            receiverId: userId,
+            receiver: userId,
           }
 
         );

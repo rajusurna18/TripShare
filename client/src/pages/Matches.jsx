@@ -15,6 +15,8 @@ import {
   getMatches,
 } from "../services/match.api";
 
+import API from "../services/api";
+
 function Matches() {
 
   const [matches, setMatches] =
@@ -97,6 +99,45 @@ function Matches() {
       return "Basic Match";
 
   };
+
+  const sendFriendRequest =
+  async (receiverId) => {
+
+    try {
+
+      const token =
+        localStorage.getItem(
+          "token"
+        );
+
+      await API.post(
+
+        "/friends/request",
+
+        {
+          receiver: receiverId,
+        },
+
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+
+      );
+
+      alert(
+        "Friend request sent 🤝"
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+};
 
   return (
 

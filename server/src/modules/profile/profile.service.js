@@ -7,7 +7,7 @@ const calculateProfileCompletion =
 
     let completedFields = 0;
 
-    const totalFields = 11;
+    const totalFields = 12;
 
     if (user.profileImage)
       completedFields++;

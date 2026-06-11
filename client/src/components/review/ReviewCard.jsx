@@ -1,67 +1,40 @@
-function ReviewCard({
-
-  review,
-
-}) {
+ function ReviewCard({ review }) {
 
   return (
 
-    <div className="glass-card p-4 mb-4">
+    <div className="glass-card p-4 h-100">
 
-      {/* TOP */}
+      {/* REVIEWER */}
 
       <div className="d-flex align-items-center gap-3 mb-3">
 
         <img
-
           src={
-
-            review?.reviewer
-              ?.profileImage ||
-
-            "https://i.pravatar.cc/150"
-
+            review?.reviewer?.profileImage ||
+            "https://i.pravatar.cc/100"
           }
-
           alt="reviewer"
-
-          className="rounded-circle"
-
           style={{
-
             width: "60px",
-
             height: "60px",
-
+            borderRadius: "50%",
             objectFit: "cover",
-
           }}
-
         />
 
         <div>
 
-          <h5 className="m-0">
+          <h5 className="mb-1">
 
-            {
-
-              review?.reviewer
-                ?.name
-
-            }
+            {review?.reviewer?.name || "Traveler"}
 
           </h5>
 
           <small className="text-secondary">
 
-            {
-
-              review?.trip
-                ?.title ||
-
-              "Trip Traveler"
-
-            }
+            {new Date(
+              review?.createdAt
+            ).toLocaleDateString()}
 
           </small>
 
@@ -73,42 +46,54 @@ function ReviewCard({
 
       <div className="mb-3">
 
-        {
+        <h4 className="text-warning m-0">
 
-          [...Array(
-            review.rating
-          )].map(
-            (_, index) => (
+          ⭐ {review?.rating || 0}/5
 
-              <span
-                key={index}
-                className="text-warning fs-5"
-              >
-
-                ⭐
-
-              </span>
-
-            )
-          )
-
-        }
+        </h4>
 
       </div>
 
       {/* COMMENT */}
 
-      <p className="text-secondary mb-0">
+      <p
+        style={{
+          minHeight: "80px",
+        }}
+      >
 
-        {
-
-          review.comment ||
-
-          "Great traveler!"
-
-        }
+        {review?.comment ||
+          "No review comment provided."}
 
       </p>
+
+      {/* TRIP */}
+
+      {
+
+        review?.trip && (
+
+          <div className="mt-3">
+
+            <small className="text-secondary">
+
+              ✈️ {review.trip.title}
+
+            </small>
+
+            <br />
+
+            <small className="text-secondary">
+
+              📍 {review.trip.destination}
+
+            </small>
+
+          </div>
+
+        )
+
+      }
 
     </div>
 

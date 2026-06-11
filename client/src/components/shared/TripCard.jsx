@@ -148,15 +148,18 @@ const sendJoinRequest =
         >
 
           {/* CHAT */}
-
-          <Link
-            to={`/chat/${trip?._id}`}
-            className="btn btn-custom"
-          >
-
-            💬 Chat
-
-          </Link>
+           <Link
+             to={`/chat/${trip?._id}`}
+             className="btn btn-custom"
+             onClick={() =>
+             localStorage.setItem(
+            "activeTripId",
+            trip._id
+         )
+         }
+        >
+       💬 Chat
+         </Link>
 
           {/* EXPENSES */}
 
@@ -203,14 +206,18 @@ const sendJoinRequest =
 
           {/* MATCHES */}
 
-          <Link
-            to="/matches"
-            className="btn btn-outline-warning"
-          >
-
-            🤝 Matches
-
-          </Link>
+         <Link
+         to="/matches"
+         className="btn btn-outline-warning"
+         onClick={() =>
+          localStorage.setItem(
+         "activeTripId",
+         trip._id
+         )
+        }
+       >
+        🤝 Matches
+      </Link>
 
         </div>
 
