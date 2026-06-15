@@ -55,7 +55,7 @@ function Itinerary() {
         const res =
           await API.post(
 
-            "/api/ai/itinerary",
+            "/ai/itinerary",
 
             {
 
