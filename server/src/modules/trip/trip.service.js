@@ -1,5 +1,6 @@
 import Trip from "./trip.model.js";
 import User from "../auth/auth.model.js";
+import { sendJoinRequestService } from "../joinRequest/joinRequest.service.js";
 
 import {
   createNotificationService,
@@ -99,81 +100,7 @@ export const getTripsService =
 export const joinTripService =
   async (tripId, userId) => {
 
-    const trip =
-      await Trip.findById(
-        tripId
-      );
-
-    if (!trip) {
-
-      throw new Error(
-        "Trip not found"
-      );
-
-    }
-
-    const alreadyJoined =
-
-      trip.members.some(
-        (member) =>
-
-          member.toString() ===
-          userId.toString()
-      );
-
-    if (alreadyJoined) {
-
-      throw new Error(
-        "Already joined this trip"
-      );
-
-    }
-
-    if (
-
-      trip.members.length >=
-      trip.maxMembers
-
-    ) {
-
-      throw new Error(
-        "Trip is full"
-      );
-
-    }
-
-    trip.members.push(
-      userId
-    );
-
-    await trip.save();
-
-    const joinedUser =
-  await User.findById(
-    userId
-  );
-
-await createNotificationService(
-
-  trip.createdBy,
-
-  `${joinedUser.name} joined ${trip.title} 🌍`
-
-);
-
-    return await Trip.findById(
-      trip._id
-    )
-
-      .populate(
-        "createdBy",
-        "name email profileImage"
-      )
-
-      .populate(
-        "members",
-        "name profileImage travelStyle"
-      );
+    return await sendJoinRequestService(tripId, userId);
 
 };
 

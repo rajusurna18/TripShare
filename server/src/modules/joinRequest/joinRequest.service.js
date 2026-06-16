@@ -13,6 +13,24 @@ import {
 export const sendJoinRequestService =
   async (tripId, userId) => {
 
+    const trip =
+      await Trip.findById(tripId);
+
+    if (!trip) {
+      throw new Error("Trip not found");
+    }
+
+    if (trip.createdBy.toString() === userId.toString()) {
+      throw new Error("You cannot request to join your own trip");
+    }
+
+    const alreadyJoined = trip.members.some(
+      (memberId) => memberId.toString() === userId.toString()
+    );
+    if (alreadyJoined) {
+      throw new Error("You are already a member of this trip");
+    }
+
     const existing =
       await JoinRequest.findOne({
 
@@ -38,9 +56,6 @@ export const sendJoinRequestService =
         user: userId,
 
       });
-
-    const trip =
-      await Trip.findById(tripId);
 
     const user =
       await User.findById(userId);

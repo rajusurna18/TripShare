@@ -129,7 +129,7 @@ export const joinTrip =
 
     try {
 
-      const trip =
+      const request =
         await joinTripService(
 
           req.params.id,
@@ -142,9 +142,9 @@ export const joinTrip =
         success: true,
 
         message:
-          "Joined trip successfully",
+          "Join request sent successfully",
 
-        trip,
+        request,
 
       });
 
