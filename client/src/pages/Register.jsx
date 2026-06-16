@@ -7,6 +7,8 @@ import {
 
 import toast from "react-hot-toast";
 
+import API from "../services/api";
+
 function Register() {
 
   const navigate =
@@ -44,35 +46,7 @@ function Register() {
 
         setLoading(true);
 
-        const res =
-          await fetch(
-            "http://localhost:5000/api/auth/register",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify(
-                  formData
-                ),
-            }
-          );
-
-        const data =
-          await res.json();
-
-        if (!res.ok) {
-
-          return toast.error(
-            data.message ||
-            "Registration failed"
-          );
-
-        }
+        const res = await API.post("/auth/register", formData);
 
         toast.success(
           "Registration successful 🎉"
@@ -83,7 +57,8 @@ function Register() {
       } catch (err) {
 
         toast.error(
-          "Something went wrong"
+          err.response?.data?.message ||
+          "Registration failed"
         );
 
       } finally {

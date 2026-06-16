@@ -973,7 +973,7 @@ function Chat() {
 
                         <source
 
-                          src={`http://localhost:5000/${msg.audioUrl}`}
+                          src={`${import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000"}/${msg.audioUrl}`}
 
                           type="audio/webm"
 

@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 
 import toast from "react-hot-toast";
 
+import API from "../services/api";
+
 function Login() {
 
   const navigate = useNavigate();
@@ -38,35 +40,8 @@ function Login() {
 
         setLoading(true);
 
-        const res =
-          await fetch(
-            "http://localhost:5000/api/auth/login",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify(
-                  formData
-                ),
-            }
-          );
-
-        const data =
-          await res.json();
-
-        if (!res.ok) {
-
-          return toast.error(
-            data.message ||
-            "Invalid credentials"
-          );
-
-        }
+        const res = await API.post("/auth/login", formData);
+        const data = res.data;
 
         localStorage.setItem(
           "token",
@@ -87,6 +62,7 @@ function Login() {
       } catch (err) {
 
         toast.error(
+          err.response?.data?.message ||
           "Login failed"
         );
 
