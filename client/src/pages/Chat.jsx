@@ -441,6 +441,8 @@ function Chat() {
 
     if (!socket.connected) {
 
+      socket.auth = { token: localStorage.getItem("token") };
+
       socket.connect();
 
     }

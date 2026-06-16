@@ -45,20 +45,18 @@ export const getNotificationsService =
 // MARK READ
 
 export const markNotificationReadService =
-  async (id) => {
+  async (id, userId) => {
 
-    return await Notification.findByIdAndUpdate(
+    const notification = await Notification.findById(id);
+    if (!notification) {
+      throw new Error("Notification not found");
+    }
 
-      id,
+    if (notification.user.toString() !== userId.toString()) {
+      throw new Error("Not authorized to modify this notification");
+    }
 
-      {
-        read: true,
-      },
-
-      {
-        new: true,
-      }
-
-    );
+    notification.read = true;
+    return await notification.save();
 
 };

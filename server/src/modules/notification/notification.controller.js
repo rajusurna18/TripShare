@@ -43,7 +43,8 @@ export const markNotificationRead =
       const notification =
 
         await markNotificationReadService(
-          req.params.id
+          req.params.id,
+          req.user.id
         );
 
       res.json(notification);

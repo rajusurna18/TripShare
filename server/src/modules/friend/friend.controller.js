@@ -64,7 +64,8 @@ export const acceptFriendRequest =
       const request =
         await acceptFriendRequestService(
 
-          req.params.id
+          req.params.id,
+          req.user.id
 
         );
 
@@ -104,7 +105,8 @@ export const rejectFriendRequest =
       const request =
         await rejectFriendRequestService(
 
-          req.params.id
+          req.params.id,
+          req.user.id
 
         );
 

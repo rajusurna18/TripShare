@@ -88,7 +88,7 @@ export const getTripRequestsService =
 // ACCEPT REQUEST
 
 export const acceptJoinRequestService =
-  async (requestId) => {
+  async (requestId, userId) => {
 
     const request =
       await JoinRequest.findById(
@@ -101,6 +101,17 @@ export const acceptJoinRequestService =
         "Request not found"
       );
 
+    }
+
+    const trip =
+      await Trip.findById(
+        request.trip
+      );
+
+    if (!trip || trip.createdBy.toString() !== userId.toString()) {
+      throw new Error(
+        "Not authorized to accept requests for this trip"
+      );
     }
 
     request.status =
@@ -125,11 +136,6 @@ export const acceptJoinRequestService =
 
     );
 
-    const trip =
-      await Trip.findById(
-        request.trip
-      );
-
     await createNotificationService(
 
       request.user,
@@ -145,7 +151,7 @@ export const acceptJoinRequestService =
 // REJECT REQUEST
 
 export const rejectJoinRequestService =
-  async (requestId) => {
+  async (requestId, userId) => {
 
     const request =
       await JoinRequest.findById(
@@ -160,15 +166,21 @@ export const rejectJoinRequestService =
 
     }
 
-    request.status =
-      "rejected";
-
-    await request.save();
-
     const trip =
       await Trip.findById(
         request.trip
       );
+
+    if (!trip || trip.createdBy.toString() !== userId.toString()) {
+      throw new Error(
+        "Not authorized to reject requests for this trip"
+      );
+    }
+
+    request.status =
+      "rejected";
+
+    await request.save();
 
     await createNotificationService(
 

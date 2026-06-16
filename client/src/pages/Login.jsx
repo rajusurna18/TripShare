@@ -73,6 +73,11 @@ function Login() {
           data.token
         );
 
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
+
         toast.success(
           "Login successful 🚀"
         );

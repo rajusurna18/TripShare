@@ -66,8 +66,8 @@ function VerifyOTP() {
         );
 
         localStorage.setItem(
-          "resetToken",
-          res.data.resetToken
+          "verifiedOTP",
+          otp
         );
 
         navigate(

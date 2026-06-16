@@ -8,8 +8,34 @@ import cors from "cors";
 
 import http from "http";
 
+import jwt from "jsonwebtoken";
+
 import { Server }
 from "socket.io";
+
+// CUSTOM RATE LIMITER MIDDLEWARE
+const rateLimit = (limit, windowMs) => {
+  const ipRequests = new Map();
+  return (req, res, next) => {
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const now = Date.now();
+    if (!ipRequests.has(ip)) {
+      ipRequests.set(ip, []);
+    }
+    const timestamps = ipRequests.get(ip).filter(time => now - time < windowMs);
+    if (timestamps.length >= limit) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests from this IP, please try again later."
+      });
+    }
+    timestamps.push(now);
+    ipRequests.set(ip, timestamps);
+    next();
+  };
+};
+
+const authLimiter = rateLimit(30, 60 * 1000); // 30 requests per minute
 
 import connectDB
 from "./config/db.js";
@@ -95,6 +121,7 @@ connectDB();
 
 app.use(
   "/api/auth",
+  authLimiter,
   authRoutes
 );
 
@@ -260,6 +287,21 @@ const onlineUsers =
 // LIVE LOCATIONS
 
 let liveLocations = [];
+
+// SOCKET AUTHENTICATION MIDDLEWARE
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) {
+    return next(new Error("Authentication error: Token missing"));
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.user = decoded;
+    next();
+  } catch (err) {
+    return next(new Error("Authentication error: Invalid token"));
+  }
+});
 
 // SOCKET CONNECTION
 

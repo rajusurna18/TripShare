@@ -115,7 +115,7 @@ export const sendFriendRequestService =
 // ========================
 
 export const acceptFriendRequestService =
-  async (requestId) => {
+  async (requestId, userId) => {
 
     const request =
       await Friend.findById(
@@ -128,6 +128,12 @@ export const acceptFriendRequestService =
         "Request not found"
       );
 
+    }
+
+    if (request.receiver.toString() !== userId.toString()) {
+      throw new Error(
+        "Not authorized to accept this request"
+      );
     }
 
     if (
@@ -226,7 +232,7 @@ export const acceptFriendRequestService =
 // ========================
 
 export const rejectFriendRequestService =
-  async (requestId) => {
+  async (requestId, userId) => {
 
     const request =
       await Friend.findById(
@@ -239,6 +245,12 @@ export const rejectFriendRequestService =
         "Request not found"
       );
 
+    }
+
+    if (request.receiver.toString() !== userId.toString()) {
+      throw new Error(
+        "Not authorized to reject this request"
+      );
     }
 
     request.status =

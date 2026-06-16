@@ -57,6 +57,7 @@ function LiveTracking() {
     let watchId;
 
     if (!socket.connected) {
+      socket.auth = { token: localStorage.getItem("token") };
       socket.connect();
     }
 
@@ -117,6 +118,7 @@ function LiveTracking() {
   useEffect(() => {
 
     if (!socket.connected) {
+      socket.auth = { token: localStorage.getItem("token") };
       socket.connect();
     }
 

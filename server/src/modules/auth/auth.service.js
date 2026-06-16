@@ -14,10 +14,27 @@ import {
 export const registerUser =
   async (data) => {
 
+    if (!data) {
+      throw new Error("Invalid request data");
+    }
+
+    if (!data.name || !data.name.trim()) {
+      throw new Error("Name is required");
+    }
+
+    if (!data.email || !data.email.trim()) {
+      throw new Error("Email is required");
+    }
+
     const email =
       data.email
         .trim()
         .toLowerCase();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Invalid email format");
+    }
 
     const existingUser =
       await User.findOne({
@@ -32,14 +49,19 @@ export const registerUser =
 
     }
 
-    if (
-      data.password.length < 6
-    ) {
+    if (!data.password || data.password.length < 6) {
 
       throw new Error(
         "Password must be at least 6 characters"
       );
 
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{6,}$/;
+    if (!passwordRegex.test(data.password)) {
+      throw new Error(
+        "Password must contain at least one uppercase letter and one number"
+      );
     }
 
     const hashedPassword =
@@ -73,6 +95,18 @@ export const registerUser =
 
 export const loginUser =
   async (data) => {
+
+    if (!data) {
+      throw new Error("Invalid request data");
+    }
+
+    if (!data.email || !data.email.trim()) {
+      throw new Error("Email is required");
+    }
+
+    if (!data.password) {
+      throw new Error("Password is required");
+    }
 
     const user =
       await User.findOne({

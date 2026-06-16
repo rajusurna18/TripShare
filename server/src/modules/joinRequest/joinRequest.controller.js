@@ -102,7 +102,8 @@ export const acceptJoinRequest =
       const request =
         await acceptJoinRequestService(
 
-          req.params.id
+          req.params.id,
+          req.user.id
 
         );
 
@@ -142,7 +143,8 @@ export const rejectJoinRequest =
       const request =
         await rejectJoinRequestService(
 
-          req.params.id
+          req.params.id,
+          req.user.id
 
         );
 
