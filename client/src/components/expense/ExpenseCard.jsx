@@ -98,6 +98,22 @@ function ExpenseCard({
 
         }
 
+        {
+
+          expense.splitAmong && expense.splitAmong.length > 0 && (
+
+            <p className="mb-0 text-secondary">
+
+              👥 Split among:{" "}
+
+              {expense.splitAmong.map((m) => m.name || "Unknown").join(", ")}
+
+            </p>
+
+          )
+
+        }
+
       </div>
 
     </div>

@@ -92,6 +92,10 @@ export const calculateBalancesService =
         .populate(
           "paidBy",
           "name profileImage"
+        )
+        .populate(
+          "splitAmong",
+          "_id"
         );
 
     if (
@@ -129,7 +133,6 @@ export const calculateBalancesService =
       );
 
     // PER PERSON
-
     const memberCount =
       trip.members.length || 1;
 
@@ -137,34 +140,45 @@ export const calculateBalancesService =
       total / memberCount;
 
     // TRACK
-
     const paidMap = {};
+    const owedMap = {};
 
     trip.members.forEach(
       (member) => {
-
-        paidMap[
-          member._id
-        ] = 0;
-
+        const idStr = member._id.toString();
+        paidMap[idStr] = 0;
+        owedMap[idStr] = 0;
       }
     );
 
     expenses.forEach(
       (exp) => {
-
         const payerId =
           exp.paidBy._id
             .toString();
 
-        paidMap[payerId] +=
-          exp.amount;
+        if (paidMap[payerId] !== undefined) {
+          paidMap[payerId] += exp.amount;
+        }
 
+        // Determine split members (fallback to all members if empty)
+        const splitList = exp.splitAmong && exp.splitAmong.length > 0
+          ? exp.splitAmong
+          : trip.members;
+
+        const splitCount = splitList.length || 1;
+        const share = exp.amount / splitCount;
+
+        splitList.forEach((member) => {
+          const memberIdStr = member._id ? member._id.toString() : member.toString();
+          if (owedMap[memberIdStr] !== undefined) {
+            owedMap[memberIdStr] += share;
+          }
+        });
       }
     );
 
     // FINAL BALANCES
-
     const balances = [];
 
     trip.members.forEach(
@@ -176,10 +190,15 @@ export const calculateBalancesService =
         const paid =
           paidMap[
             memberId
-          ];
+          ] || 0;
+
+        const owed =
+          owedMap[
+            memberId
+          ] || 0;
 
         const balance =
-          paid - perPerson;
+          paid - owed;
 
         balances.push({
 

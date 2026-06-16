@@ -30,16 +30,43 @@ function Expenses() {
   const [expenses, setExpenses] =
     useState([]);
 
+  const [trip, setTrip] =
+    useState(null);
+
   const [loading, setLoading] =
     useState(true);
 
   useEffect(() => {
+
+    fetchTrip();
 
     fetchBalances();
 
     fetchExpenses();
 
   }, []);
+
+  const fetchTrip =
+    async () => {
+
+      try {
+
+        const res =
+          await API.get(
+            `/trips/${tripId}`
+          );
+
+        setTrip(
+          res.data.trip
+        );
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
+
+  };
 
   // =====================
   // FETCH BALANCES
@@ -237,6 +264,7 @@ function Expenses() {
         <div className="mb-5">
 
           <AddExpenseModal
+            members={trip?.members || []}
             onSubmit={
               addExpense
             }
