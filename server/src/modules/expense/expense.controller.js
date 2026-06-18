@@ -4,12 +4,34 @@ import {
   calculateBalancesService,
 } from "./expense.service.js";
 
+import Trip from "../trip/trip.model.js";
+
 // CREATE EXPENSE
 
 export const createExpense =
   async (req, res) => {
 
     try {
+
+      const trip = await Trip.findById(req.params.tripId);
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: "Trip not found",
+        });
+      }
+
+      const isCreator = trip.createdBy.toString() === req.user.id.toString();
+      const isMember = trip.members.some(
+        (member) => member.toString() === req.user.id.toString()
+      );
+
+      if (!isCreator && !isMember) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied: You are not a member of this trip",
+        });
+      }
 
       const expense =
         await createExpenseService({
@@ -59,6 +81,26 @@ export const getTripExpenses =
 
     try {
 
+      const trip = await Trip.findById(req.params.tripId);
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: "Trip not found",
+        });
+      }
+
+      const isCreator = trip.createdBy.toString() === req.user.id.toString();
+      const isMember = trip.members.some(
+        (member) => member.toString() === req.user.id.toString()
+      );
+
+      if (!isCreator && !isMember) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied: You are not a member of this trip",
+        });
+      }
+
       const expenses =
         await getTripExpensesService(
           req.params.tripId
@@ -98,6 +140,26 @@ export const calculateBalances =
   async (req, res) => {
 
     try {
+
+      const trip = await Trip.findById(req.params.tripId);
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: "Trip not found",
+        });
+      }
+
+      const isCreator = trip.createdBy.toString() === req.user.id.toString();
+      const isMember = trip.members.some(
+        (member) => member.toString() === req.user.id.toString()
+      );
+
+      if (!isCreator && !isMember) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied: You are not a member of this trip",
+        });
+      }
 
       const balances =
         await calculateBalancesService(

@@ -84,6 +84,12 @@ from "./modules/memory/memory.routes.js";
 import recommendationRoutes
 from "./modules/recommendation/recommendation.routes.js";
 
+import matchRoutes
+from "./modules/match/match.routes.js";
+
+import Trip
+from "./modules/trip/trip.model.js";
+
 const app = express();
 
 // MIDDLEWARES
@@ -185,6 +191,13 @@ app.use(
   "/api/recommendations",
 
   recommendationRoutes
+
+);
+
+app.use(
+  "/api/match",
+
+  matchRoutes
 
 );
 
@@ -360,13 +373,36 @@ io.on(
 
       "join_trip",
 
-      (tripId) => {
+      async (tripId) => {
 
-        socket.join(tripId);
+        try {
+          const trip = await Trip.findById(tripId);
+          if (!trip) {
+            console.log(`Socket join rejected: Trip ${tripId} not found`);
+            return;
+          }
+          const userId = socket.user?.id;
+          if (!userId) {
+            console.log(`Socket join rejected: User not authenticated`);
+            return;
+          }
+          const isCreator = trip.createdBy.toString() === userId.toString();
+          const isMember = trip.members.some(
+            (member) => member.toString() === userId.toString()
+          );
+          if (!isCreator && !isMember) {
+            console.log(`Socket join rejected: User ${userId} is not a member of Trip ${tripId}`);
+            return;
+          }
 
-        console.log(
-          `Joined Room: ${tripId}`
-        );
+          socket.join(tripId);
+
+          console.log(
+            `Joined Room: ${tripId}`
+          );
+        } catch (err) {
+          console.error("Socket join error:", err.message);
+        }
 
       }
 

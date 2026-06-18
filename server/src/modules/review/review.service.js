@@ -11,6 +11,10 @@ import {
 export const createReviewService =
   async (data) => {
 
+    if (data.reviewer.toString() === data.reviewFor.toString()) {
+      throw new Error("You cannot review yourself");
+    }
+
     const alreadyReviewed =
       await Review.findOne({
 

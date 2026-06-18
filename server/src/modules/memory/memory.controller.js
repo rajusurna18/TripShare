@@ -8,12 +8,35 @@ import {
 
 } from "./memory.service.js";
 
+import Trip from "../trip/trip.model.js";
+import Memory from "./memory.model.js";
+
 // CREATE
 
 export const createMemory =
   async (req, res) => {
 
     try {
+
+      const trip = await Trip.findById(req.params.tripId);
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: "Trip not found",
+        });
+      }
+
+      const isCreator = trip.createdBy.toString() === req.user.id.toString();
+      const isMember = trip.members.some(
+        (member) => member.toString() === req.user.id.toString()
+      );
+
+      if (!isCreator && !isMember) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied: You are not a member of this trip",
+        });
+      }
 
       if (req.file) {
 
@@ -65,6 +88,26 @@ export const getTripMemories =
 
     try {
 
+      const trip = await Trip.findById(req.params.tripId);
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: "Trip not found",
+        });
+      }
+
+      const isCreator = trip.createdBy.toString() === req.user.id.toString();
+      const isMember = trip.members.some(
+        (member) => member.toString() === req.user.id.toString()
+      );
+
+      if (!isCreator && !isMember) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied: You are not a member of this trip",
+        });
+      }
+
       const memories =
         await getTripMemoriesService(
 
@@ -101,6 +144,34 @@ export const likeMemory =
   async (req, res) => {
 
     try {
+
+      const memoryDoc = await Memory.findById(req.params.id);
+      if (!memoryDoc) {
+        return res.status(404).json({
+          success: false,
+          message: "Memory not found",
+        });
+      }
+
+      const trip = await Trip.findById(memoryDoc.trip);
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: "Trip associated with memory not found",
+        });
+      }
+
+      const isCreator = trip.createdBy.toString() === req.user.id.toString();
+      const isMember = trip.members.some(
+        (member) => member.toString() === req.user.id.toString()
+      );
+
+      if (!isCreator && !isMember) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied: You are not a member of this trip",
+        });
+      }
 
       const memory =
         await likeMemoryService(
