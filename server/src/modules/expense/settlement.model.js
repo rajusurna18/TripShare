@@ -39,6 +39,10 @@ const settlementSchema =
     }
   );
 
+settlementSchema.index({
+  trip: 1,
+});
+
 export default mongoose.model(
   "Settlement",
   settlementSchema

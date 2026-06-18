@@ -79,6 +79,10 @@ const reviewSchema =
 
   );
 
+reviewSchema.index({
+  reviewFor: 1,
+});
+
 export default mongoose.model(
   "Review",
   reviewSchema

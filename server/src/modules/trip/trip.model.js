@@ -53,6 +53,18 @@ const tripSchema =
 
       },
 
+      startDate: {
+
+        type: Date,
+
+      },
+
+      endDate: {
+
+        type: Date,
+
+      },
+
       budget: {
 
         type: Number,
@@ -166,6 +178,18 @@ tripSchema.index({
 tripSchema.index({
 
   status: 1,
+
+});
+
+tripSchema.index({
+
+  createdBy: 1,
+
+});
+
+tripSchema.index({
+
+  members: 1,
 
 });
 

@@ -5,6 +5,11 @@ import {
   getTrips,
   joinTrip,
   getTripById,
+  updateTrip,
+  deleteTrip,
+  leaveTrip,
+  removeMember,
+  transferOwnership,
 } from "./trip.controller.js";
 
 import { protect }
@@ -34,10 +39,41 @@ router.get(
   getTripById
 );
 
+router.put(
+  "/:id",
+  protect,
+  upload.single("image"),
+  updateTrip
+);
+
+router.delete(
+  "/:id",
+  protect,
+  deleteTrip
+);
+
 router.post(
   "/:id/join",
   protect,
   joinTrip
+);
+
+router.post(
+  "/:id/leave",
+  protect,
+  leaveTrip
+);
+
+router.post(
+  "/:id/remove-member",
+  protect,
+  removeMember
+);
+
+router.post(
+  "/:id/transfer-ownership",
+  protect,
+  transferOwnership
 );
 
 export default router;

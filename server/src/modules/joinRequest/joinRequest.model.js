@@ -55,6 +55,11 @@ const joinRequestSchema =
 
   );
 
+joinRequestSchema.index({
+  trip: 1,
+  user: 1,
+});
+
 export default mongoose.model(
 
   "JoinRequest",

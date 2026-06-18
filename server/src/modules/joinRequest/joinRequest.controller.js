@@ -10,6 +10,8 @@ import {
 
 } from "./joinRequest.service.js";
 
+import Trip from "../trip/trip.model.js";
+
 // SEND REQUEST
 
 export const sendJoinRequest =
@@ -58,6 +60,21 @@ export const getTripRequests =
   async (req, res) => {
 
     try {
+
+      const trip = await Trip.findById(req.params.tripId);
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: "Trip not found",
+        });
+      }
+
+      if (trip.createdBy.toString() !== req.user.id.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "Not authorized: Only the trip owner can view join requests",
+        });
+      }
 
       const requests =
         await getTripRequestsService(

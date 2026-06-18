@@ -118,6 +118,10 @@ export const acceptJoinRequestService =
 
     }
 
+    if (request.status !== "pending") {
+      throw new Error(`Request is already ${request.status}`);
+    }
+
     const trip =
       await Trip.findById(
         request.trip
@@ -179,6 +183,10 @@ export const rejectJoinRequestService =
         "Request not found"
       );
 
+    }
+
+    if (request.status !== "pending") {
+      throw new Error(`Request is already ${request.status}`);
     }
 
     const trip =
