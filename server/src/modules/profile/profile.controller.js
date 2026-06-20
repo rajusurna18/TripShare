@@ -11,9 +11,12 @@ export const getProfile =
 
     try {
 
+      const simple = req.query.simple === "true";
+
       const user =
         await getProfileService(
-          req.user.id
+          req.user.id,
+          simple
         );
 
       res.json(user);

@@ -1,3 +1,5 @@
+import Avatar from "../shared/Avatar";
+
  function ReviewCard({ review }) {
 
   return (
@@ -8,18 +10,10 @@
 
       <div className="d-flex align-items-center gap-3 mb-3">
 
-        <img
-          src={
-            review?.reviewer?.profileImage ||
-            "https://i.pravatar.cc/100"
-          }
+        <Avatar
+          src={review?.reviewer?.profileImage}
           alt="reviewer"
-          style={{
-            width: "60px",
-            height: "60px",
-            borderRadius: "50%",
-            objectFit: "cover",
-          }}
+          size={60}
         />
 
         <div>

@@ -78,7 +78,11 @@ export const likeMemoryService =
 
           `${user.name} liked your memory ❤️`,
 
-          "memory"
+          "memory",
+
+          "",
+
+          userId
 
         );
 

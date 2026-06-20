@@ -1,3 +1,5 @@
+import Avatar from "../shared/Avatar";
+
 function NotificationCard({
 
   notification,
@@ -16,28 +18,22 @@ function NotificationCard({
       }`}
     >
 
-      <div className="d-flex justify-content-between align-items-start">
+      <div className="d-flex justify-content-between align-items-start gap-3">
 
-        <div>
-
-          <h5 className="mb-2">
-
-            {notification.message}
-
-          </h5>
-
-          <small className="text-secondary">
-
-            {
-
-              new Date(
-                notification.createdAt
-              ).toLocaleString()
-
-            }
-
-          </small>
-
+        <div className="d-flex align-items-center gap-3">
+          <Avatar src={notification.sender?.profileImage} size={50} />
+          <div>
+            <h5 className="mb-2">
+              {notification.message}
+            </h5>
+            <small className="text-secondary">
+              {
+                new Date(
+                  notification.createdAt
+                ).toLocaleString()
+              }
+            </small>
+          </div>
         </div>
 
         {

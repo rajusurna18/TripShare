@@ -1,3 +1,5 @@
+import Avatar from "../shared/Avatar";
+
 function JoinRequestCard({
 
   request,
@@ -18,32 +20,14 @@ function JoinRequestCard({
 
         <div className="d-flex flex-column flex-sm-row align-items-center text-center text-sm-start gap-3">
 
-          <img
-
-            src={
-
-              request?.user?.profileImage ||
-
-              "https://i.pravatar.cc/150"
-
-            }
-
+          <Avatar
+            src={request?.user?.profileImage}
             alt="profile"
-
             className="rounded-circle"
-
             style={{
-
-              width: "80px",
-
-              height: "80px",
-
-              objectFit: "cover",
-
               border: "3px solid #ffc107",
-
             }}
-
+            size={80}
           />
 
           <div>

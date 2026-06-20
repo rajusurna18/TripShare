@@ -53,7 +53,9 @@ export const createReviewService =
 
       "review",
 
-      `/reviews/${data.reviewFor}`
+      `/reviews/${data.reviewFor}`,
+
+      data.reviewer
 
     );
 

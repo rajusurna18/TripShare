@@ -272,7 +272,8 @@ export const leaveTripService = async (tripId, userId) => {
     trip.createdBy,
     `A member has left your trip: ${trip.title}`,
     "trip_leave",
-    `/trip/${tripId}`
+    `/trip/${tripId}`,
+    userId
   );
 
   return await Trip.findById(tripId)
@@ -307,7 +308,8 @@ export const removeMemberService = async (tripId, memberId, userId) => {
     memberId,
     `You have been removed from the trip: ${trip.title}`,
     "trip_remove",
-    ""
+    "",
+    userId
   );
 
   return await Trip.findById(tripId)
@@ -341,7 +343,8 @@ export const transferOwnershipService = async (tripId, newOwnerId, userId) => {
     newOwnerId,
     `You are now the owner of the trip: ${trip.title}`,
     "trip_ownership_transfer",
-    `/trip/${tripId}`
+    `/trip/${tripId}`,
+    userId
   );
 
   return await Trip.findById(tripId)

@@ -1,3 +1,4 @@
+import Avatar from "../shared/Avatar";
 import API from "../../services/api";
 
 function MemoryCard({
@@ -29,19 +30,11 @@ function MemoryCard({
 
       <div className="d-flex align-items-center gap-3 mb-3">
 
-        <img
-          src={
-            memory?.user
-              ?.profileImage ||
-            "https://i.pravatar.cc/150"
-          }
+        <Avatar
+          src={memory?.user?.profileImage}
           alt="user"
           className="rounded-circle"
-          style={{
-            width: "60px",
-            height: "60px",
-            objectFit: "cover",
-          }}
+          size={60}
         />
 
         <div>

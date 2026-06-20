@@ -14,6 +14,8 @@ import API from "../services/api";
 
 import socket from "../socket";
 
+import Avatar from "../components/shared/Avatar";
+
 function Chat() {
 
   // ======================
@@ -934,19 +936,17 @@ function Chat() {
                   }}
                 >
 
-                  <strong>
+                  <div className="d-flex align-items-center gap-2 mb-1">
+                    <Avatar src={msg.sender?.profileImage} size={28} />
+                    <strong className="text-warning">
+                      {
+                        msg.sender?.name ||
+                        "Traveler"
+                      }
+                    </strong>
+                  </div>
 
-                    {
-
-                      msg.sender?.name ||
-
-                      "Traveler"
-
-                    }
-
-                  </strong>
-
-                  <p>
+                  <p className="mb-1" style={{ paddingLeft: "36px" }}>
 
                     {msg.message}
 

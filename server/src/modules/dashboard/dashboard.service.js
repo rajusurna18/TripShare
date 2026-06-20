@@ -5,6 +5,7 @@ import Expense from "../expense/expense.model.js";
 import Friend from "../friend/friend.model.js";
 import Notification from "../notification/notification.model.js";
 import Memory from "../memory/memory.model.js";
+import { calculateTrustScore } from "../profile/profile.service.js";
 
 export const getDashboardStatsService = async (userId) => {
 
@@ -79,22 +80,12 @@ export const getDashboardStatsService = async (userId) => {
 
   const totalReviews = reviews.length;
 
-  let trustScore = 0;
-
-  if (totalReviews > 0) {
-
-    const totalRating = reviews.reduce(
-      (sum, review) => sum + review.rating,
-      0
-    );
-
-    trustScore = Math.min(
-      100,
-      Math.round(
-        (totalRating / totalReviews) * 20
-      )
-    );
-  }
+  const trustScore = calculateTrustScore(user, {
+    tripsCreated,
+    tripsJoined,
+    reviewsCount: totalReviews,
+    reviews,
+  });
 
   const totalExpenses =
     expenseResult[0]?.total || 0;

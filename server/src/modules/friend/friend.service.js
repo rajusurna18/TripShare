@@ -102,7 +102,9 @@ export const sendFriendRequestService =
 
       "friend",
 
-      "/friends"
+      "/friends",
+
+      sender
 
     );
 
@@ -207,7 +209,9 @@ export const acceptFriendRequestService =
 
       "friend",
 
-      "/friends"
+      "/friends",
+
+      request.receiver
 
     );
 

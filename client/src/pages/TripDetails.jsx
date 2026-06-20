@@ -24,6 +24,7 @@ import {
 
 import "leaflet/dist/leaflet.css";
 import toast from "react-hot-toast";
+import Avatar from "../components/shared/Avatar";
 
 const styles = {
   container: {
@@ -515,15 +516,11 @@ function TripDetails() {
                           border: "1px solid rgba(255,255,255,0.1)"
                         }}
                       >
-                        {member.profileImage ? (
-                          <img 
-                            src={member.profileImage} 
-                            alt={member.name}
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          />
-                        ) : (
-                          member.name.charAt(0).toUpperCase()
-                        )}
+                        <Avatar
+                          src={member.profileImage}
+                          alt={member.name}
+                          size={42}
+                        />
                       </div>
                       <div>
                         <p className="m-0 fw-semibold">{member.name}</p>

@@ -66,7 +66,13 @@ export const sendJoinRequestService =
 
         trip.createdBy,
 
-        `${user.name} requested to join ${trip.title} ✈️`
+        `${user.name} requested to join ${trip.title} ✈️`,
+
+        "join_request",
+
+        "",
+
+        userId
 
       );
 
@@ -159,7 +165,13 @@ export const acceptJoinRequestService =
 
       request.user,
 
-      `Your request to join ${trip.title} was accepted 🎉`
+      `Your request to join ${trip.title} was accepted 🎉`,
+
+      "join_request",
+
+      "",
+
+      userId
 
     );
 
@@ -209,7 +221,13 @@ export const rejectJoinRequestService =
 
       request.user,
 
-      `Your request to join ${trip.title} was rejected ❌`
+      `Your request to join ${trip.title} was rejected ❌`,
+
+      "join_request",
+
+      "",
+
+      userId
 
     );
 

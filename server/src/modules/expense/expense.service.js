@@ -26,7 +26,9 @@ export const createExpenseService =
 
       "expense",
 
-      `/expenses/${data.trip}`
+      `/expenses/${data.trip}`,
+
+      data.paidBy
 
     );
 

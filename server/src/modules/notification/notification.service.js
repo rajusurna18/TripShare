@@ -8,7 +8,8 @@ export const createNotificationService =
     userId,
     message,
     type = "general",
-    link = ""
+    link = "",
+    sender = null
   ) => {
 
     return await Notification.create({
@@ -20,6 +21,8 @@ export const createNotificationService =
       type,
 
       link,
+
+      sender: sender || null,
 
     });
 
@@ -34,11 +37,13 @@ export const getNotificationsService =
 
       user: userId,
 
-    }).sort({
+    })
+      .populate("sender", "name profileImage")
+      .sort({
 
-      createdAt: -1,
+        createdAt: -1,
 
-    });
+      });
 
 };
 

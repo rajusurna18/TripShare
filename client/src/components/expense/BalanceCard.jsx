@@ -1,3 +1,5 @@
+import Avatar from "../shared/Avatar";
+
 function BalanceCard({
 
   balance,
@@ -27,31 +29,13 @@ function BalanceCard({
 
     <div className="glass-card p-4 text-center h-100">
 
-      <img
-
-        src={
-          balance.profileImage ||
-
-          "https://i.pravatar.cc/150"
-        }
-
+      <Avatar
+        src={balance.profileImage}
         alt="user"
-
         style={{
-
-          width: "80px",
-
-          height: "80px",
-
-          borderRadius: "50%",
-
-          objectFit: "cover",
-
-          border:
-            "3px solid #ffc107",
-
+          border: "3px solid #ffc107",
         }}
-
+        size={80}
       />
 
       <h5 className="mt-3 mb-1">

@@ -7,6 +7,8 @@ import API from "../services/api";
 import StatCard
 from "../components/dashboard/StatCard";
 
+import Avatar from "../components/shared/Avatar";
+
 function Dashboard() {
 
   const [trips, setTrips] =
@@ -78,7 +80,7 @@ function Dashboard() {
         localStorage.getItem("token");
 
       const res = await API.get(
-        "/profile",
+        "/profile?simple=true",
         {
           headers: {
             Authorization:
@@ -256,12 +258,10 @@ function Dashboard() {
                 className="profile-card-modern text-decoration-none"
               >
 
-                <img
-                  src={
-                    user?.profileImage ||
-                    "https://i.pravatar.cc/150"
-                  }
+                <Avatar
+                  src={user?.profileImage}
                   alt="profile"
+                  size={150}
                 />
 
                 <div>

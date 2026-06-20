@@ -1,10 +1,8 @@
+import Avatar from "../components/shared/Avatar";
 
 import {
-
   useEffect,
-
   useState,
-
 } from "react";
 
 import {
@@ -288,28 +286,14 @@ function Matches() {
 
                         {/* PROFILE IMAGE */}
 
-                        <img
-
-                          src={
-
-                            item.user
-                              ?.profileImage ||
-
-                            "https://i.pravatar.cc/150"
-
-                          }
-
+                        <Avatar
+                          src={item.user?.profileImage}
                           alt="profile"
-
                           className="match-profile-img"
-
-                            style={{
-                            width: "100px",
-                            height: "100px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
+                          style={{
                             border: "4px solid #ffb703",
-                            }}
+                          }}
+                          size={100}
                         />
 
                         {/* NAME */}

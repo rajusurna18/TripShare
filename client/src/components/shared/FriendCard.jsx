@@ -1,3 +1,5 @@
+import Avatar from "./Avatar";
+
 function FriendCard({
 
   user,
@@ -29,34 +31,11 @@ function FriendCard({
         }}
       >
 
-        <img
-
-          src={
-
-            user?.profileImage ||
-
-            "https://i.pravatar.cc/150"
-
-          }
-
+        <Avatar
+          src={user?.profileImage}
           alt="profile"
-
           className="friend-avatar"
-
-          style={{
-
-            width: "70px",
-
-            height: "70px",
-
-            borderRadius: "50%",
-
-            objectFit: "cover",
-
-            flexShrink: 0,
-
-          }}
-
+          size={70}
         />
 
         <div

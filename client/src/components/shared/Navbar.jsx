@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
 import socket from "../../socket";
+import Avatar from "./Avatar";
 
 import {
   useEffect,
@@ -38,7 +39,7 @@ function Navbar() {
         const res =
           await API.get(
 
-            "/profile",
+            "/profile?simple=true",
 
             {
 
@@ -308,20 +309,11 @@ useEffect(() => {
 
               >
 
-                <img
-
-                  src={
-
-                    user?.profileImage ||
-
-                    "https://i.pravatar.cc/40"
-
-                  }
-
+                <Avatar
+                  src={user?.profileImage}
                   alt="profile"
-
                   className="navbar-profile"
-
+                  size={40}
                 />
 
               </button>
