@@ -2,6 +2,7 @@ import User from "../auth/auth.model.js";
 import Trip from "../trip/trip.model.js";
 import Review from "../review/review.model.js";
 import Friend from "../friend/friend.model.js";
+import { createNotificationService } from "../notification/notification.service.js";
 
 // PROFILE COMPLETION DETAILS
 export const calculateProfileCompletionDetails = (user) => {
@@ -86,7 +87,7 @@ const computeStatsObj = async (user, userId) => {
 // GET PROFILE
 export const getProfileService = async (userId, simple = false) => {
   if (simple) {
-    const user = await User.findById(userId).select("name email profileImage travelStyle isVerified");
+    const user = await User.findById(userId).select("name email profileImage travelStyle isVerified following followers");
     if (!user) {
       throw new Error("User not found");
     }
@@ -138,7 +139,7 @@ export const updateProfileService = async (userId, data) => {
 };
 
 // PUBLIC PROFILE
-export const getPublicProfileService = async (userId) => {
+export const getPublicProfileService = async (userId, currentUserId = null) => {
   const user = await User.findById(userId)
     .select("-password")
     .populate("friends", "name profileImage")
@@ -167,11 +168,118 @@ export const getPublicProfileService = async (userId) => {
       .limit(3)
   ]);
 
+  let isFollowing = false;
+  if (currentUserId) {
+    const currentUser = await User.findById(currentUserId).select("following");
+    if (currentUser && currentUser.following) {
+      isFollowing = currentUser.following.some(
+        (id) => id.toString() === userId.toString()
+      );
+    }
+  }
+
   return {
     ...user.toObject(),
     stats,
     profileCompletion: stats.profileCompletion,
     recentTrips,
     recentReviews,
+    isFollowing,
   };
+};
+
+// FOLLOW USER SERVICE
+export const followUserService = async (userId, targetId) => {
+  if (userId.toString() === targetId.toString()) {
+    throw new Error("You cannot follow yourself");
+  }
+
+  const targetUser = await User.findById(targetId);
+  if (!targetUser) {
+    throw new Error("User to follow not found");
+  }
+
+  const currentUser = await User.findById(userId).select("following name");
+  if (!currentUser) {
+    throw new Error("Current user not found");
+  }
+
+  // Prevent duplicates
+  const alreadyFollowing = currentUser.following.some(
+    (id) => id.toString() === targetId.toString()
+  );
+  if (alreadyFollowing) {
+    throw new Error("You are already following this user");
+  }
+
+  // Update databases
+  await Promise.all([
+    User.findByIdAndUpdate(userId, { $addToSet: { following: targetId } }),
+    User.findByIdAndUpdate(targetId, { $addToSet: { followers: userId } }),
+  ]);
+
+  // Create notification
+  await createNotificationService(
+    targetId,
+    `${currentUser.name} started following you. 👤`,
+    "follow",
+    `/profile/${userId}`,
+    userId
+  );
+
+  return { success: true };
+};
+
+// UNFOLLOW USER SERVICE
+export const unfollowUserService = async (userId, targetId) => {
+  const targetUser = await User.findById(targetId);
+  if (!targetUser) {
+    throw new Error("User to unfollow not found");
+  }
+
+  const currentUser = await User.findById(userId).select("following");
+  if (!currentUser) {
+    throw new Error("Current user not found");
+  }
+
+  const isFollowing = currentUser.following.some(
+    (id) => id.toString() === targetId.toString()
+  );
+  if (!isFollowing) {
+    throw new Error("You are not following this user");
+  }
+
+  // Update databases
+  await Promise.all([
+    User.findByIdAndUpdate(userId, { $pull: { following: targetId } }),
+    User.findByIdAndUpdate(targetId, { $pull: { followers: userId } }),
+  ]);
+
+  return { success: true };
+};
+
+// GET FOLLOWERS LIST SERVICE
+export const getFollowersService = async (userId) => {
+  const user = await User.findById(userId)
+    .populate("followers", "name profileImage travelStyle isVerified stats")
+    .select("followers");
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user.followers || [];
+};
+
+// GET FOLLOWING LIST SERVICE
+export const getFollowingService = async (userId) => {
+  const user = await User.findById(userId)
+    .populate("following", "name profileImage travelStyle isVerified stats")
+    .select("following");
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user.following || [];
 };

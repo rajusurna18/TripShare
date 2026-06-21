@@ -2,12 +2,24 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import API from "../services/api";
 import Avatar from "../components/shared/Avatar";
+import FollowModal from "../components/profile/FollowModal";
 
 function PublicProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  // Modals state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalUsers, setModalUsers] = useState([]);
+
+  const currentUser = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+  const isSelf = userId === currentUser._id;
 
   useEffect(() => {
     fetchProfile();
@@ -17,6 +29,7 @@ function PublicProfile() {
     try {
       const res = await API.get(`/api/profile/public/${userId}`);
       setUser(res.data);
+      setIsFollowing(res.data.isFollowing || false);
     } catch (err) {
       console.log(err);
     } finally {
@@ -40,6 +53,44 @@ function PublicProfile() {
     } catch (err) {
       console.log(err);
       alert(err?.response?.data?.message || "Request Failed");
+    }
+  };
+
+  const toggleFollow = async () => {
+    try {
+      const endpoint = isFollowing
+        ? `/api/profile/unfollow/${userId}`
+        : `/api/profile/follow/${userId}`;
+      await API.post(endpoint);
+      setIsFollowing(!isFollowing);
+      // Refresh to update followers count
+      fetchProfile();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // FOLLOWERS MODAL OPEN
+  const openFollowers = async () => {
+    try {
+      const res = await API.get(`/api/profile/followers/${userId}`);
+      setModalUsers(res.data);
+      setModalTitle("Followers");
+      setModalOpen(true);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // FOLLOWING MODAL OPEN
+  const openFollowing = async () => {
+    try {
+      const res = await API.get(`/api/profile/following/${userId}`);
+      setModalUsers(res.data);
+      setModalTitle("Following");
+      setModalOpen(true);
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -125,9 +176,27 @@ function PublicProfile() {
 
           {/* SOCIAL ACTIONS BUTTONS */}
           <div className="d-flex justify-content-center gap-3 mt-4 flex-wrap">
-            <button className="btn btn-warning px-4 py-2 fw-semibold" onClick={sendFriendRequest}>
-              🤝 Send Friend Request
-            </button>
+            {isSelf ? (
+              <Link to="/profile" className="btn btn-warning px-4 py-2 fw-semibold">
+                👤 Edit Profile
+              </Link>
+            ) : (
+              <>
+                <button
+                  className={`btn ${isFollowing ? "btn-outline-warning" : "btn-warning"} px-4 py-2 fw-semibold`}
+                  onClick={toggleFollow}
+                >
+                  {isFollowing ? "👤 Unfollow" : "👤 Follow"}
+                </button>
+                <button
+                  className="btn px-4 py-2 fw-semibold text-white border"
+                  style={{ background: "rgba(255, 183, 3, 0.15)", borderColor: "rgba(255,183,3,0.3)" }}
+                  onClick={sendFriendRequest}
+                >
+                  🤝 Send Friend Request
+                </button>
+              </>
+            )}
             <button
               className="btn btn-outline-light px-4 py-2"
               onClick={() => navigate(`/reviews/${userId}`)}
@@ -150,16 +219,16 @@ function PublicProfile() {
                     <small className="text-secondary">Friends</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3">
+                <div className="col-4 col-md-3" style={{ cursor: "pointer" }} onClick={openFollowers}>
                   <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-white fw-bold">{stats.followersCount || 0}</h3>
-                    <small className="text-secondary">Followers</small>
+                    <small className="text-secondary text-decoration-underline">Followers</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3">
+                <div className="col-4 col-md-3" style={{ cursor: "pointer" }} onClick={openFollowing}>
                   <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-white fw-bold">{stats.followingCount || 0}</h3>
-                    <small className="text-secondary">Following</small>
+                    <small className="text-secondary text-decoration-underline">Following</small>
                   </div>
                 </div>
                 <div className="col-4 col-md-3">
@@ -416,6 +485,14 @@ function PublicProfile() {
             </div>
           </div>
         </div>
+
+        {/* MODAL WINDOW */}
+        <FollowModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title={modalTitle}
+          users={modalUsers}
+        />
       </div>
     </div>
   );

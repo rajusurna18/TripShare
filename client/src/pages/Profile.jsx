@@ -6,6 +6,7 @@ import ProfileHero from "../components/profile/ProfileHero";
 import InterestTags from "../components/profile/InterestTags";
 import TravelerBadges from "../components/profile/TravelerBadges";
 import ProfileForm from "../components/profile/ProfileForm";
+import FollowModal from "../components/profile/FollowModal";
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -24,6 +25,11 @@ function Profile() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Modals state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalUsers, setModalUsers] = useState([]);
 
   useEffect(() => {
     fetchProfile();
@@ -123,6 +129,30 @@ function Profile() {
     }
   };
 
+  // FOLLOWERS MODAL OPEN
+  const openFollowers = async () => {
+    try {
+      const res = await API.get(`/api/profile/followers/${user._id}`);
+      setModalUsers(res.data);
+      setModalTitle("Followers");
+      setModalOpen(true);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // FOLLOWING MODAL OPEN
+  const openFollowing = async () => {
+    try {
+      const res = await API.get(`/api/profile/following/${user._id}`);
+      setModalUsers(res.data);
+      setModalTitle("Following");
+      setModalOpen(true);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   // PROFILE STATS
   const completion = user?.stats?.profileCompletion || 0;
   const missingFields = user?.stats?.missingFields || [];
@@ -143,6 +173,8 @@ function Profile() {
           user={user}
           completion={completion}
           missingFields={missingFields}
+          onFollowersClick={openFollowers}
+          onFollowingClick={openFollowing}
         />
 
         {/* BADGES */}
@@ -190,6 +222,14 @@ function Profile() {
           setImage={setImage}
           updateProfile={updateProfile}
           saving={saving}
+        />
+
+        {/* REUSABLE FOLLOWERS/FOLLOWING MODAL */}
+        <FollowModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title={modalTitle}
+          users={modalUsers}
         />
       </div>
     </div>

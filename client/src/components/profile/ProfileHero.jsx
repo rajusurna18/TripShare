@@ -4,6 +4,8 @@ function ProfileHero({
   user,
   completion,
   missingFields = [],
+  onFollowersClick,
+  onFollowingClick,
 }) {
   return (
     <div className="glass-card p-5 mb-5 text-center position-relative overflow-hidden">
@@ -29,7 +31,29 @@ function ProfileHero({
       <h1 className="fw-bold mt-3">{user?.name}</h1>
 
       {/* EMAIL */}
-      <p className="text-secondary">{user?.email}</p>
+      <p className="text-secondary mb-2">{user?.email}</p>
+
+      {/* STATS COUNT */}
+      <div className="d-flex justify-content-center gap-4 mt-2 mb-4 text-center">
+        <div style={{ cursor: "pointer" }} onClick={onFollowersClick}>
+          <span className="text-warning fw-bold d-block" style={{ fontSize: "20px" }}>
+            {user?.stats?.followersCount || 0}
+          </span>
+          <small className="text-secondary text-decoration-underline">Followers</small>
+        </div>
+        <div style={{ cursor: "pointer" }} onClick={onFollowingClick}>
+          <span className="text-warning fw-bold d-block" style={{ fontSize: "20px" }}>
+            {user?.stats?.followingCount || 0}
+          </span>
+          <small className="text-secondary text-decoration-underline">Following</small>
+        </div>
+        <div>
+          <span className="text-warning fw-bold d-block" style={{ fontSize: "20px" }}>
+            {user?.stats?.friendsCount || 0}
+          </span>
+          <small className="text-secondary">Friends</small>
+        </div>
+      </div>
 
       {/* BADGES */}
       <div className="d-flex justify-content-center gap-3 flex-wrap mt-4">
