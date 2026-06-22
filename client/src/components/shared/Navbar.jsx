@@ -223,6 +223,21 @@ useEffect(() => {
 
             </li>
 
+            {/* DISCOVER */}
+
+            <li className="nav-item">
+
+              <Link
+                className="nav-link"
+                to="/discover"
+              >
+
+                Discover
+
+              </Link>
+
+            </li>
+
             {/* ABOUT */}
 
             <li className="nav-item">

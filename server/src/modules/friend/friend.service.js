@@ -3,10 +3,9 @@ import Friend from "./friend.model.js";
 import User from "../auth/auth.model.js";
 
 import {
-
   createNotificationService,
-
 } from "../notification/notification.service.js";
+import { updateUserStatsCache } from "../profile/profile.service.js";
 
 // ========================
 // SEND FRIEND REQUEST
@@ -193,6 +192,12 @@ export const acceptFriendRequestService =
       }
 
     );
+
+    // Update cached stats for both users
+    await Promise.all([
+      updateUserStatsCache(request.sender),
+      updateUserStatsCache(request.receiver),
+    ]);
 
     const receiver =
       await User.findById(

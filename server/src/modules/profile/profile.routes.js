@@ -9,6 +9,7 @@ import {
   unfollowUser,
   getFollowersList,
   getFollowingList,
+  getDiscoverTravelers,
 } from "./profile.controller.js";
 
 const router = express.Router();
@@ -18,6 +19,9 @@ router.get("/", protect, getProfile);
 
 // UPDATE PROFILE
 router.put("/", protect, upload.single("profileImage"), updateProfile);
+
+// TRAVELER DISCOVERY
+router.get("/discover", protect, getDiscoverTravelers);
 
 // PUBLIC PROFILE
 router.get("/public/:userId", protect, getPublicProfile);

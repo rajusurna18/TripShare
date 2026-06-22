@@ -125,10 +125,30 @@ const userSchema =
      default: 0,
     },
 
-   joinedTrips: {
-    type: Number,
-    default: 0,
-   },
+    joinedTrips: {
+     type: Number,
+     default: 0,
+    },
+
+    trustScore: {
+      type: Number,
+      default: 10,
+    },
+
+    profileCompletion: {
+      type: Number,
+      default: 0,
+    },
+
+    followersCount: {
+      type: Number,
+      default: 0,
+    },
+
+    followingCount: {
+      type: Number,
+      default: 0,
+    },
 
       // FRIEND SYSTEM
 
@@ -182,6 +202,14 @@ const userSchema =
     }
 
   );
+
+userSchema.index({ name: "text", interests: "text" });
+userSchema.index({ travelStyle: 1 });
+userSchema.index({ personality: 1 });
+userSchema.index({ destinationPreference: 1 });
+userSchema.index({ trustScore: -1 });
+userSchema.index({ profileCompletion: -1 });
+userSchema.index({ followersCount: -1 });
 
 
 export default mongoose.model(

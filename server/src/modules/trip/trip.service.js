@@ -14,6 +14,7 @@ import Settlement from "../expense/settlement.model.js";
 import Review from "../review/review.model.js";
 import Notification from "../notification/notification.model.js";
 import mongoose from "mongoose";
+import { updateUserStatsCache } from "../profile/profile.service.js";
 
 // CREATE TRIP
 
@@ -48,6 +49,9 @@ export const createTripService =
           "upcoming",
 
       });
+
+    // Update user stats cache for tripsCreated update
+    await updateUserStatsCache(userId);
 
     return await Trip.findById(
       trip._id

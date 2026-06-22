@@ -6,6 +6,7 @@ import {
   unfollowUserService,
   getFollowersService,
   getFollowingService,
+  getDiscoverTravelersService,
 } from "./profile.service.js";
 
 // GET PROFILE
@@ -112,6 +113,18 @@ export const getFollowingList = async (req, res) => {
   try {
     const list = await getFollowingService(req.params.userId);
     res.json(list);
+  } catch (err) {
+    res.status(400).json({
+      message: err.message,
+    });
+  }
+};
+
+// GET DISCOVER TRAVELERS
+export const getDiscoverTravelers = async (req, res) => {
+  try {
+    const result = await getDiscoverTravelersService(req.query, req.user?.id);
+    res.json(result);
   } catch (err) {
     res.status(400).json({
       message: err.message,

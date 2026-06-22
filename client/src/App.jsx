@@ -59,6 +59,9 @@ from "./pages/TripMemories";
 import Recommendations
 from "./pages/Recommendations";
 
+import Discover
+from "./pages/Discover";
+
 function App() {
 
   return (
@@ -343,6 +346,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+        <Route
+          path="/discover"
+          element={
+            <ProtectedRoute>
+              <Discover />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
 

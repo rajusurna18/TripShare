@@ -7,6 +7,7 @@ import User from "../auth/auth.model.js";
 import {
   createNotificationService,
 } from "../notification/notification.service.js";
+import { updateUserStatsCache } from "../profile/profile.service.js";
 
 // SEND REQUEST
 
@@ -160,6 +161,9 @@ export const acceptJoinRequestService =
       }
 
     );
+
+    // Update target user's stats cache
+    await updateUserStatsCache(request.user);
 
     await createNotificationService(
 

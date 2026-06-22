@@ -5,6 +5,7 @@ import User from "../auth/auth.model.js";
 import {
   createNotificationService,
 } from "../notification/notification.service.js";
+import { updateUserStatsCache } from "../profile/profile.service.js";
 
 // CREATE REVIEW
 
@@ -39,6 +40,9 @@ export const createReviewService =
 
     const review =
       await Review.create(data);
+
+    // Update target user's cached stats (which computes trust score using review count & rating)
+    await updateUserStatsCache(data.reviewFor);
 
     const reviewer =
       await User.findById(

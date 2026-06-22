@@ -1,6 +1,7 @@
 import User from "../auth/auth.model.js";
 import Trip from "../trip/trip.model.js";
 import Review from "../review/review.model.js";
+import mongoose from "mongoose";
 import Friend from "../friend/friend.model.js";
 import { createNotificationService } from "../notification/notification.service.js";
 
@@ -56,7 +57,7 @@ export const calculateTrustScore = (user, stats) => {
 };
 
 // HELPER FOR PROFILE STATS
-const computeStatsObj = async (user, userId) => {
+export const computeStatsObj = async (user, userId) => {
   const [tripsCreated, tripsJoined, reviews] = await Promise.all([
     Trip.countDocuments({ createdBy: userId }),
     Trip.countDocuments({ members: userId }),
@@ -131,10 +132,22 @@ export const updateProfileService = async (userId, data) => {
 
   const stats = await computeStatsObj(updatedUser, userId);
 
+  await User.findByIdAndUpdate(userId, {
+    $set: {
+      trustScore: stats.trustScore || 10,
+      profileCompletion: stats.profileCompletion || 0,
+      followersCount: stats.followersCount || 0,
+      followingCount: stats.followingCount || 0,
+    }
+  });
+
   return {
     ...updatedUser.toObject(),
     stats,
     profileCompletion: stats.profileCompletion,
+    trustScore: stats.trustScore,
+    followersCount: stats.followersCount,
+    followingCount: stats.followingCount,
   };
 };
 
@@ -218,6 +231,12 @@ export const followUserService = async (userId, targetId) => {
     User.findByIdAndUpdate(targetId, { $addToSet: { followers: userId } }),
   ]);
 
+  // Update cached stats for both users
+  await Promise.all([
+    updateUserStatsCache(userId),
+    updateUserStatsCache(targetId)
+  ]);
+
   // Create notification
   await createNotificationService(
     targetId,
@@ -255,6 +274,12 @@ export const unfollowUserService = async (userId, targetId) => {
     User.findByIdAndUpdate(targetId, { $pull: { followers: userId } }),
   ]);
 
+  // Update cached stats for both users
+  await Promise.all([
+    updateUserStatsCache(userId),
+    updateUserStatsCache(targetId)
+  ]);
+
   return { success: true };
 };
 
@@ -282,4 +307,234 @@ export const getFollowingService = async (userId) => {
   }
 
   return user.following || [];
+};
+
+// CENTRALIZED STATS CACHE UPDATE HELPER
+export const updateUserStatsCache = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) return;
+    const stats = await computeStatsObj(user, userId);
+    await User.findByIdAndUpdate(userId, {
+      $set: {
+        trustScore: stats.trustScore || 10,
+        profileCompletion: stats.profileCompletion || 0,
+        followersCount: stats.followersCount || 0,
+        followingCount: stats.followingCount || 0,
+      }
+    });
+  } catch (err) {
+    console.error(`Failed to update user stats cache for ${userId}:`, err.message);
+  }
+};
+
+// GET DISCOVER TRAVELERS SERVICE (PHASE 4)
+export const getDiscoverTravelersService = async (params, currentUserId) => {
+  const {
+    query,
+    page = 1,
+    limit = 10,
+    travelStyle,
+    personality,
+    destinationPreference,
+    minTrustScore,
+    minCompletion,
+    minFollowers,
+    minFollowing,
+    sortBy = "relevance"
+  } = params;
+
+  const pageNum = parseInt(page, 10) || 1;
+  const limitNum = parseInt(limit, 10) || 10;
+  const skipNum = (pageNum - 1) * limitNum;
+
+  // 1. MATCH FILTER
+  const matchStage = {};
+
+  // Exclude current user from discovery list
+  if (currentUserId) {
+    matchStage._id = { $ne: new mongoose.Types.ObjectId(currentUserId) };
+  }
+
+  // Text/Regex matching on search query
+  if (query) {
+    const cleanQuery = query.trim();
+    matchStage.$or = [
+      { name: { $regex: cleanQuery, $options: "i" } },
+      { interests: { $regex: cleanQuery, $options: "i" } },
+      { travelStyle: { $regex: cleanQuery, $options: "i" } },
+      { personality: { $regex: cleanQuery, $options: "i" } },
+      { destinationPreference: { $regex: cleanQuery, $options: "i" } }
+    ];
+  }
+
+  // Exact or pattern match filters
+  if (travelStyle) {
+    matchStage.travelStyle = { $regex: travelStyle, $options: "i" };
+  }
+  if (personality) {
+    matchStage.personality = { $regex: personality, $options: "i" };
+  }
+  if (destinationPreference) {
+    matchStage.destinationPreference = { $regex: destinationPreference, $options: "i" };
+  }
+
+  // Numeric range filters on cached stats
+  if (minTrustScore) {
+    matchStage.trustScore = { $gte: parseInt(minTrustScore, 10) };
+  }
+  if (minCompletion) {
+    matchStage.profileCompletion = { $gte: parseInt(minCompletion, 10) };
+  }
+  if (minFollowers) {
+    matchStage.followersCount = { $gte: parseInt(minFollowers, 10) };
+  }
+  if (minFollowing) {
+    matchStage.followingCount = { $gte: parseInt(minFollowing, 10) };
+  }
+
+  // 2. RELEVANCE SORT / ADD FIELDS STAGE
+  const pipeline = [{ $match: matchStage }];
+
+  // Relevance logic ranking:
+  // Exact Name match: 100, Interest match: 80, travelStyle: 60, destination: 40, personality: 20
+  if (query) {
+    const cleanQuery = query.trim();
+    pipeline.push({
+      $addFields: {
+        relevanceScore: {
+          $add: [
+            {
+              $cond: {
+                if: { $regexMatch: { input: "$name", regex: `^${cleanQuery}$`, options: "i" } },
+                then: 100,
+                else: 0
+              }
+            },
+            {
+              $cond: {
+                if: {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input: { $ifNull: ["$interests", []] },
+                          as: "interest",
+                          cond: { $regexMatch: { input: "$$interest", regex: cleanQuery, options: "i" } }
+                        }
+                      }
+                    },
+                    0
+                  ]
+                },
+                then: 80,
+                else: 0
+              }
+            },
+            {
+              $cond: {
+                if: { $regexMatch: { input: { $ifNull: ["$travelStyle", ""] }, regex: cleanQuery, options: "i" } },
+                then: 60,
+                else: 0
+              }
+            },
+            {
+              $cond: {
+                if: { $regexMatch: { input: { $ifNull: ["$destinationPreference", ""] }, regex: cleanQuery, options: "i" } },
+                then: 40,
+                else: 0
+              }
+            },
+            {
+              $cond: {
+                if: { $regexMatch: { input: { $ifNull: ["$personality", ""] }, regex: cleanQuery, options: "i" } },
+                then: 20,
+                else: 0
+              }
+            }
+          ]
+        }
+      }
+    });
+  } else {
+    pipeline.push({
+      $addFields: {
+        relevanceScore: 0
+      }
+    });
+  }
+
+  // 3. SORT STAGE
+  const sortStage = {};
+  if (sortBy === "relevance" && query) {
+    sortStage.relevanceScore = -1;
+    sortStage.trustScore = -1;
+  } else if (sortBy === "followed") {
+    sortStage.followersCount = -1;
+  } else if (sortBy === "trust") {
+    sortStage.trustScore = -1;
+  } else if (sortBy === "newest") {
+    sortStage.createdAt = -1;
+  } else if (sortBy === "active") {
+    sortStage.totalTrips = -1;
+  } else if (sortBy === "completion") {
+    sortStage.profileCompletion = -1;
+  } else {
+    // Default fallback
+    sortStage.trustScore = -1;
+  }
+  pipeline.push({ $sort: sortStage });
+
+  // 4. FACET PAGINATION (Single round-trip for data and count metadata)
+  pipeline.push({
+    $facet: {
+      metadata: [{ $count: "total" }],
+      data: [
+        { $skip: skipNum },
+        { $limit: limitNum },
+        {
+          $project: {
+            password: 0,
+            email: 0,
+            resetOTP: 0,
+            resetOTPExpire: 0,
+            friends: 0,
+            followers: 0,
+            following: 0,
+          }
+        }
+      ]
+    }
+  });
+
+  const aggregationResult = await User.aggregate(pipeline);
+  const facetResult = aggregationResult[0] || { metadata: [], data: [] };
+
+  const totalResults = facetResult.metadata[0]?.total || 0;
+  const travelers = facetResult.data || [];
+  const totalPages = Math.ceil(totalResults / limitNum);
+
+  // 5. ATOMIC FOLLOW STATE POPULATOR (O(1) checks using requester follow lists)
+  let currentUserFollowing = [];
+  if (currentUserId) {
+    const curUser = await User.findById(currentUserId).select("following");
+    if (curUser && curUser.following) {
+      currentUserFollowing = curUser.following.map((id) => id.toString());
+    }
+  }
+
+  const enhancedTravelers = travelers.map((trav) => ({
+    ...trav,
+    isFollowing: currentUserFollowing.includes(trav._id.toString())
+  }));
+
+  return {
+    travelers: enhancedTravelers,
+    page: pageNum,
+    limit: limitNum,
+    totalPages,
+    totalResults,
+    hasNextPage: pageNum < totalPages,
+    hasPreviousPage: pageNum > 1
+  };
 };
