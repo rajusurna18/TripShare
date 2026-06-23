@@ -340,10 +340,10 @@ io.on(
 
       (userId) => {
 
-        onlineUsers.set(
-          userId,
-          socket.id
-        );
+        if (!onlineUsers.has(userId)) {
+          onlineUsers.set(userId, new Set());
+        }
+        onlineUsers.get(userId).add(socket.id);
 
         io.emit(
 
@@ -502,6 +502,28 @@ io.on(
           data.message
 
         );
+
+      }
+
+    );
+
+    // MESSAGE REACTION
+
+    socket.on(
+
+      "message_reaction",
+
+      (data) => {
+
+        io.to(data.tripId)
+
+          .emit(
+
+            "message_reaction_update",
+
+            data
+
+          );
 
       }
 
@@ -707,17 +729,23 @@ io.on(
 
         for (
 
-          const [userId, id]
+          const [userId, socketsSet]
 
           of onlineUsers.entries()
 
         ) {
 
-          if (id === socket.id) {
+          if (socketsSet.has(socket.id)) {
 
-            onlineUsers.delete(
-              userId
-            );
+            socketsSet.delete(socket.id);
+
+            if (socketsSet.size === 0) {
+
+              onlineUsers.delete(
+                userId
+              );
+
+            }
 
             break;
 
