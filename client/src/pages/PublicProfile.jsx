@@ -27,7 +27,7 @@ function PublicProfile() {
 
   const fetchProfile = async () => {
     try {
-      const res = await API.get(`/api/profile/public/${userId}`);
+      const res = await API.get(`/profile/public/${userId}`);
       setUser(res.data);
       setIsFollowing(res.data.isFollowing || false);
     } catch (err) {
@@ -39,15 +39,9 @@ function PublicProfile() {
 
   const sendFriendRequest = async () => {
     try {
-      const token = localStorage.getItem("token");
       await API.post(
-        "/api/friends/request",
-        { receiver: userId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        "/friends/send",
+        { receiver: userId }
       );
       alert("Friend Request Sent 🤝");
     } catch (err) {
@@ -59,8 +53,8 @@ function PublicProfile() {
   const toggleFollow = async () => {
     try {
       const endpoint = isFollowing
-        ? `/api/profile/unfollow/${userId}`
-        : `/api/profile/follow/${userId}`;
+        ? `/profile/unfollow/${userId}`
+        : `/profile/follow/${userId}`;
       await API.post(endpoint);
       setIsFollowing(!isFollowing);
       // Refresh to update followers count
@@ -73,7 +67,7 @@ function PublicProfile() {
   // FOLLOWERS MODAL OPEN
   const openFollowers = async () => {
     try {
-      const res = await API.get(`/api/profile/followers/${userId}`);
+      const res = await API.get(`/profile/followers/${userId}`);
       setModalUsers(res.data);
       setModalTitle("Followers");
       setModalOpen(true);
@@ -85,7 +79,7 @@ function PublicProfile() {
   // FOLLOWING MODAL OPEN
   const openFollowing = async () => {
     try {
-      const res = await API.get(`/api/profile/following/${userId}`);
+      const res = await API.get(`/profile/following/${userId}`);
       setModalUsers(res.data);
       setModalTitle("Following");
       setModalOpen(true);

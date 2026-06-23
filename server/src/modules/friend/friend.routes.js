@@ -1,83 +1,44 @@
 import express from "express";
-
 import {
-
   sendFriendRequest,
-
   acceptFriendRequest,
-
   rejectFriendRequest,
-
+  cancelFriendRequest,
+  removeFriend,
   getFriends,
-
   getPendingRequests,
-
+  getSentRequests,
+  getFriendSuggestions,
 } from "./friend.controller.js";
+import { protect } from "../../middleware/auth.middleware.js";
 
-import { protect }
-from "../../middleware/auth.middleware.js";
-
-const router =
-  express.Router();
+const router = express.Router();
 
 // SEND REQUEST
-
-router.post(
-
-  "/send",
-
-  protect,
-
-  sendFriendRequest
-
-);
+router.post("/send", protect, sendFriendRequest);
 
 // ACCEPT REQUEST
-
-router.put(
-
-  "/accept/:id",
-
-  protect,
-
-  acceptFriendRequest
-
-);
+router.put("/accept/:id", protect, acceptFriendRequest);
 
 // REJECT REQUEST
+router.put("/reject/:id", protect, rejectFriendRequest);
 
-router.put(
+// CANCEL REQUEST (NEW)
+router.delete("/cancel/:id", protect, cancelFriendRequest);
 
-  "/reject/:id",
-
-  protect,
-
-  rejectFriendRequest
-
-);
+// REMOVE FRIEND (NEW)
+router.delete("/remove/:friendId", protect, removeFriend);
 
 // GET FRIENDS
+router.get("/", protect, getFriends);
 
-router.get(
+// GET PENDING RECEIVED REQUESTS
+router.get("/requests", protect, getPendingRequests);
 
-  "/",
+// GET PENDING SENT REQUESTS (NEW)
+router.get("/sent-requests", protect, getSentRequests);
 
-  protect,
-
-  getFriends
-
-);
-
-// GET PENDING REQUESTS
-
-router.get(
-
-  "/requests",
-
-  protect,
-
-  getPendingRequests
-
-);
+// GET SUGGESTIONS (NEW)
+router.get("/suggestions", protect, getFriendSuggestions);
 
 export default router;
