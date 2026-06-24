@@ -8,6 +8,14 @@ import {
 
   likeMemory,
 
+  createComment,
+
+  createReply,
+
+  getMemoryComments,
+
+  deleteComment,
+
 } from "./memory.controller.js";
 
 import { protect }
@@ -49,6 +57,31 @@ router.put(
 
   likeMemory
 
+);
+
+// COMMENTS & REPLIES ROUTES
+router.post(
+  "/:id/comments",
+  protect,
+  createComment
+);
+
+router.post(
+  "/:id/comments/:commentId/replies",
+  protect,
+  createReply
+);
+
+router.get(
+  "/:id/comments",
+  protect,
+  getMemoryComments
+);
+
+router.delete(
+  "/comments/:commentId",
+  protect,
+  deleteComment
 );
 
 export default router;

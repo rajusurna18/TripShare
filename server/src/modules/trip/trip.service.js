@@ -11,6 +11,7 @@ import Activity from "../activity/activity.model.js";
 
 import Message from "../messages/message.model.js";
 import Memory from "../memory/memory.model.js";
+import MemoryComment from "../memory/memoryComment.model.js";
 import JoinRequest from "../joinRequest/joinRequest.model.js";
 import Expense from "../expense/expense.model.js";
 import Settlement from "../expense/settlement.model.js";
@@ -244,6 +245,9 @@ export const deleteTripService = async (tripId, userId) => {
     session.startTransaction();
 
     await Message.deleteMany({ trip: tripId }).session(session);
+    const memories = await Memory.find({ trip: tripId }).session(session);
+    const memoryIds = memories.map(m => m._id);
+    await MemoryComment.deleteMany({ memory: { $in: memoryIds } }).session(session);
     await Memory.deleteMany({ trip: tripId }).session(session);
     await JoinRequest.deleteMany({ trip: tripId }).session(session);
     await Expense.deleteMany({ trip: tripId }).session(session);
@@ -262,6 +266,9 @@ export const deleteTripService = async (tripId, userId) => {
     }
     console.warn("Mongoose transaction failed, falling back to sequential delete:", error.message);
     await Message.deleteMany({ trip: tripId });
+    const fallbackMemories = await Memory.find({ trip: tripId });
+    const fallbackMemoryIds = fallbackMemories.map(m => m._id);
+    await MemoryComment.deleteMany({ memory: { $in: fallbackMemoryIds } });
     await Memory.deleteMany({ trip: tripId });
     await JoinRequest.deleteMany({ trip: tripId });
     await Expense.deleteMany({ trip: tripId });

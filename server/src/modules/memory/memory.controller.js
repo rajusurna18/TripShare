@@ -6,6 +6,14 @@ import {
 
   likeMemoryService,
 
+  createCommentService,
+
+  createReplyService,
+
+  getMemoryCommentsService,
+
+  deleteCommentService,
+
 } from "./memory.service.js";
 
 import Trip from "../trip/trip.model.js";
@@ -203,4 +211,110 @@ export const likeMemory =
 
     }
 
+};
+
+// COMMENTS & REPLIES
+
+export const createComment = async (req, res) => {
+  try {
+    const { id } = req.params; // Memory ID
+    const memory = await Memory.findById(id);
+    if (!memory) {
+      return res.status(404).json({ success: false, message: "Memory not found" });
+    }
+    const trip = await Trip.findById(memory.trip);
+    if (!trip) {
+      return res.status(404).json({ success: false, message: "Trip not found" });
+    }
+
+    const isCreator = trip.createdBy.toString() === req.user.id.toString();
+    const isMember = trip.members.some(
+      (member) => member.toString() === req.user.id.toString()
+    );
+
+    if (!isCreator && !isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: You are not a member of this trip",
+      });
+    }
+
+    const comment = await createCommentService(id, req.user.id, req.body.text);
+    res.status(201).json({ success: true, comment });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+export const createReply = async (req, res) => {
+  try {
+    const { id, commentId } = req.params; // id: Memory ID, commentId: Parent Comment ID
+    const memory = await Memory.findById(id);
+    if (!memory) {
+      return res.status(404).json({ success: false, message: "Memory not found" });
+    }
+    const trip = await Trip.findById(memory.trip);
+    if (!trip) {
+      return res.status(404).json({ success: false, message: "Trip not found" });
+    }
+
+    const isCreator = trip.createdBy.toString() === req.user.id.toString();
+    const isMember = trip.members.some(
+      (member) => member.toString() === req.user.id.toString()
+    );
+
+    if (!isCreator && !isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: You are not a member of this trip",
+      });
+    }
+
+    const reply = await createReplyService(id, req.user.id, commentId, req.body.text);
+    res.status(201).json({ success: true, reply });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+export const getMemoryComments = async (req, res) => {
+  try {
+    const { id } = req.params; // Memory ID
+    const { page, limit } = req.query;
+    const memory = await Memory.findById(id);
+    if (!memory) {
+      return res.status(404).json({ success: false, message: "Memory not found" });
+    }
+    const trip = await Trip.findById(memory.trip);
+    if (!trip) {
+      return res.status(404).json({ success: false, message: "Trip not found" });
+    }
+
+    const isCreator = trip.createdBy.toString() === req.user.id.toString();
+    const isMember = trip.members.some(
+      (member) => member.toString() === req.user.id.toString()
+    );
+
+    if (!isCreator && !isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: You are not a member of this trip",
+      });
+    }
+
+    const data = await getMemoryCommentsService(id, page, limit);
+    res.json({ success: true, ...data });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+export const deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { deletedCount } = await deleteCommentService(commentId, req.user.id);
+    res.json({ success: true, message: "Comment deleted successfully", deletedCount });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
 };

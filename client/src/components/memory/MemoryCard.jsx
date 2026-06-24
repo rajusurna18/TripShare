@@ -1,10 +1,13 @@
+import { useState } from "react";
 import Avatar from "../shared/Avatar";
 import API from "../../services/api";
+import MemoryCommentsDrawer from "./MemoryCommentsDrawer";
 
 function MemoryCard({
   memory,
   fetchMemories,
 }) {
+  const [showComments, setShowComments] = useState(false);
 
   const likeMemory =
     async () => {
@@ -68,12 +71,30 @@ function MemoryCard({
         {memory.caption}
       </p>
 
-      <button
-        className="btn btn-outline-warning"
-        onClick={likeMemory}
-      >
-        ❤️ {memory.likes?.length || 0}
-      </button>
+      <div className="d-flex gap-2">
+        <button
+          className="btn btn-outline-warning"
+          onClick={likeMemory}
+        >
+          ❤️ {memory.likesCount !== undefined ? memory.likesCount : (memory.likes?.length || 0)}
+        </button>
+
+        <button
+          className="btn btn-outline-info"
+          onClick={() => setShowComments(true)}
+        >
+          💬 {memory.commentsCount || 0}
+        </button>
+      </div>
+
+      {showComments && (
+        <MemoryCommentsDrawer
+          memoryId={memory._id}
+          memoryOwnerId={memory.user?._id || memory.user?.id || memory.user}
+          onClose={() => setShowComments(false)}
+          onCommentUpdated={fetchMemories}
+        />
+      )}
 
     </div>
   );

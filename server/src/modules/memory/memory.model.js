@@ -83,6 +83,16 @@ const memorySchema =
 
       ],
 
+      likesCount: {
+        type: Number,
+        default: 0,
+      },
+
+      commentsCount: {
+        type: Number,
+        default: 0,
+      },
+
     },
 
     {
