@@ -36,6 +36,12 @@ const notificationSchema =
         type: Boolean,
         default: false,
       },
+
+      category: {
+        type: String,
+        enum: ["FRIEND", "TRIP", "CHAT", "MEMORY", "REVIEW", "SYSTEM"],
+        default: "SYSTEM",
+      },
     },
 
     {
@@ -43,6 +49,10 @@ const notificationSchema =
     }
 
   );
+
+// INDEXES FOR QUERY OPTIMIZATION
+notificationSchema.index({ user: 1, createdAt: -1 });
+notificationSchema.index({ user: 1, read: 1, category: 1 });
 
 export default mongoose.model(
   "Notification",

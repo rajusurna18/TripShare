@@ -71,7 +71,7 @@ export const sendJoinRequestService =
 
         "join_request",
 
-        "",
+        `/join-requests/${tripId}`,
 
         userId
 
@@ -173,7 +173,7 @@ export const acceptJoinRequestService =
 
       "join_request",
 
-      "",
+      `/trip/${trip._id}`,
 
       userId
 
@@ -229,7 +229,7 @@ export const rejectJoinRequestService =
 
       "join_request",
 
-      "",
+      "/trips",
 
       userId
 

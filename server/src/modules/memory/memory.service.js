@@ -80,7 +80,7 @@ export const likeMemoryService =
 
           "memory",
 
-          "",
+          `/memories/${memory.trip}`,
 
           userId
 

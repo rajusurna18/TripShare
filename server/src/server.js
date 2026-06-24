@@ -13,6 +13,8 @@ import jwt from "jsonwebtoken";
 import { Server }
 from "socket.io";
 
+import { setIo, getOnlineUsers } from "./utils/socketRegistry.js";
+
 // CUSTOM RATE LIMITER MIDDLEWARE
 const rateLimit = (limit, windowMs) => {
   const ipRequests = new Map();
@@ -65,6 +67,8 @@ from "./modules/messages/message.routes.js";
 
 import notificationRoutes
 from "./modules/notification/notification.routes.js";
+
+import Notification from "./modules/notification/notification.model.js";
 
 import friendRoutes
 from "./modules/friend/friend.routes.js";
@@ -122,6 +126,50 @@ app.use(
 // DATABASE
 
 connectDB();
+
+// Category migration for legacy notifications
+const migrateNotificationCategories = async () => {
+  try {
+    const friendTypes = ["friend", "follow"];
+    const tripTypes = ["join_request", "trip_leave", "trip_remove", "trip_ownership_transfer", "expense"];
+    const memoryTypes = ["memory"];
+    const reviewTypes = ["review"];
+    const chatTypes = ["chat", "message"];
+
+    const r1 = await Notification.updateMany(
+      { category: { $exists: false }, type: { $in: friendTypes } },
+      { $set: { category: "FRIEND" } }
+    );
+    const r2 = await Notification.updateMany(
+      { category: { $exists: false }, type: { $in: tripTypes } },
+      { $set: { category: "TRIP" } }
+    );
+    const r3 = await Notification.updateMany(
+      { category: { $exists: false }, type: { $in: memoryTypes } },
+      { $set: { category: "MEMORY" } }
+    );
+    const r4 = await Notification.updateMany(
+      { category: { $exists: false }, type: { $in: reviewTypes } },
+      { $set: { category: "REVIEW" } }
+    );
+    const r5 = await Notification.updateMany(
+      { category: { $exists: false }, type: { $in: chatTypes } },
+      { $set: { category: "CHAT" } }
+    );
+    const r6 = await Notification.updateMany(
+      { category: { $exists: false } },
+      { $set: { category: "SYSTEM" } }
+    );
+
+    const totalModified = r1.modifiedCount + r2.modifiedCount + r3.modifiedCount + r4.modifiedCount + r5.modifiedCount + r6.modifiedCount;
+    if (totalModified > 0) {
+      console.log(`[Migration] Migrated ${totalModified} legacy notifications to categories.`);
+    }
+  } catch (err) {
+    console.error("[Migration] Category migration failed:", err.message);
+  }
+};
+migrateNotificationCategories();
 
 // ROUTES
 
@@ -292,10 +340,12 @@ const io = new Server(
 
 );
 
+setIo(io);
+
 // ONLINE USERS
 
 const onlineUsers =
-  new Map();
+  getOnlineUsers();
 
 // LIVE LOCATIONS
 
