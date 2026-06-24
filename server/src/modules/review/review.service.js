@@ -6,6 +6,7 @@ import {
   createNotificationService,
 } from "../notification/notification.service.js";
 import { updateUserStatsCache } from "../profile/profile.service.js";
+import { logActivityService } from "../activity/activity.service.js";
 
 // CREATE REVIEW
 
@@ -48,6 +49,26 @@ export const createReviewService =
       await User.findById(
         data.reviewer
       );
+
+    try {
+      const targetUser = await User.findById(data.reviewFor).select("name");
+      await logActivityService(
+        data.reviewer,
+        "REVIEW_ADDED",
+        review._id,
+        "Review",
+        data.trip || null,
+        {
+          rating: review.rating,
+          comment: review.comment || "",
+          reviewedUserId: data.reviewFor,
+          reviewedUserName: targetUser?.name || "Traveler",
+        },
+        "PUBLIC"
+      );
+    } catch (err) {
+      console.error("Failed to log review activity:", err.message);
+    }
 
     await createNotificationService(
 

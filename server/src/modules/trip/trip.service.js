@@ -6,6 +6,9 @@ import {
   createNotificationService,
 } from "../notification/notification.service.js";
 
+import { logActivityService } from "../activity/activity.service.js";
+import Activity from "../activity/activity.model.js";
+
 import Message from "../messages/message.model.js";
 import Memory from "../memory/memory.model.js";
 import JoinRequest from "../joinRequest/joinRequest.model.js";
@@ -52,6 +55,23 @@ export const createTripService =
 
     // Update user stats cache for tripsCreated update
     await updateUserStatsCache(userId);
+
+    // Log Activity
+    await logActivityService(
+      userId,
+      "TRIP_CREATED",
+      trip._id,
+      "Trip",
+      trip._id,
+      {
+        title: trip.title,
+        destination: trip.destination,
+        imageUrl: trip.image || "",
+        startDate: trip.startDate,
+        endDate: trip.endDate
+      },
+      trip.visibility === "private" ? "MEMBERS_ONLY" : "PUBLIC"
+    );
 
     return await Trip.findById(
       trip._id
@@ -230,6 +250,7 @@ export const deleteTripService = async (tripId, userId) => {
     await Settlement.deleteMany({ trip: tripId }).session(session);
     await Review.deleteMany({ trip: tripId }).session(session);
     await Notification.deleteMany({ link: { $regex: tripId } }).session(session);
+    await Activity.deleteMany({ $or: [{ entityId: tripId }, { tripId }] }).session(session);
     await Trip.deleteOne({ _id: tripId }).session(session);
 
     await session.commitTransaction();
@@ -247,6 +268,7 @@ export const deleteTripService = async (tripId, userId) => {
     await Settlement.deleteMany({ trip: tripId });
     await Review.deleteMany({ trip: tripId });
     await Notification.deleteMany({ link: { $regex: tripId } });
+    await Activity.deleteMany({ $or: [{ entityId: tripId }, { tripId }] });
     await Trip.deleteOne({ _id: tripId });
   }
 

@@ -8,6 +8,7 @@ import {
   createNotificationService,
 } from "../notification/notification.service.js";
 import { updateUserStatsCache } from "../profile/profile.service.js";
+import { logActivityService } from "../activity/activity.service.js";
 
 // SEND REQUEST
 
@@ -164,6 +165,21 @@ export const acceptJoinRequestService =
 
     // Update target user's stats cache
     await updateUserStatsCache(request.user);
+
+    // Log Activity
+    await logActivityService(
+      request.user,
+      "TRIP_JOINED",
+      trip._id,
+      "Trip",
+      trip._id,
+      {
+        title: trip.title,
+        destination: trip.destination,
+        imageUrl: trip.image || "",
+      },
+      trip.visibility === "private" ? "MEMBERS_ONLY" : "PUBLIC"
+    );
 
     await createNotificationService(
 

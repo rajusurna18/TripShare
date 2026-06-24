@@ -3,11 +3,36 @@ import User from "../auth/auth.model.js";
 import {
   createNotificationService,
 } from "../notification/notification.service.js";
+import Trip from "../trip/trip.model.js";
+import { logActivityService } from "../activity/activity.service.js";
 
 export const createMemoryService =
   async (data) => {
 
-    return await Memory.create(data);
+    const memory = await Memory.create(data);
+
+    try {
+      const trip = await Trip.findById(data.trip).select("visibility title");
+      const visibility = trip?.visibility === "private" ? "MEMBERS_ONLY" : "PUBLIC";
+
+      await logActivityService(
+        data.user,
+        "MEMORY_UPLOADED",
+        memory._id,
+        "Memory",
+        data.trip,
+        {
+          caption: memory.caption || "",
+          imageUrl: memory.image,
+          tripTitle: trip?.title || "",
+        },
+        visibility
+      );
+    } catch (err) {
+      console.error("Failed to log memory activity:", err.message);
+    }
+
+    return memory;
 
 };
 

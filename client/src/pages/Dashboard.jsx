@@ -8,6 +8,7 @@ import StatCard
 from "../components/dashboard/StatCard";
 
 import Avatar from "../components/shared/Avatar";
+import ActivityCard from "../components/activity/ActivityCard";
 
 function Dashboard() {
 
@@ -20,8 +21,13 @@ function Dashboard() {
   const [user, setUser] =
     useState(null);
 
-    const [dashboardStats, setDashboardStats] =
+  const [dashboardStats, setDashboardStats] =
   useState(null);
+
+  const [activities, setActivities] = useState([]);
+  const [feedPage, setFeedPage] = useState(1);
+  const [feedTotalPages, setFeedTotalPages] = useState(1);
+  const [loadingFeed, setLoadingFeed] = useState(false);
 
   useEffect(() => {
 
@@ -29,7 +35,9 @@ function Dashboard() {
 
     fetchProfile();
 
-     fetchDashboardStats();
+    fetchDashboardStats();
+
+    fetchFeed(1);
 
   }, []);
 
@@ -142,6 +150,30 @@ function Dashboard() {
     }
 
 };
+
+  // FETCH PERSONALIZED FEED
+  const fetchFeed = async (pageNum = 1) => {
+    try {
+      setLoadingFeed(true);
+      const token = localStorage.getItem("token");
+      const res = await API.get(`/activities?feedType=dashboard&page=${pageNum}&limit=5`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (pageNum === 1) {
+        setActivities(res.data.activities || []);
+      } else {
+        setActivities((prev) => [...prev, ...(res.data.activities || [])]);
+      }
+      setFeedPage(res.data.page);
+      setFeedTotalPages(res.data.totalPages);
+    } catch (err) {
+      console.error("Failed to fetch dashboard feed:", err);
+    } finally {
+      setLoadingFeed(false);
+    }
+  };
 
   // STATS
 
@@ -772,6 +804,34 @@ function Dashboard() {
           )
 
         }
+
+        {/* SOCIAL ACTIVITY FEED */}
+        <div className="mt-5 mb-4">
+          <h2 className="text-warning fw-bold mb-4">📢 Social Feed Updates</h2>
+          {activities.length === 0 && !loadingFeed ? (
+            <div className="glass-card p-4 text-center">
+              <p className="text-secondary mb-0">No travel updates from users you follow yet. Explore the Home page feed or follow fellow travelers!</p>
+            </div>
+          ) : (
+            <div className="d-flex flex-column gap-4">
+              {activities.map((activity) => (
+                <ActivityCard key={activity._id} activity={activity} />
+              ))}
+              {feedPage < feedTotalPages && (
+                <div className="text-center mt-3">
+                  <button
+                    className="btn btn-outline-warning fw-bold px-4 py-2"
+                    disabled={loadingFeed}
+                    onClick={() => fetchFeed(feedPage + 1)}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    {loadingFeed ? "Syncing..." : "Load More Activity"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
       </div>
 

@@ -70,6 +70,8 @@ from "./modules/notification/notification.routes.js";
 
 import Notification from "./modules/notification/notification.model.js";
 
+import activityRoutes from "./modules/activity/activity.routes.js";
+
 import friendRoutes
 from "./modules/friend/friend.routes.js";
 
@@ -207,6 +209,11 @@ app.use(
 app.use(
   "/api/notifications",
   notificationRoutes
+);
+
+app.use(
+  "/api/activities",
+  activityRoutes
 );
 
 app.use(
