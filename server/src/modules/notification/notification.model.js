@@ -39,7 +39,7 @@ const notificationSchema =
 
       category: {
         type: String,
-        enum: ["FRIEND", "TRIP", "CHAT", "MEMORY", "REVIEW", "SYSTEM"],
+        enum: ["FRIEND", "TRIP", "CHAT", "MEMORY", "REVIEW", "SYSTEM", "BLOG"],
         default: "SYSTEM",
       },
     },

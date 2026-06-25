@@ -5,6 +5,7 @@ import Expense from "../expense/expense.model.js";
 import Friend from "../friend/friend.model.js";
 import Notification from "../notification/notification.model.js";
 import Memory from "../memory/memory.model.js";
+import Blog from "../blog/blog.model.js";
 import { calculateTrustScore } from "../profile/profile.service.js";
 
 export const getDashboardStatsService = async (userId) => {
@@ -24,6 +25,11 @@ export const getDashboardStatsService = async (userId) => {
     totalMemories,
     unreadNotifications,
     expenseResult,
+    totalBlogs,
+    latestBlog,
+    popularBlog,
+    mostViewedBlog,
+    recentDraft,
   ] = await Promise.all([
 
     Trip.countDocuments({
@@ -76,6 +82,15 @@ export const getDashboardStatsService = async (userId) => {
       },
     ]),
 
+    Blog.countDocuments({
+      author: userId,
+    }),
+
+    Blog.findOne({ author: userId }).sort({ createdAt: -1 }),
+    Blog.findOne({ author: userId }).sort({ likesCount: -1, createdAt: -1 }),
+    Blog.findOne({ author: userId }).sort({ viewsCount: -1, createdAt: -1 }),
+    Blog.findOne({ author: userId, visibility: "private" }).sort({ createdAt: -1 }),
+
   ]);
 
   const totalReviews = reviews.length;
@@ -100,5 +115,12 @@ export const getDashboardStatsService = async (userId) => {
     totalExpenses,
     totalMemories,
     unreadNotifications,
+    totalBlogs,
+    widgets: {
+      latestBlog,
+      popularBlog,
+      mostViewedBlog,
+      recentDraft,
+    },
   };
 };

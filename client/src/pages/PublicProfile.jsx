@@ -245,6 +245,12 @@ function PublicProfile() {
                 </div>
                 <div className="col-4 col-md-3">
                   <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                    <h3 className="m-0 text-warning fw-bold">{stats.blogsCount || 0}</h3>
+                    <small className="text-secondary">Blogs</small>
+                  </div>
+                </div>
+                <div className="col-4 col-md-3">
+                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-warning fw-bold">{user.travelStyle || "Explorer"}</h3>
                     <small className="text-secondary">Travel Style</small>
                   </div>
@@ -440,6 +446,41 @@ function PublicProfile() {
                 <p className="text-secondary">No recent trips discovered.</p>
               )}
             </div>
+
+            {/* RECENT BLOGS */}
+            <div className="glass-card p-4 mt-4">
+              <h4 className="fw-bold mb-4 text-warning">📝 Recent Journals & Blogs</h4>
+              {user.recentBlogs && user.recentBlogs.length > 0 ? (
+                <div className="row g-3">
+                  {user.recentBlogs.map((blog) => (
+                    <div className="col-md-6" key={blog._id}>
+                      <div
+                        className="p-3 rounded border border-secondary h-100 d-flex flex-column justify-content-between cursor-pointer hover-lift"
+                        style={{ background: "#181818", border: "1px solid rgba(255,255,255,0.06)", transition: "all 0.2s" }}
+                        onClick={() => navigate(`/blog/${blog._id}`)}
+                      >
+                        <div>
+                          <h5 className="fw-bold mb-1 text-white text-truncate" title={blog.title}>{blog.title}</h5>
+                          <p className="text-info mb-2 small" style={{ fontSize: "13.5px" }}>
+                            📍 {blog.destination}
+                          </p>
+                          <small className="text-secondary d-block mb-3">
+                            ⏱️ {blog.readTime || 1} min read • 👁️ {blog.viewsCount || 0} views
+                          </small>
+                        </div>
+                        <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-10 text-secondary" style={{ fontSize: "0.75rem" }}>
+                          <span>❤️ {blog.likesCount || 0} likes</span>
+                          <span>💬 {blog.commentsCount || 0} comments</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-secondary">No travel journals published yet.</p>
+              )}
+            </div>
+
           </div>
 
           {/* RECENT REVIEWS */}

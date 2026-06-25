@@ -461,6 +461,13 @@ function Dashboard() {
                       ✈️ Create Trip
                     </Link>
 
+                    <Link
+                      to="/create-blog"
+                      className="quick-action-btn"
+                    >
+                      ✍️ Write Blog
+                    </Link>
+
                     {/* AI ASSISTANT */}
 
                     <Link
@@ -789,9 +796,123 @@ function Dashboard() {
                icon="🔔"
               />
 
+            <StatCard
+              title="Blogs Published"
+              value={
+                dashboardStats.totalBlogs || 0
+               }
+               icon="📝"
+              />
+
           </div>
 
          </div>
+
+          {/* BLOG WIDGETS SECTION */}
+          {dashboardStats?.widgets && (
+            <div className="mb-5">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="fw-bold m-0 text-white">✍️ Your Travel Journals</h2>
+                <Link to="/create-blog" className="btn btn-warning btn-sm px-3 fw-bold rounded-pill text-dark text-decoration-none">
+                  + New Blog Post
+                </Link>
+              </div>
+
+              <div className="row g-3">
+                {/* LATEST BLOG */}
+                <div className="col-12 col-md-6 col-lg-3">
+                  <div className="glass-card p-4 h-100 d-flex flex-column" style={{ background: "rgba(255,255,255,0.02)" }}>
+                    <small className="text-warning fw-semibold text-uppercase" style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}>Latest Article ⏱️</small>
+                    {dashboardStats.widgets.latestBlog ? (
+                      <div className="mt-2 d-flex flex-column flex-grow-1">
+                        <Link to={`/blog/${dashboardStats.widgets.latestBlog._id}`} className="text-decoration-none text-light hover-warning">
+                          <h6 className="fw-bold text-truncate mb-2 text-white">{dashboardStats.widgets.latestBlog.title}</h6>
+                        </Link>
+                        <p className="text-secondary small flex-grow-1 text-truncate mb-3" style={{ fontSize: "0.8rem" }}>
+                          📍 {dashboardStats.widgets.latestBlog.destination}
+                        </p>
+                        <div className="d-flex justify-content-between text-secondary pt-2 border-top border-secondary border-opacity-20" style={{ fontSize: "0.7rem" }}>
+                          <span>👁️ {dashboardStats.widgets.latestBlog.viewsCount || 0} views</span>
+                          <span>❤️ {dashboardStats.widgets.latestBlog.likesCount || 0} likes</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-secondary small italic mt-3 mb-0">No posts written yet.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* POPULAR BLOG */}
+                <div className="col-12 col-md-6 col-lg-3">
+                  <div className="glass-card p-4 h-100 d-flex flex-column" style={{ background: "rgba(255,255,255,0.02)" }}>
+                    <small className="text-warning fw-semibold text-uppercase" style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}>Most Popular 🔥</small>
+                    {dashboardStats.widgets.popularBlog ? (
+                      <div className="mt-2 d-flex flex-column flex-grow-1">
+                        <Link to={`/blog/${dashboardStats.widgets.popularBlog._id}`} className="text-decoration-none text-light hover-warning">
+                          <h6 className="fw-bold text-truncate mb-2 text-white">{dashboardStats.widgets.popularBlog.title}</h6>
+                        </Link>
+                        <p className="text-secondary small flex-grow-1 text-truncate mb-3" style={{ fontSize: "0.8rem" }}>
+                          📍 {dashboardStats.widgets.popularBlog.destination}
+                        </p>
+                        <div className="d-flex justify-content-between text-secondary pt-2 border-top border-secondary border-opacity-20" style={{ fontSize: "0.7rem" }}>
+                          <span>👁️ {dashboardStats.widgets.popularBlog.viewsCount || 0} views</span>
+                          <span>❤️ {dashboardStats.widgets.popularBlog.likesCount || 0} likes</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-secondary small italic mt-3 mb-0">No popular posts yet.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* MOST VIEWED BLOG */}
+                <div className="col-12 col-md-6 col-lg-3">
+                  <div className="glass-card p-4 h-100 d-flex flex-column" style={{ background: "rgba(255,255,255,0.02)" }}>
+                    <small className="text-warning fw-semibold text-uppercase" style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}>Most Viewed 👁️</small>
+                    {dashboardStats.widgets.mostViewedBlog ? (
+                      <div className="mt-2 d-flex flex-column flex-grow-1">
+                        <Link to={`/blog/${dashboardStats.widgets.mostViewedBlog._id}`} className="text-decoration-none text-light hover-warning">
+                          <h6 className="fw-bold text-truncate mb-2 text-white">{dashboardStats.widgets.mostViewedBlog.title}</h6>
+                        </Link>
+                        <p className="text-secondary small flex-grow-1 text-truncate mb-3" style={{ fontSize: "0.8rem" }}>
+                          📍 {dashboardStats.widgets.mostViewedBlog.destination}
+                        </p>
+                        <div className="d-flex justify-content-between text-secondary pt-2 border-top border-secondary border-opacity-20" style={{ fontSize: "0.7rem" }}>
+                          <span>👁️ {dashboardStats.widgets.mostViewedBlog.viewsCount || 0} views</span>
+                          <span>❤️ {dashboardStats.widgets.mostViewedBlog.likesCount || 0} likes</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-secondary small italic mt-3 mb-0">No views recorded yet.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* RECENT DRAFT */}
+                <div className="col-12 col-md-6 col-lg-3">
+                  <div className="glass-card p-4 h-100 d-flex flex-column" style={{ background: "rgba(255,255,255,0.02)" }}>
+                    <small className="text-warning fw-semibold text-uppercase" style={{ fontSize: "0.7rem", letterSpacing: "0.5px" }}>Recent Draft 🔒</small>
+                    {dashboardStats.widgets.recentDraft ? (
+                      <div className="mt-2 d-flex flex-column flex-grow-1">
+                        <Link to={`/blog/${dashboardStats.widgets.recentDraft._id}`} className="text-decoration-none text-light hover-warning">
+                          <h6 className="fw-bold text-truncate mb-2 text-white">{dashboardStats.widgets.recentDraft.title}</h6>
+                        </Link>
+                        <p className="text-secondary small flex-grow-1 text-truncate mb-3" style={{ fontSize: "0.8rem" }}>
+                          📍 {dashboardStats.widgets.recentDraft.destination}
+                        </p>
+                        <div className="d-flex justify-content-between text-secondary pt-2 border-top border-secondary border-opacity-20" style={{ fontSize: "0.7rem" }}>
+                          <span>👁️ {dashboardStats.widgets.recentDraft.viewsCount || 0} views</span>
+                          <span>❤️ {dashboardStats.widgets.recentDraft.likesCount || 0} likes</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-secondary small italic mt-3 mb-0">No active drafts saved.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
            </>
 

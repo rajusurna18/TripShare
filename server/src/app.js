@@ -26,6 +26,9 @@ from "./modules/message/message.routes.js";
 import profileRoutes
 from "./modules/profile/profile.routes.js";
 
+import blogRoutes
+from "./modules/blog/blog.routes.js";
+
 import { protect }
 from "./middleware/auth.middleware.js";
 
@@ -100,6 +103,11 @@ app.use(
 app.use(
   "/api/profile",
   profileRoutes
+);
+
+app.use(
+  "/api/blogs",
+  blogRoutes
 );
 
 app.use(

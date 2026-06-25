@@ -87,6 +87,9 @@ from "./modules/joinRequest/joinRequest.routes.js";
 import memoryRoutes
 from "./modules/memory/memory.routes.js";
 
+import blogRoutes
+from "./modules/blog/blog.routes.js";
+
 import recommendationRoutes
 from "./modules/recommendation/recommendation.routes.js";
 
@@ -239,6 +242,11 @@ app.use(
 app.use(
   "/api/memories",
   memoryRoutes
+);
+
+app.use(
+  "/api/blogs",
+  blogRoutes
 );
 
 

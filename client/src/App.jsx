@@ -62,6 +62,11 @@ from "./pages/Recommendations";
 import Discover
 from "./pages/Discover";
 
+import Blogs from "./pages/Blogs";
+import BlogDetails from "./pages/BlogDetails";
+import CreateBlog from "./pages/CreateBlog";
+import EditBlog from "./pages/EditBlog";
+
 function App() {
 
   return (
@@ -370,6 +375,32 @@ function App() {
 
          }
 
+        />
+
+        {/* BLOG MODULE */}
+        <Route
+          path="/blogs"
+          element={<Blogs />}
+        />
+        <Route
+          path="/blog/:id"
+          element={<BlogDetails />}
+        />
+        <Route
+          path="/create-blog"
+          element={
+            <ProtectedRoute>
+              <CreateBlog />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-blog/:id"
+          element={
+            <ProtectedRoute>
+              <EditBlog />
+            </ProtectedRoute>
+          }
         />
       </Routes>
 

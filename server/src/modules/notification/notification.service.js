@@ -18,6 +18,8 @@ export const createNotificationService =
     const reviewTypes = ["review"];
     const chatTypes = ["chat", "message"];
 
+    const blogTypes = ["BLOG_LIKED", "BLOG_COMMENTED", "BLOG_REPLIED", "BLOG_PUBLISHED"];
+
     if (friendTypes.includes(type)) {
       category = "FRIEND";
     } else if (tripTypes.includes(type)) {
@@ -28,6 +30,8 @@ export const createNotificationService =
       category = "REVIEW";
     } else if (chatTypes.includes(type)) {
       category = "CHAT";
+    } else if (blogTypes.includes(type)) {
+      category = "BLOG";
     }
 
     const notification = await Notification.create({

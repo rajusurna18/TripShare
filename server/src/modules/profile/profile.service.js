@@ -3,6 +3,7 @@ import Trip from "../trip/trip.model.js";
 import Review from "../review/review.model.js";
 import mongoose from "mongoose";
 import Friend from "../friend/friend.model.js";
+import Blog from "../blog/blog.model.js";
 import { createNotificationService } from "../notification/notification.service.js";
 
 // PROFILE COMPLETION DETAILS
@@ -58,10 +59,11 @@ export const calculateTrustScore = (user, stats) => {
 
 // HELPER FOR PROFILE STATS
 export const computeStatsObj = async (user, userId) => {
-  const [tripsCreated, tripsJoined, reviews] = await Promise.all([
+  const [tripsCreated, tripsJoined, reviews, blogsCount] = await Promise.all([
     Trip.countDocuments({ createdBy: userId }),
     Trip.countDocuments({ members: userId }),
     Review.find({ reviewFor: userId }),
+    Blog.countDocuments({ author: userId }),
   ]);
 
   const completionDetails = calculateProfileCompletionDetails(user);
@@ -79,6 +81,7 @@ export const computeStatsObj = async (user, userId) => {
     tripsCreated,
     tripsJoined,
     reviewsCount: reviews.length,
+    blogsCount,
     trustScore,
     profileCompletion: completionDetails.percentage,
     missingFields: completionDetails.missingFields,
@@ -191,12 +194,28 @@ export const getPublicProfileService = async (userId, currentUserId = null) => {
     }
   }
 
+  // Determine visibility query for blogs in profile
+  const blogVisibilityQuery = { author: userId };
+  if (currentUserId && userId.toString() === currentUserId.toString()) {
+    // Owner sees all their blogs
+  } else if (isFollowing) {
+    blogVisibilityQuery.visibility = { $in: ["public", "followers_only"] };
+  } else {
+    blogVisibilityQuery.visibility = "public";
+  }
+
+  const recentBlogs = await Blog.find(blogVisibilityQuery)
+    .populate("author", "name profileImage travelStyle isVerified")
+    .sort({ createdAt: -1 })
+    .limit(3);
+
   return {
     ...user.toObject(),
     stats,
     profileCompletion: stats.profileCompletion,
     recentTrips,
     recentReviews,
+    recentBlogs,
     isFollowing,
   };
 };
