@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import API
-from "../../services/api";
+  from "../../services/api";
 
 function Navbar() {
 
@@ -62,7 +62,7 @@ function Navbar() {
 
       }
 
-  };
+    };
 
   // FETCH NOTIFICATIONS
 
@@ -113,35 +113,35 @@ function Navbar() {
 
       }
 
-  };
+    };
 
-useEffect(() => {
+  useEffect(() => {
 
-  fetchProfile();
+    fetchProfile();
 
-  fetchNotifications();
+    fetchNotifications();
 
-  socket.on(
+    socket.on(
 
-    "new_notification",
+      "new_notification",
 
-    () => {
+      () => {
 
-      fetchNotifications();
+        fetchNotifications();
 
-    }
+      }
 
-  );
-
-  return () => {
-
-    socket.off(
-      "new_notification"
     );
 
-  };
+    return () => {
 
-}, []);
+      socket.off(
+        "new_notification"
+      );
+
+    };
+
+  }, []);
 
   // LOGOUT
 
@@ -159,7 +159,7 @@ useEffect(() => {
       window.location.href =
         "/login";
 
-  };
+    };
 
   // UNREAD COUNT
 
@@ -253,17 +253,6 @@ useEffect(() => {
 
             </li>
 
-            {localStorage.getItem("token") && (
-              <li className="nav-item">
-                <Link
-                  className="nav-link"
-                  to="/saved-trips"
-                >
-                  Saved Trips ⭐
-                </Link>
-              </li>
-            )}
-
             {/* ABOUT */}
 
             <li className="nav-item">
@@ -320,7 +309,7 @@ useEffect(() => {
 
                 🔔
 
-              </Link> 
+              </Link>
 
               {
 
