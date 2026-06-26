@@ -17,7 +17,9 @@ const activitySchema = new mongoose.Schema(
         "REVIEW_ADDED",
         "FRIEND_ADDED",
         "FOLLOWED_USER",
-        "TIMELINE_CREATED"
+        "TIMELINE_CREATED",
+        "TRIP_SAVED",
+        "TRIP_SHARED"
       ],
       required: true,
     },

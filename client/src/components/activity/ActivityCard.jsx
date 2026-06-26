@@ -1,8 +1,36 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Avatar from "../shared/Avatar";
+import SaveButton from "../shared/SaveButton";
+import ShareButton from "../shared/ShareButton";
+import API from "../../services/api";
 
 function ActivityCard({ activity }) {
   const { actor, type, tripId, metadata, createdAt } = activity;
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      const targetId = tripId?._id || tripId;
+      if (!targetId) return;
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      if (window.savedTripIds) {
+        setIsSaved(window.savedTripIds.has(targetId.toString()));
+      } else {
+        try {
+          const res = await API.get("/saves");
+          const ids = new Set((res.data.saves || []).map((s) => s.trip?._id).filter(Boolean));
+          window.savedTripIds = ids;
+          setIsSaved(ids.has(targetId.toString()));
+        } catch (err) {
+          console.error("Error checking saved status in ActivityCard:", err);
+        }
+      }
+    };
+    checkSavedStatus();
+  }, [tripId]);
 
   // Format time nicely
   const timeStr = new Date(createdAt).toLocaleString(undefined, {
@@ -17,6 +45,10 @@ function ActivityCard({ activity }) {
         return "created a new travel trip ✈️";
       case "TRIP_JOINED":
         return "joined a travel trip 🎒";
+      case "TRIP_SAVED":
+        return "bookmarked an adventure to their saved list ⭐";
+      case "TRIP_SHARED":
+        return `shared a trip on ${metadata?.platform || "socials"} 🔗`;
       case "MEMORY_UPLOADED":
         return "shared a new trip memory 📸";
       case "REVIEW_ADDED":
@@ -35,23 +67,51 @@ function ActivityCard({ activity }) {
     switch (type) {
       case "TRIP_CREATED":
       case "TRIP_JOINED":
+      case "TRIP_SAVED":
+      case "TRIP_SHARED":
+        const actualTripId = tripId?._id || tripId;
         return (
           <div className="mt-3 p-3 rounded" style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.05)" }}>
             <h5 className="fw-bold text-warning mb-2">{metadata?.title || "Upcoming Adventure"}</h5>
             <p className="text-light mb-2" style={{ fontSize: "14px" }}>
               📍 <b>Destination</b>: {metadata?.destination || "Unknown"}
             </p>
-            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3 pt-2 border-top border-secondary border-opacity-10">
               {metadata?.startDate && (
                 <span className="text-secondary" style={{ fontSize: "12px" }}>
                   📅 {new Date(metadata.startDate).toLocaleDateString()} - {metadata.endDate ? new Date(metadata.endDate).toLocaleDateString() : ""}
                 </span>
               )}
-              {tripId?._id && (
-                <Link to={`/trip/${tripId._id}`} className="btn btn-outline-warning btn-sm fw-bold px-3" style={{ borderRadius: "8px" }}>
-                  View Trip Details
-                </Link>
-              )}
+              <div className="d-flex gap-2 align-items-center mt-2 mt-sm-0">
+                {actualTripId && (
+                  <>
+                    <SaveButton
+                      tripId={actualTripId}
+                      initialSaved={isSaved}
+                      initialCount={tripId?.savesCount || 0}
+                      onToggle={(savedState) => {
+                        setIsSaved(savedState);
+                        if (window.savedTripIds) {
+                          if (savedState) {
+                            window.savedTripIds.add(actualTripId.toString());
+                          } else {
+                            window.savedTripIds.delete(actualTripId.toString());
+                          }
+                        }
+                      }}
+                    />
+                    <ShareButton
+                      tripId={actualTripId}
+                      tripTitle={metadata?.title}
+                      tripDestination={metadata?.destination}
+                      initialCount={tripId?.sharesCount || 0}
+                    />
+                    <Link to={`/trip/${actualTripId}`} className="btn btn-outline-warning btn-sm fw-bold px-3 py-2" style={{ borderRadius: "20px" }}>
+                      View Details
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         );

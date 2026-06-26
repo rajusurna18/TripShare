@@ -13,7 +13,7 @@ export const createNotificationService =
 
     let category = "SYSTEM";
     const friendTypes = ["friend", "follow"];
-    const tripTypes = ["join_request", "trip_leave", "trip_remove", "trip_ownership_transfer", "expense"];
+    const tripTypes = ["join_request", "trip_leave", "trip_remove", "trip_ownership_transfer", "expense", "trip_save", "trip_share"];
     const memoryTypes = ["memory", "MEMORY_LIKED", "MEMORY_COMMENTED", "MEMORY_REPLIED"];
     const reviewTypes = ["review"];
     const chatTypes = ["chat", "message"];

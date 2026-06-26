@@ -253,6 +253,17 @@ useEffect(() => {
 
             </li>
 
+            {localStorage.getItem("token") && (
+              <li className="nav-item">
+                <Link
+                  className="nav-link"
+                  to="/saved-trips"
+                >
+                  Saved Trips ⭐
+                </Link>
+              </li>
+            )}
+
             {/* ABOUT */}
 
             <li className="nav-item">
@@ -361,6 +372,22 @@ useEffect(() => {
                   >
 
                     👤 Edit Profile
+
+                  </Link>
+
+                </li>
+
+                <li>
+
+                  <Link
+
+                    className="dropdown-item"
+
+                    to="/saved-trips"
+
+                  >
+
+                    ⭐ Saved Trips
 
                   </Link>
 

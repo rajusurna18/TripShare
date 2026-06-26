@@ -25,6 +25,8 @@ import {
 import "leaflet/dist/leaflet.css";
 import toast from "react-hot-toast";
 import Avatar from "../components/shared/Avatar";
+import SaveButton from "../components/shared/SaveButton";
+import ShareButton from "../components/shared/ShareButton";
 
 const styles = {
   container: {
@@ -149,6 +151,7 @@ function TripDetails() {
 
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
   const [location, setLocation] = useState(null);
   const [membersLocations, setMembersLocations] = useState([]);
 
@@ -255,6 +258,29 @@ function TripDetails() {
       setLoading(false);
     }
   };
+
+  // CHECK SAVED STATUS
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      if (window.savedTripIds) {
+        setIsSaved(window.savedTripIds.has(tripId));
+      } else {
+        try {
+          const res = await API.get("/saves");
+          const ids = new Set((res.data.saves || []).map((s) => s.trip?._id).filter(Boolean));
+          window.savedTripIds = ids;
+          setIsSaved(ids.has(tripId));
+        } catch (err) {
+          console.error("Error checking saved status in TripDetails:", err);
+        }
+      }
+    };
+    if (trip) {
+      checkSavedStatus();
+    }
+  }, [tripId, trip]);
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80";
@@ -454,7 +480,30 @@ function TripDetails() {
                 <span className="fw-semibold">{trip.createdBy?.name || "Unknown"}</span>
               </div>
               
-              <div className="d-flex gap-2">
+              <div className="d-flex gap-2 flex-wrap align-items-center">
+                <SaveButton
+                  tripId={tripId}
+                  initialSaved={isSaved}
+                  initialCount={trip.savesCount || 0}
+                  onToggle={(savedState, newCount) => {
+                    setIsSaved(savedState);
+                    if (window.savedTripIds) {
+                      if (savedState) {
+                        window.savedTripIds.add(tripId);
+                      } else {
+                        window.savedTripIds.delete(tripId);
+                      }
+                    }
+                    setTrip((prev) => ({ ...prev, savesCount: newCount }));
+                  }}
+                />
+                <ShareButton
+                  tripId={tripId}
+                  tripTitle={trip.title}
+                  tripDestination={trip.destination}
+                  initialCount={trip.sharesCount || 0}
+                />
+
                 {isOwner && (
                   <>
                     <button className="btn btn-warning btn-sm px-3" onClick={openEditModal}>

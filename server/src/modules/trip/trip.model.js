@@ -131,6 +131,26 @@ const tripSchema =
 
       },
 
+      savesCount: {
+
+        type: Number,
+
+        default: 0,
+
+        min: 0,
+
+      },
+
+      sharesCount: {
+
+        type: Number,
+
+        default: 0,
+
+        min: 0,
+
+      },
+
       status: {
 
         type: String,
@@ -190,6 +210,18 @@ tripSchema.index({
 tripSchema.index({
 
   members: 1,
+
+});
+
+tripSchema.index({
+
+  savesCount: -1,
+
+});
+
+tripSchema.index({
+
+  sharesCount: -1,
 
 });
 

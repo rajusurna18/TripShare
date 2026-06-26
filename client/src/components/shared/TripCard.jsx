@@ -1,15 +1,38 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import API from "../../services/api";
+import SaveButton from "./SaveButton";
+import ShareButton from "./ShareButton";
 
 function TripCard({ trip }) {
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      if (window.savedTripIds) {
+        setIsSaved(window.savedTripIds.has(trip._id));
+      } else {
+        try {
+          const res = await API.get("/saves");
+          const ids = new Set((res.data.saves || []).map((s) => s.trip?._id).filter(Boolean));
+          window.savedTripIds = ids;
+          setIsSaved(ids.has(trip._id));
+        } catch (err) {
+          console.error("Error checking saved status in TripCard:", err);
+        }
+      }
+    };
+    checkSavedStatus();
+  }, [trip._id]);
 
   const currentUser =
   JSON.parse(
-
     localStorage.getItem(
       "user"
     ) || "{}"
-
   );
 
 const sendJoinRequest =
@@ -218,6 +241,30 @@ const sendJoinRequest =
        >
         🤝 Matches
       </Link>
+
+      <div className="d-flex gap-2 w-100 mt-2 border-top border-secondary border-opacity-10 pt-2 justify-content-end">
+        <SaveButton
+          tripId={trip._id}
+          initialSaved={isSaved}
+          initialCount={trip.savesCount}
+          onToggle={(savedState, newCount) => {
+            setIsSaved(savedState);
+            if (window.savedTripIds) {
+              if (savedState) {
+                window.savedTripIds.add(trip._id);
+              } else {
+                window.savedTripIds.delete(trip._id);
+              }
+            }
+          }}
+        />
+        <ShareButton
+          tripId={trip._id}
+          tripTitle={trip.title}
+          tripDestination={trip.destination}
+          initialCount={trip.sharesCount}
+        />
+      </div>
 
         </div>
 

@@ -29,6 +29,9 @@ from "./modules/profile/profile.routes.js";
 import blogRoutes
 from "./modules/blog/blog.routes.js";
 
+import tripSaveRoutes
+from "./modules/tripSave/tripSave.routes.js";
+
 import { protect }
 from "./middleware/auth.middleware.js";
 
@@ -108,6 +111,11 @@ app.use(
 app.use(
   "/api/blogs",
   blogRoutes
+);
+
+app.use(
+  "/api/saves",
+  tripSaveRoutes
 );
 
 app.use(

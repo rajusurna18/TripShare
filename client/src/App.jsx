@@ -62,6 +62,8 @@ from "./pages/Recommendations";
 import Discover
 from "./pages/Discover";
 
+import SavedTrips from "./pages/SavedTrips";
+
 import Blogs from "./pages/Blogs";
 import BlogDetails from "./pages/BlogDetails";
 import CreateBlog from "./pages/CreateBlog";
@@ -357,6 +359,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Discover />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/saved-trips"
+          element={
+            <ProtectedRoute>
+              <SavedTrips />
             </ProtectedRoute>
           }
         />
