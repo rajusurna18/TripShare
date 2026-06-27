@@ -23,6 +23,9 @@ function Matches() {
   const [loading, setLoading] =
     useState(true);
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const navigate =
     useNavigate();
 
@@ -51,18 +54,23 @@ function Matches() {
 
           }
 
+          setLoading(true);
+
           const res =
             await getMatches(
-              tripId
+              tripId,
+              page,
+              12
             );
 
-          setMatches(
+          const data = res.data.matches || res.data;
+          setMatches(data);
 
-            res.data.matches ||
-
-            res.data
-
-          );
+          if (res.data.total) {
+            setTotalPages(Math.ceil(res.data.total / 12));
+          } else {
+            setTotalPages(1);
+          }
 
         } catch (err) {
 
@@ -78,7 +86,7 @@ function Matches() {
 
     fetchMatches();
 
-  }, [tripId]);
+  }, [tripId, page]);
 
   // MATCH QUALITY
 
@@ -268,7 +276,7 @@ function Matches() {
           ) : (
 
             // MATCHES GRID
-
+            <>
             <div className="row g-4">
 
               {
@@ -495,7 +503,30 @@ function Matches() {
               }
 
             </div>
-
+            {totalPages > 1 && (
+              <div className="d-flex justify-content-center align-items-center gap-3 mt-5">
+                <button
+                  className="btn btn-outline-warning px-4 py-2"
+                  disabled={page === 1}
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  style={{ borderRadius: "10px", fontWeight: "600" }}
+                >
+                  ◀ Prev
+                </button>
+                <span className="text-secondary fw-semibold">
+                  Page <strong className="text-warning">{page}</strong> of {totalPages}
+                </span>
+                <button
+                  className="btn btn-outline-warning px-4 py-2"
+                  disabled={page === totalPages}
+                  onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                  style={{ borderRadius: "10px", fontWeight: "600" }}
+                >
+                  Next ▶
+                </button>
+              </div>
+            )}
+            </>
           )
 
         }

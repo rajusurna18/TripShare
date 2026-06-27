@@ -61,6 +61,16 @@ const userSchema =
         default: "",
       },
 
+      budgetPreference: {
+        type: Number,
+        default: 0,
+      },
+
+      preferredTripCategories: {
+        type: [String],
+        default: [],
+      },
+
       // SOCIAL PROFILE
 
       location: {

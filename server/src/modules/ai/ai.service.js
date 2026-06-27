@@ -1,33 +1,11 @@
-import genAI
-from "../../config/gemini.js";
+import genAI from "../../config/gemini.js";
+import AIConversation from "./ai.model.js";
 
-// GEMINI MODEL
-
-const model =
-  genAI.getGenerativeModel({
-
-    model:
-      "gemini-2.5-flash",
-
-  });
-
-// ==============================
-// AI CHAT ASSISTANT
-// ==============================
-
-export const generateAIReplyService =
-  async (question) => {
-
-    const prompt = `
-
-You are TripShare AI Buddy,
-an advanced travel assistant.
-
+// GEMINI MODELS WITH SYSTEM INSTRUCTIONS
+const chatModel = genAI.getGenerativeModel({
+  model: "gemini-2.5-flash",
+  systemInstruction: `You are TripShare AI Buddy, an advanced travel assistant.
 Answer clearly and professionally.
-
-USER QUESTION:
-${question}
-
 Include:
 - travel tips
 - budget suggestions
@@ -35,66 +13,109 @@ Include:
 - transport ideas
 - food recommendations
 - safety tips
+Keep formatting clean and readable. Use Markdown headings and bullet points.`,
+});
 
-Keep formatting clean and readable.
+const itineraryModel = genAI.getGenerativeModel({
+  model: "gemini-2.5-flash",
+  systemInstruction: "You are TripShare AI Planner. You specialize in generating detailed day-wise travel itineraries based on trip details.",
+});
 
-`;
-
-    const result =
-      await model.generateContent(
-        prompt
-      );
-
-    return result
-      .response
-      .text();
-
+// EXPONENTIAL BACKOFF RETRY HELPER
+const callGeminiWithRetry = async (fn, retries = 3, delay = 1000) => {
+  let attempt = 0;
+  while (attempt < retries) {
+    try {
+      return await fn();
+    } catch (error) {
+      attempt++;
+      if (attempt >= retries) throw error;
+      console.log(`Gemini API call failed (attempt ${attempt}/${retries}). Retrying in ${delay}ms... Error:`, error.message);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 2;
+    }
+  }
 };
 
 // ==============================
-// AI ITINERARY GENERATOR
+// AI CHAT ASSISTANT (PERSISTENT & RETRY-CAPABLE)
 // ==============================
+export const generateAIReplyService = async (question, userId, conversationId) => {
+  let conversation;
 
-export const generateItineraryService =
-  async (data) => {
+  if (conversationId) {
+    conversation = await AIConversation.findOne({ _id: conversationId, userId });
+  }
 
-    const {
+  // Auto-create conversation if not found or not provided
+  if (!conversation) {
+    conversation = await AIConversation.create({
+      userId,
+      title: question.substring(0, 35) + (question.length > 35 ? "..." : ""),
+      messages: [],
+    });
+  }
 
-      destination,
+  // Format existing messages for Gemini SDK startChat
+  const sdkHistory = conversation.messages.map(msg => ({
+    role: msg.role,
+    parts: [{ text: msg.content }],
+  }));
 
-      budget,
+  // Append user's new question to the db conversation first
+  conversation.messages.push({
+    role: "user",
+    content: question,
+    timestamp: new Date(),
+  });
 
-      days,
+  const chat = chatModel.startChat({
+    history: sdkHistory,
+  });
 
-      travelers,
+  // Call Gemini using retry wrapper
+  const textResponse = await callGeminiWithRetry(async () => {
+    const result = await chat.sendMessage(question);
+    return result.response.text();
+  });
 
-      tripType,
+  // Append AI's reply to the db conversation
+  conversation.messages.push({
+    role: "model",
+    content: textResponse,
+    timestamp: new Date(),
+  });
 
-    } = data;
+  await conversation.save();
 
-    const prompt = `
+  return {
+    reply: textResponse,
+    conversation,
+  };
+};
 
-You are TripShare AI Planner.
+// ==============================
+// AI ITINERARY GENERATOR (RETRY-CAPABLE)
+// ==============================
+export const generateItineraryService = async (data) => {
+  const {
+    destination,
+    budget,
+    days,
+    travelers,
+    tripType,
+  } = data;
 
-Create a detailed and professional
-${days}-day travel itinerary.
+  const prompt = `
+Create a detailed and professional ${days}-day travel itinerary.
 
 TRIP DETAILS:
-
-Destination:
-${destination}
-
-Budget:
-₹${budget}
-
-Travelers:
-${travelers}
-
-Trip Type:
-${tripType}
+Destination: ${destination}
+Budget: ₹${budget}
+Travelers: ${travelers}
+Trip Type: ${tripType}
 
 INCLUDE:
-
 1. Day-wise travel plan
 2. Morning / afternoon / night activities
 3. Hotel recommendations
@@ -108,7 +129,6 @@ INCLUDE:
 11. Best local experiences
 
 RULES:
-
 - Keep response beautiful
 - Use headings
 - Use emojis
@@ -116,16 +136,12 @@ RULES:
 - Budget should match properly
 - Avoid very expensive suggestions
 - Give smart recommendations
-
 `;
 
-    const result =
-      await model.generateContent(
-        prompt
-      );
+  const textResponse = await callGeminiWithRetry(async () => {
+    const result = await itineraryModel.generateContent(prompt);
+    return result.response.text();
+  });
 
-    return result
-      .response
-      .text();
-
+  return textResponse;
 };

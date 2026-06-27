@@ -74,6 +74,9 @@ export const computeStatsObj = async (user, userId) => {
     reviews,
   });
 
+  const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+  const averageRating = reviews.length > 0 ? parseFloat((totalRating / reviews.length).toFixed(1)) : 5;
+
   return {
     friendsCount: user.friends?.length || 0,
     followersCount: user.followers?.length || 0,
@@ -81,6 +84,7 @@ export const computeStatsObj = async (user, userId) => {
     tripsCreated,
     tripsJoined,
     reviewsCount: reviews.length,
+    averageRating,
     blogsCount,
     trustScore,
     profileCompletion: completionDetails.percentage,
@@ -141,6 +145,8 @@ export const updateProfileService = async (userId, data) => {
       profileCompletion: stats.profileCompletion || 0,
       followersCount: stats.followersCount || 0,
       followingCount: stats.followingCount || 0,
+      averageRating: stats.averageRating || 5,
+      totalReviews: stats.reviewsCount || 0,
     }
   });
 
@@ -340,6 +346,8 @@ export const updateUserStatsCache = async (userId) => {
         profileCompletion: stats.profileCompletion || 0,
         followersCount: stats.followersCount || 0,
         followingCount: stats.followingCount || 0,
+        averageRating: stats.averageRating || 5,
+        totalReviews: stats.reviewsCount || 0,
       }
     });
   } catch (err) {

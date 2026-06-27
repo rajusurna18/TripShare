@@ -3,6 +3,10 @@ import express from "express";
 import {
   generateAIReply,
   generateItinerary,
+  getConversations,
+  getConversation,
+  createConversation,
+  deleteConversation,
 } from "./ai.controller.js";
 
 import { protect } from "../../middleware/auth.middleware.js";
@@ -22,5 +26,11 @@ router.post(
   protect,
   generateItinerary
 );
+
+// AI CONVERSATION CRUD
+router.get("/conversations", protect, getConversations);
+router.get("/conversations/:id", protect, getConversation);
+router.post("/conversations", protect, createConversation);
+router.delete("/conversations/:id", protect, deleteConversation);
 
 export default router;

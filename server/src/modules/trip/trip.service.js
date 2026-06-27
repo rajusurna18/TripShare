@@ -279,6 +279,10 @@ export const deleteTripService = async (tripId, userId) => {
     await Trip.deleteOne({ _id: tripId });
   }
 
+  // Update cached stats for owner and all members
+  const membersToUpdate = Array.from(new Set([trip.createdBy, ...(trip.members || [])]));
+  await Promise.all(membersToUpdate.map(memberId => updateUserStatsCache(memberId)));
+
   return { success: true };
 };
 
@@ -308,6 +312,12 @@ export const leaveTripService = async (tripId, userId) => {
     `/trip/${tripId}`,
     userId
   );
+
+  // Update cached stats for the leaving user and trip creator
+  await Promise.all([
+    updateUserStatsCache(userId),
+    updateUserStatsCache(trip.createdBy),
+  ]);
 
   return await Trip.findById(tripId)
     .populate("createdBy", "name email profileImage")
@@ -345,6 +355,9 @@ export const removeMemberService = async (tripId, memberId, userId) => {
     userId
   );
 
+  // Update cached stats for the removed member
+  await updateUserStatsCache(memberId);
+
   return await Trip.findById(tripId)
     .populate("createdBy", "name email profileImage")
     .populate("members", "name profileImage travelStyle");
@@ -379,6 +392,12 @@ export const transferOwnershipService = async (tripId, newOwnerId, userId) => {
     `/trip/${tripId}`,
     userId
   );
+
+  // Update cached stats for both old and new owner
+  await Promise.all([
+    updateUserStatsCache(userId),
+    updateUserStatsCache(newOwnerId)
+  ]);
 
   return await Trip.findById(tripId)
     .populate("createdBy", "name email profileImage")
