@@ -5,6 +5,7 @@ import {
 
 import {
   useParams,
+  useNavigate,
 } from "react-router-dom";
 
 import API
@@ -23,6 +24,8 @@ function Expenses() {
 
   const { tripId } =
     useParams();
+
+  const navigate = useNavigate();
 
   const [balances, setBalances] =
     useState(null);
@@ -241,21 +244,32 @@ function Expenses() {
 
         {/* PAGE TITLE */}
 
-        <div className="mb-5">
+        <div className="mb-5 d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-          <h1 className="fw-bold">
+          <div>
 
-            💳 Trip Expenses
+            <h1 className="fw-bold">
 
-          </h1>
+              💳 Trip Expenses
 
-          <p className="dashboard-subtitle">
+            </h1>
 
-            Track spending,
-            balances,
-            and settlements.
+            <p className="dashboard-subtitle">
 
-          </p>
+              Track spending,
+              balances,
+              and settlements.
+
+            </p>
+
+          </div>
+
+          <button
+            className="btn btn-outline-warning rounded-4 px-4 py-2.5 fw-bold shadow-sm"
+            onClick={() => navigate(`/expense-ai/${tripId}`)}
+          >
+            🤖 Run AI Settlement Insights
+          </button>
 
         </div>
 

@@ -7,6 +7,7 @@ import {
   getTripExpenses,
 
   calculateBalances,
+  getExpenseAIInsights,
 
 } from "./expense.controller.js";
 
@@ -49,6 +50,16 @@ router.get(
   protect,
 
   calculateBalances
+
+);
+
+router.get(
+
+  "/ai/:tripId/insights",
+
+  protect,
+
+  getExpenseAIInsights
 
 );
 

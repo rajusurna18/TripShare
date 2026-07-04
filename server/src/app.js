@@ -14,6 +14,9 @@ from "./modules/match/match.routes.js";
 import aiRoutes
 from "./modules/ai/ai.routes.js";
 
+import aiPackingRoutes
+from "./modules/ai/aiPacking.routes.js";
+
 import expenseRoutes
 from "./modules/expense/expense.routes.js";
 
@@ -121,6 +124,11 @@ app.use(
 app.use(
   "/api/ai",
   aiRoutes
+);
+
+app.use(
+  "/api/ai/packing",
+  aiPackingRoutes
 );
 
 // TEST PROTECTED ROUTE

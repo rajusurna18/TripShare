@@ -714,6 +714,12 @@ function TripDetails() {
           Expenses 💳
         </Link>
         <Link
+          to={`/packing-list/${tripId}`}
+          className="btn btn-outline-warning"
+        >
+          🎒 Packing List
+        </Link>
+        <Link
           to={`/memories/${tripId}`}
           className="btn btn-outline-light"
         >   

@@ -2,6 +2,7 @@ import {
   createExpenseService,
   getTripExpensesService,
   calculateBalancesService,
+  getExpenseAIInsightsService,
 } from "./expense.service.js";
 
 import Trip from "../trip/trip.model.js";
@@ -189,4 +190,42 @@ export const calculateBalances =
 
     }
 
+};
+
+// GET EXPENSE AI INSIGHTS
+export const getExpenseAIInsights = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const trip = await Trip.findById(tripId);
+    if (!trip) {
+      return res.status(404).json({
+        success: false,
+        message: "Trip not found",
+      });
+    }
+
+    const isCreator = trip.createdBy.toString() === req.user.id.toString();
+    const isMember = trip.members.some(
+      (member) => member.toString() === req.user.id.toString()
+    );
+
+    if (!isCreator && !isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: You are not a member of this trip",
+      });
+    }
+
+    const insights = await getExpenseAIInsightsService(tripId);
+    res.status(200).json({
+      success: true,
+      insights,
+    });
+  } catch (err) {
+    console.log("GET EXPENSE AI INSIGHTS ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message || "Failed to fetch AI insights",
+    });
+  }
 };

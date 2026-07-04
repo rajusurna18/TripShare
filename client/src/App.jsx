@@ -68,6 +68,8 @@ import Blogs from "./pages/Blogs";
 import BlogDetails from "./pages/BlogDetails";
 import CreateBlog from "./pages/CreateBlog";
 import EditBlog from "./pages/EditBlog";
+import AIPackingList from "./pages/AIPackingList";
+import AIExpenses from "./pages/AIExpenses";
 
 function App() {
 
@@ -263,6 +265,22 @@ function App() {
 
               <Expenses />
 
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/packing-list/:tripId"
+          element={
+            <ProtectedRoute>
+              <AIPackingList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/expense-ai/:tripId"
+          element={
+            <ProtectedRoute>
+              <AIExpenses />
             </ProtectedRoute>
           }
         />
