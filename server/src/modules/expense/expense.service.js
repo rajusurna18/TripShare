@@ -418,6 +418,7 @@ export const getExpenseAIInsightsService = async (tripId) => {
     budgetAdviser: parsedAIResponse.budgetAdviser || [],
     fraudNarrative: parsedAIResponse.fraudNarrative || "No suspicious entries flagged.",
     simplifiedTransactions,
+    balancesData,
     charts: {
       categoryChart,
       memberChart,

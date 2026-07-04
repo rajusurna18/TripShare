@@ -63,6 +63,31 @@ function AIExpenses() {
           </div>
         )}
 
+        {/* SETTLEMENT SUMMARY */}
+        {insights?.balancesData && (
+          <div className="glass-card p-4 mb-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-4 shadow-sm">
+            <h4 className="fw-bold text-warning mb-4">Settlement Summary 📊</h4>
+            <div className="row text-center g-3">
+              <div className="col-6 col-md-3 border-end border-secondary border-opacity-15">
+                <h3 className="text-light fw-bold mb-1">₹{insights.balancesData.total || 0}</h3>
+                <small className="text-secondary d-block">Total Expenses</small>
+              </div>
+              <div className="col-6 col-md-3 border-end border-secondary border-opacity-15">
+                <h3 className="text-success fw-bold mb-1">₹{insights.balancesData.perPerson || 0}</h3>
+                <small className="text-secondary d-block">Per Person Share</small>
+              </div>
+              <div className="col-6 col-md-3 border-end border-secondary border-opacity-15">
+                <h3 className="text-info fw-bold mb-1">₹{insights.simplifiedTransactions?.reduce((sum, tx) => sum + tx.amount, 0) || 0}</h3>
+                <small className="text-secondary d-block">Total Settled</small>
+              </div>
+              <div className="col-6 col-md-3">
+                <h3 className="text-warning fw-bold mb-1">{insights.simplifiedTransactions?.length || 0}</h3>
+                <small className="text-secondary d-block">Transfers Required</small>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="row g-4">
           
           {/* LEFT: SETTLEMENT PLAN & ANOMALIES */}
@@ -96,6 +121,18 @@ function AIExpenses() {
                   ))}
                 </div>
               )}
+
+              <h5 className="fw-bold text-light border-top pt-4 border-secondary border-opacity-10 mb-3" style={{ fontSize: "15px" }}>Individual Net Balances</h5>
+              <div className="d-flex flex-column gap-2 mb-4">
+                {insights?.balancesData?.balances?.map((b, idx) => (
+                  <div key={idx} className="d-flex justify-content-between align-items-center py-2 px-3 bg-dark bg-opacity-20 rounded-3" style={{ border: "1px solid rgba(255,255,255,0.02)" }}>
+                    <span className="small text-secondary">{b.user} (Paid: ₹{b.paid})</span>
+                    <strong className={b.balance > 0 ? "text-success small" : b.balance < 0 ? "text-danger small" : "text-secondary small"}>
+                      {b.balance > 0 ? `Gets back ₹${b.balance}` : b.balance < 0 ? `Owes ₹${Math.abs(b.balance)}` : "Settled"}
+                    </strong>
+                  </div>
+                ))}
+              </div>
 
               {insights?.narrative && (
                 <div className="bg-dark bg-opacity-20 p-3 rounded-4 border border-secondary border-opacity-5">
