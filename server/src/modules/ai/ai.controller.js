@@ -1,13 +1,14 @@
 import {
   generateAIReplyService,
   generateItineraryService,
+  generateAIReplyServiceStream,
 } from "./ai.service.js";
 import AIConversation from "./ai.model.js";
 
 // AI CHAT
 export const generateAIReply = async (req, res) => {
   try {
-    const { question, conversationId } = req.body;
+    const { question, conversationId, stream } = req.body;
     const userId = req.user.id;
 
     if (!question) {
@@ -17,23 +18,52 @@ export const generateAIReply = async (req, res) => {
       });
     }
 
-    const { reply, conversation } = await generateAIReplyService(
+    // Default to streaming unless explicitly set to false
+    if (stream === false) {
+      const { reply, conversation } = await generateAIReplyService(
+        question,
+        userId,
+        conversationId
+      );
+
+      return res.status(200).json({
+        success: true,
+        reply,
+        conversation,
+      });
+    }
+
+    // Set Server-Sent Events headers
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
+
+    const { reply, conversation } = await generateAIReplyServiceStream(
       question,
       userId,
-      conversationId
+      conversationId,
+      (chunkText) => {
+        // Send incremental chunk
+        res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+      }
     );
 
-    res.status(200).json({
-      success: true,
-      reply,
-      conversation,
-    });
+    // Send final completed payload
+    res.write(`data: ${JSON.stringify({ done: true, conversation })}\n\n`);
+    res.end();
+
   } catch (err) {
     console.log("AI CHAT ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: "AI response failed",
-    });
+    if (res.headersSent) {
+      res.write(`data: ${JSON.stringify({ error: "AI response failed" })}\n\n`);
+      res.end();
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "AI response failed",
+      });
+    }
   }
 };
 

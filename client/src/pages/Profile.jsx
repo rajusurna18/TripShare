@@ -14,6 +14,10 @@ function Profile() {
   const [interests, setInterests] = useState("");
   const [travelStyle, setTravelStyle] = useState("");
   const [personality, setPersonality] = useState("");
+  const [mbti, setMbti] = useState("");
+  const [budgetMin, setBudgetMin] = useState(0);
+  const [budgetMax, setBudgetMax] = useState(0);
+  const [travelFrequency, setTravelFrequency] = useState("medium");
   const [location, setLocation] = useState("");
   const [instagram, setInstagram] = useState("");
   const [website, setWebsite] = useState("");
@@ -46,6 +50,10 @@ function Profile() {
       setInterests(profile.interests?.join(", ") || "");
       setTravelStyle(profile.travelStyle || "");
       setPersonality(profile.personality || "");
+      setMbti(profile.mbti || "");
+      setBudgetMin(profile.budgetRange?.min || 0);
+      setBudgetMax(profile.budgetRange?.max || 0);
+      setTravelFrequency(profile.travelFrequency || "medium");
       setLocation(profile.location || "");
       setInstagram(profile.instagram || "");
       setWebsite(profile.website || "");
@@ -69,6 +77,10 @@ function Profile() {
       formData.append("bio", bio);
       formData.append("travelStyle", travelStyle);
       formData.append("personality", personality);
+      formData.append("mbti", mbti);
+      formData.append("budgetMin", budgetMin);
+      formData.append("budgetMax", budgetMax);
+      formData.append("travelFrequency", travelFrequency);
       formData.append("location", location);
       formData.append("instagram", instagram);
       formData.append("website", website);
@@ -112,6 +124,10 @@ function Profile() {
       setInterests(updatedUser.interests?.join(", ") || "");
       setTravelStyle(updatedUser.travelStyle || "");
       setPersonality(updatedUser.personality || "");
+      setMbti(updatedUser.mbti || "");
+      setBudgetMin(updatedUser.budgetRange?.min || 0);
+      setBudgetMax(updatedUser.budgetRange?.max || 0);
+      setTravelFrequency(updatedUser.travelFrequency || "medium");
       setLocation(updatedUser.location || "");
       setInstagram(updatedUser.instagram || "");
       setWebsite(updatedUser.website || "");
@@ -203,6 +219,14 @@ function Profile() {
           setTravelStyle={setTravelStyle}
           personality={personality}
           setPersonality={setPersonality}
+          mbti={mbti}
+          setMbti={setMbti}
+          budgetMin={budgetMin}
+          setBudgetMin={setBudgetMin}
+          budgetMax={budgetMax}
+          setBudgetMax={setBudgetMax}
+          travelFrequency={travelFrequency}
+          setTravelFrequency={setTravelFrequency}
           location={location}
           setLocation={setLocation}
           instagram={instagram}

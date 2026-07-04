@@ -63,6 +63,14 @@ export const updateProfile = async (req, res) => {
       }
     }
 
+    // Translate flat form fields to budgetRange object
+    if (req.body.budgetMin !== undefined || req.body.budgetMax !== undefined) {
+      req.body.budgetRange = {
+        min: Number(req.body.budgetMin) || 0,
+        max: Number(req.body.budgetMax) || 0,
+      };
+    }
+
     const user = await updateProfileService(req.user.id, req.body);
     res.json(user);
   } catch (err) {

@@ -56,9 +56,16 @@ export const generateAIReplyService = async (question, userId, conversationId) =
     });
   }
 
+  // History Pruning: keep last 14 messages (7 turns) to prevent context window bloat
+  const MAX_HISTORY_MESSAGES = 14;
+  let messagesToUse = conversation.messages;
+  if (messagesToUse.length > MAX_HISTORY_MESSAGES) {
+    messagesToUse = messagesToUse.slice(-MAX_HISTORY_MESSAGES);
+  }
+
   // Format existing messages for Gemini SDK startChat
-  const sdkHistory = conversation.messages.map(msg => ({
-    role: msg.role,
+  const sdkHistory = messagesToUse.map(msg => ({
+    role: msg.role === "user" ? "user" : "model",
     parts: [{ text: msg.content }],
   }));
 
@@ -90,6 +97,80 @@ export const generateAIReplyService = async (question, userId, conversationId) =
 
   return {
     reply: textResponse,
+    conversation,
+  };
+};
+
+// ==============================
+// AI CHAT ASSISTANT STREAMING SERVICE
+// ==============================
+export const generateAIReplyServiceStream = async (question, userId, conversationId, onChunk) => {
+  let conversation;
+
+  if (conversationId) {
+    conversation = await AIConversation.findOne({ _id: conversationId, userId });
+  }
+
+  // Auto-create conversation if not found or not provided
+  if (!conversation) {
+    conversation = await AIConversation.create({
+      userId,
+      title: question.substring(0, 35) + (question.length > 35 ? "..." : ""),
+      messages: [],
+    });
+  }
+
+  // History Pruning: keep last 14 messages to prevent context window bloat
+  const MAX_HISTORY_MESSAGES = 14;
+  let messagesToUse = conversation.messages;
+  if (messagesToUse.length > MAX_HISTORY_MESSAGES) {
+    messagesToUse = messagesToUse.slice(-MAX_HISTORY_MESSAGES);
+  }
+
+  // Format existing messages for Gemini SDK startChat
+  const sdkHistory = messagesToUse.map(msg => ({
+    role: msg.role === "user" ? "user" : "model",
+    parts: [{ text: msg.content }],
+  }));
+
+  // Append user's new question to the db conversation first
+  conversation.messages.push({
+    role: "user",
+    content: question,
+    timestamp: new Date(),
+  });
+  await conversation.save();
+
+  const chat = chatModel.startChat({
+    history: sdkHistory,
+  });
+
+  let fullResponseText = "";
+
+  // Call Gemini streaming using retry wrapper
+  const resultStream = await callGeminiWithRetry(async () => {
+    return await chat.sendMessageStream(question);
+  });
+
+  for await (const chunk of resultStream.stream) {
+    const chunkText = chunk.text();
+    fullResponseText += chunkText;
+    if (onChunk) {
+      onChunk(chunkText);
+    }
+  }
+
+  // Append AI's reply to the db conversation
+  conversation.messages.push({
+    role: "model",
+    content: fullResponseText,
+    timestamp: new Date(),
+  });
+
+  await conversation.save();
+
+  return {
+    reply: fullResponseText,
     conversation,
   };
 };

@@ -22,11 +22,21 @@ export const findMatchesService =
     const currentUserInterests = currentUser.interests || [];
 
     const facetResult = await User.aggregate([
+      // STAGE 1: Indexed Pre-Filtering (O(N) -> O(K) Reduction)
       {
         $match: {
           _id: { $ne: new mongoose.Types.ObjectId(currentUserId) },
+          $or: [
+            { destinationPreference: currentTrip.destination },
+            { travelStyle: currentUser.travelStyle }
+          ]
         },
       },
+      // Limit candidate pool size to prevent database aggregation CPU bottlenecks
+      {
+        $limit: 1000
+      },
+      // Calculate intersection sets
       {
         $addFields: {
           commonInterests: {
@@ -47,14 +57,36 @@ export const findMatchesService =
               currentUser.languages || [],
             ],
           },
+          intersectionCategory: {
+            $size: {
+              $setIntersection: [
+                { $ifNull: ["$preferredTripCategories", []] },
+                currentTrip.tags || [],
+              ]
+            }
+          },
+          unionCategory: {
+            $size: {
+              $setUnion: [
+                { $ifNull: ["$preferredTripCategories", []] },
+                currentTrip.tags || [],
+              ]
+            }
+          },
+          // Char match for MBTI (MBTI compatibility dimensions check)
+          char1Match: { $cond: [{ $eq: [{ $substrCP: [{ $ifNull: ["$mbti", ""] }, 0, 1] }, { $substrCP: [currentUser.mbti || "", 0, 1] }] }, 1, 0] },
+          char2Match: { $cond: [{ $eq: [{ $substrCP: [{ $ifNull: ["$mbti", ""] }, 1, 1] }, { $substrCP: [currentUser.mbti || "", 1, 1] }] }, 1, 0] },
+          char3Match: { $cond: [{ $eq: [{ $substrCP: [{ $ifNull: ["$mbti", ""] }, 2, 1] }, { $substrCP: [currentUser.mbti || "", 2, 1] }] }, 1, 0] },
+          char4Match: { $cond: [{ $eq: [{ $substrCP: [{ $ifNull: ["$mbti", ""] }, 3, 1] }, { $substrCP: [currentUser.mbti || "", 3, 1] }] }, 1, 0] }
         },
       },
+      // Calculate Stage 2 compatibility scores (total weights = 100)
       {
         $addFields: {
           scoreDest: {
             $cond: [
               { $eq: ["$destinationPreference", currentTrip.destination] },
-              25,
+              20,
               0,
             ],
           },
@@ -81,10 +113,16 @@ export const findMatchesService =
               0,
             ],
           },
+          // Budget range check: full 15 points if trip budget fits within user's min/max range, decay outside
           scoreBudget: {
             $cond: [
-              { $eq: [{ $ifNull: ["$budgetPreference", 0] }, 0] },
-              7.5,
+              {
+                $and: [
+                  { $gte: [currentTrip.budget, { $ifNull: ["$budgetRange.min", 0] }] },
+                  { $lte: [currentTrip.budget, { $ifNull: ["$budgetRange.max", 0] }] }
+                ]
+              },
+              15,
               {
                 $multiply: [
                   {
@@ -96,143 +134,77 @@ export const findMatchesService =
                           {
                             $divide: [
                               {
-                                $abs: {
-                                  $subtract: [
-                                    currentTrip.budget,
-                                    { $ifNull: ["$budgetPreference", 0] },
-                                  ],
-                                },
+                                $min: [
+                                  { $abs: { $subtract: [currentTrip.budget, { $ifNull: ["$budgetRange.min", 0] }] } },
+                                  { $abs: { $subtract: [currentTrip.budget, { $ifNull: ["$budgetRange.max", 0] }] } }
+                                ]
                               },
-                              {
-                                $max: [
-                                  currentTrip.budget,
-                                  { $ifNull: ["$budgetPreference", 1] },
-                                ],
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
+                              { $max: [currentTrip.budget, 1] }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
                   },
-                  15,
-                ],
-              },
-            ],
+                  15
+                ]
+              }
+            ]
           },
+          // MBTI Personality Overlaps: Max 10 points
           scorePersonality: {
+            $multiply: [
+              {
+                $divide: [
+                  { $add: ["$char1Match", "$char2Match", "$char3Match", "$char4Match"] },
+                  4
+                ]
+              },
+              10
+            ]
+          },
+          // Trip Category Overlaps (Jaccard similarity): Max 10 points
+          scoreCategory: {
             $cond: [
-              { $eq: ["$personality", currentUser.personality] },
-              10,
+              { $eq: ["$unionCategory", 0] },
+              5, // Fallback default
+              {
+                $multiply: [
+                  { $divide: ["$intersectionCategory", "$unionCategory"] },
+                  10
+                ]
+              }
+            ]
+          },
+          // Travel History (visited intersection + frequency similarity): Max 5 points
+          scoreHistory: {
+            $add: [
+              {
+                $multiply: [
+                  { $min: [1.0, { $size: { $ifNull: ["$commonVisited", []] } }] },
+                  2.5
+                ]
+              },
               {
                 $cond: [
-                  {
-                    $or: [
-                      {
-                        $and: [
-                          { $eq: ["$personality", "Introvert"] },
-                          { $eq: [currentUser.personality, "Extrovert"] },
-                        ],
-                      },
-                      {
-                        $and: [
-                          { $eq: ["$personality", "Extrovert"] },
-                          { $eq: [currentUser.personality, "Introvert"] },
-                        ],
-                      },
-                    ],
-                  },
-                  8,
-                  {
-                    $cond: [
-                      {
-                        $and: [
-                          { $ne: [{ $ifNull: ["$personality", ""] }, ""] },
-                          {
-                            $ne: [
-                              { $ifNull: [currentUser.personality, ""] },
-                              "",
-                            ],
-                          },
-                        ],
-                      },
-                      3,
-                      0,
-                    ],
-                  },
-                ],
-              },
-            ],
+                  { $eq: [{ $ifNull: ["$travelFrequency", "medium"] }, { $ifNull: [currentUser.travelFrequency, "medium"] }] },
+                  2.5,
+                  0
+                ]
+              }
+            ]
           },
-          scoreCategory: {
-            $multiply: [
-              {
-                $min: [
-                  1.0,
-                  {
-                    $divide: [
-                      {
-                        $size: {
-                          $setIntersection: [
-                            { $ifNull: ["$preferredTripCategories", []] },
-                            currentTrip.tags || [],
-                          ],
-                        },
-                      },
-                      2,
-                    ],
-                  },
-                ],
-              },
-              10,
-            ],
-          },
-          scoreHistoryVisited: {
-            $multiply: [
-              { $min: [1.0, { $size: { $ifNull: ["$commonVisited", []] } }] },
-              2.5,
-            ],
-          },
-          scoreHistoryExperience: {
-            $multiply: [
-              {
-                $max: [
-                  0,
-                  {
-                    $subtract: [
-                      1,
-                      {
-                        $divide: [
-                          {
-                            $abs: {
-                              $subtract: [
-                                { $ifNull: ["$completedTrips", 0] },
-                                currentUser.completedTrips || 0,
-                              ],
-                            },
-                          },
-                          {
-                            $max: [
-                              1,
-                              {
-                                $add: [
-                                  { $ifNull: ["$completedTrips", 0] },
-                                  currentUser.completedTrips || 0,
-                                ],
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              2.5,
-            ],
-          },
+          // Language Compatibility: Max 5 points
+          scoreLanguage: {
+            $cond: [
+              { $gt: [{ $size: { $ifNull: ["$commonLanguages", []] } }, 0] },
+              5,
+              0
+            ]
+          }
         },
       },
+      // Compile final aggregate scores
       {
         $addFields: {
           score: {
@@ -245,8 +217,8 @@ export const findMatchesService =
                   "$scoreBudget",
                   "$scorePersonality",
                   "$scoreCategory",
-                  "$scoreHistoryVisited",
-                  "$scoreHistoryExperience",
+                  "$scoreHistory",
+                  "$scoreLanguage"
                 ],
               },
               0,
@@ -254,11 +226,13 @@ export const findMatchesService =
           },
         },
       },
+      // Filter out low compatible records
       {
         $match: {
           score: { $gte: 20 },
         },
       },
+      // Rank matched elements (using primary scores, then tie-breakers)
       {
         $sort: {
           score: -1,
@@ -267,6 +241,7 @@ export const findMatchesService =
           profileCompletion: -1,
         },
       },
+      // Redact sensitive credentials
       {
         $project: {
           password: 0,
@@ -274,6 +249,7 @@ export const findMatchesService =
           resetOTPExpire: 0,
         },
       },
+      // Facet paginator
       {
         $facet: {
           metadata: [{ $count: "total" }],
@@ -288,6 +264,16 @@ export const findMatchesService =
     const formattedMatches = matchesData.map(user => ({
       user,
       score: user.score,
+      scoreBreakdown: {
+        destination: user.scoreDest || 0,
+        interests: user.scoreInterests || 0,
+        travelStyle: user.scoreStyle || 0,
+        budget: user.scoreBudget || 0,
+        personality: user.scorePersonality || 0,
+        category: user.scoreCategory || 0,
+        history: user.scoreHistory || 0,
+        language: user.scoreLanguage || 0
+      },
       commonInterests: user.commonInterests || [],
       commonLanguages: user.commonLanguages || [],
     }));

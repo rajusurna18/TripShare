@@ -71,6 +71,28 @@ const userSchema =
         default: [],
       },
 
+      mbti: {
+        type: String,
+        default: "",
+      },
+
+      budgetRange: {
+        min: {
+          type: Number,
+          default: 0,
+        },
+        max: {
+          type: Number,
+          default: 0,
+        },
+      },
+
+      travelFrequency: {
+        type: String,
+        enum: ["low", "medium", "high"],
+        default: "medium",
+      },
+
       // SOCIAL PROFILE
 
       location: {
@@ -220,6 +242,9 @@ userSchema.index({ destinationPreference: 1 });
 userSchema.index({ trustScore: -1 });
 userSchema.index({ profileCompletion: -1 });
 userSchema.index({ followersCount: -1 });
+userSchema.index({ destinationPreference: 1, travelStyle: 1 });
+userSchema.index({ preferredTripCategories: 1 });
+userSchema.index({ interests: 1 });
 
 
 export default mongoose.model(

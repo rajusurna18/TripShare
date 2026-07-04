@@ -25,6 +25,7 @@ function Matches() {
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [minScore, setMinScore] = useState(20);
 
   const navigate =
     useNavigate();
@@ -145,6 +146,8 @@ function Matches() {
 
 };
 
+  const filteredMatches = matches.filter(item => item.score >= minScore);
+
   return (
 
     <div className="dashboard-page min-vh-100 text-light">
@@ -171,6 +174,32 @@ function Matches() {
 
           </p>
 
+        </div>
+
+        {/* FILTER CONTROLS */}
+        <div className="glass-card p-4 mb-5 border border-secondary border-opacity-25 rounded-4 bg-dark bg-opacity-50 text-light shadow-sm">
+          <div className="row g-3 align-items-center">
+            <div className="col-12 col-md-8">
+              <label className="form-label fw-bold text-warning d-flex justify-content-between mb-2">
+                <span>Minimum Compatibility Match Threshold</span>
+                <span className="badge bg-warning text-dark px-3 py-2 fw-bold" style={{ fontSize: "14px" }}>{minScore}%</span>
+              </label>
+              <input
+                type="range"
+                className="form-range"
+                min="20"
+                max="100"
+                step="5"
+                value={minScore}
+                onChange={(e) => setMinScore(Number(e.target.value))}
+                style={{ cursor: "pointer" }}
+              />
+            </div>
+            <div className="col-12 col-md-4 text-md-end">
+              <span className="text-secondary small d-block">Matching Travelers Found</span>
+              <strong className="text-warning display-6 fw-bold">{filteredMatches.length}</strong>
+            </div>
+          </div>
         </div>
 
         {/* LOADING */}
@@ -273,6 +302,26 @@ function Matches() {
 
             </div>
 
+          ) : filteredMatches.length === 0 ? (
+
+            // FILTERED EMPTY STATE
+
+            <div className="glass-card p-5 text-center">
+
+              <h2 className="text-warning mb-3">
+
+                No Matches Found 🔍
+
+              </h2>
+
+              <p className="dashboard-text mb-4">
+
+                Try lowering the compatibility match threshold slider above to view more travelers.
+
+              </p>
+
+            </div>
+
           ) : (
 
             // MATCHES GRID
@@ -281,7 +330,7 @@ function Matches() {
 
               {
 
-                matches.map(
+                filteredMatches.map(
 
                   (item) => (
 
@@ -376,6 +425,7 @@ function Matches() {
                                 "Not Added"
 
                               }
+                              {item.user?.mbti ? ` (${item.user.mbti})` : ""}
 
                             </strong>
 
@@ -425,6 +475,78 @@ function Matches() {
                             </strong>
 
                           </p>
+
+                          {/* SCORE BREAKDOWN COLLAPSIBLE */}
+                          <div className="mt-3">
+                            <button
+                              className="btn btn-sm btn-outline-warning w-100 py-1.5 rounded-3 fw-semibold border-secondary border-opacity-25 hover-warning-btn"
+                              onClick={(e) => {
+                                const el = document.getElementById(`breakdown-${item.user?._id}`);
+                                if (el) {
+                                  el.style.display = el.style.display === "none" ? "block" : "none";
+                                }
+                              }}
+                              style={{ fontSize: "12px", transition: "all 0.2s ease" }}
+                            >
+                              Toggle Breakdown Details 📊
+                            </button>
+                            <div id={`breakdown-${item.user?._id}`} style={{ display: "none" }} className="mt-2 bg-dark bg-opacity-40 p-3 rounded-4 border border-secondary border-opacity-10">
+                              <div className="mb-2">
+                                <div className="d-flex justify-content-between small text-secondary mb-1">
+                                  <span>Destination</span>
+                                  <strong className="text-warning">{item.scoreBreakdown?.destination || 0}/20</strong>
+                                </div>
+                                <div className="progress" style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.05)" }}>
+                                  <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${((item.scoreBreakdown?.destination || 0) / 20) * 100}%` }}></div>
+                                </div>
+                              </div>
+                              <div className="mb-2">
+                                <div className="d-flex justify-content-between small text-secondary mb-1">
+                                  <span>Interests</span>
+                                  <strong className="text-warning">{item.scoreBreakdown?.interests || 0}/20</strong>
+                                </div>
+                                <div className="progress" style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.05)" }}>
+                                  <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${((item.scoreBreakdown?.interests || 0) / 20) * 100}%` }}></div>
+                                </div>
+                              </div>
+                              <div className="mb-2">
+                                <div className="d-flex justify-content-between small text-secondary mb-1">
+                                  <span>Travel Style</span>
+                                  <strong className="text-warning">{item.scoreBreakdown?.travelStyle || 0}/15</strong>
+                                </div>
+                                <div className="progress" style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.05)" }}>
+                                  <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${((item.scoreBreakdown?.travelStyle || 0) / 15) * 100}%` }}></div>
+                                </div>
+                              </div>
+                              <div className="mb-2">
+                                <div className="d-flex justify-content-between small text-secondary mb-1">
+                                  <span>Budget range</span>
+                                  <strong className="text-warning">{item.scoreBreakdown?.budget || 0}/15</strong>
+                                </div>
+                                <div className="progress" style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.05)" }}>
+                                  <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${((item.scoreBreakdown?.budget || 0) / 15) * 100}%` }}></div>
+                                </div>
+                              </div>
+                              <div className="mb-2">
+                                <div className="d-flex justify-content-between small text-secondary mb-1">
+                                  <span>Personality MBTI</span>
+                                  <strong className="text-warning">{item.scoreBreakdown?.personality || 0}/10</strong>
+                                </div>
+                                <div className="progress" style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.05)" }}>
+                                  <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${((item.scoreBreakdown?.personality || 0) / 10) * 100}%` }}></div>
+                                </div>
+                              </div>
+                              <div className="mb-2">
+                                <div className="d-flex justify-content-between small text-secondary mb-1">
+                                  <span>Categories & tags</span>
+                                  <strong className="text-warning">{item.scoreBreakdown?.category || 0}/10</strong>
+                                </div>
+                                <div className="progress" style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.05)" }}>
+                                  <div className="progress-bar bg-warning" role="progressbar" style={{ width: `${((item.scoreBreakdown?.category || 0) / 10) * 100}%` }}></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
                         </div>
 

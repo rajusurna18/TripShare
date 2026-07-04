@@ -7,6 +7,14 @@ function ProfileForm({
   setTravelStyle,
   personality,
   setPersonality,
+  mbti,
+  setMbti,
+  budgetMin,
+  setBudgetMin,
+  budgetMax,
+  setBudgetMax,
+  travelFrequency,
+  setTravelFrequency,
   location,
   setLocation,
   instagram,
@@ -81,6 +89,78 @@ function ProfileForm({
             <option value="Introvert">Introvert</option>
             <option value="Extrovert">Extrovert</option>
           </select>
+        </div>
+      </div>
+
+      <div className="row">
+        {/* MBTI PERSONALITY TYPE */}
+        <div className="col-md-6 mb-4">
+          <label className="form-label fw-bold">Personality Type (MBTI)</label>
+          <select
+            className="form-select profile-input"
+            value={mbti}
+            onChange={(e) => setMbti(e.target.value)}
+          >
+            <option value="">Select MBTI Type</option>
+            <option value="INTJ">INTJ (Architect)</option>
+            <option value="INTP">INTP (Logician)</option>
+            <option value="ENTJ">ENTJ (Commander)</option>
+            <option value="ENTP">ENTP (Debater)</option>
+            <option value="INFJ">INFJ (Advocate)</option>
+            <option value="INFP">INFP (Mediator)</option>
+            <option value="ENFJ">ENFJ (Protagonist)</option>
+            <option value="ENFP">ENFP (Campaigner)</option>
+            <option value="ISTJ">ISTJ (Logistician)</option>
+            <option value="ISFJ">ISFJ (Defender)</option>
+            <option value="ESTJ">ESTJ (Executive)</option>
+            <option value="ESFJ">ESFJ (Consul)</option>
+            <option value="ISTP">ISTP (Virtuoso)</option>
+            <option value="ISFP">ISFP (Adventurer)</option>
+            <option value="ESTP">ESTP (Entrepreneur)</option>
+            <option value="ESFP">ESFP (Entertainer)</option>
+          </select>
+        </div>
+
+        {/* TRAVEL FREQUENCY */}
+        <div className="col-md-6 mb-4">
+          <label className="form-label fw-bold">Travel Frequency</label>
+          <select
+            className="form-select profile-input"
+            value={travelFrequency}
+            onChange={(e) => setTravelFrequency(e.target.value)}
+          >
+            <option value="low">Low (1-2 trips/year)</option>
+            <option value="medium">Medium (3-5 trips/year)</option>
+            <option value="high">High (6+ trips/year)</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="row">
+        {/* BUDGET RANGE MIN */}
+        <div className="col-md-6 mb-4">
+          <label className="form-label fw-bold">Min Budget Preference (₹)</label>
+          <input
+            type="number"
+            className="form-control profile-input"
+            placeholder="Min budget"
+            value={budgetMin}
+            onChange={(e) => setBudgetMin(Number(e.target.value))}
+            min="0"
+          />
+        </div>
+
+        {/* BUDGET RANGE MAX */}
+        <div className="col-md-6 mb-4">
+          <label className="form-label fw-bold">Max Budget Preference (₹)</label>
+          <input
+            type="number"
+            className="form-control profile-input"
+            placeholder="Max budget"
+            value={budgetMax}
+            onChange={(e) => setBudgetMax(Number(e.target.value))}
+            min="0"
+          />
         </div>
       </div>
 

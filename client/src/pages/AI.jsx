@@ -11,6 +11,16 @@ function AI() {
   const [error, setError] = useState("");
 
   const messagesEndRef = useRef(null);
+  const abortRef = useRef(null);
+
+  // CLEANUP ACTIVE STREAMS ON UNMOUNT
+  useEffect(() => {
+    return () => {
+      if (abortRef.current) {
+        abortRef.current.abort();
+      }
+    };
+  }, []);
 
   // FETCH CONVERSATIONS ON MOUNT
   useEffect(() => {
@@ -103,89 +113,212 @@ function AI() {
     setLoading(true);
     setError("");
 
+    const token = localStorage.getItem("token");
+    const abortController = new AbortController();
+    abortRef.current = abortController;
+
     try {
-      const res = await API.post("/ai/chat", {
-        question,
-        conversationId: activeId,
+      // Append a placeholder model response that we will update in real-time
+      setMessages(prev => [...prev, { role: "model", content: "", timestamp: new Date() }]);
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/ai/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          question,
+          conversationId: activeId,
+          stream: true,
+        }),
+        signal: abortController.signal,
       });
 
-      if (res.data.success) {
-        setMessages(res.data.conversation.messages || []);
-        
-        // If a new session was auto-created on the backend, update conversations list
-        if (!activeId) {
-          setActiveId(res.data.conversation._id);
-          fetchConversations();
-        } else {
-          // Refresh list to update modified date/titles
-          setConversations(prev =>
-            prev.map(c => c._id === activeId ? res.data.conversation : c)
-          );
+      if (!response.ok) {
+        throw new Error("Failed to receive stream from AI server");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let completeText = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.substring(6).trim();
+            if (!dataStr) continue;
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.error) {
+                throw new Error(data.error);
+              }
+              if (data.text) {
+                completeText += data.text;
+                setMessages(prev => {
+                  const copy = [...prev];
+                  copy[copy.length - 1] = {
+                    ...copy[copy.length - 1],
+                    content: completeText,
+                  };
+                  return copy;
+                });
+              }
+              if (data.done) {
+                setMessages(data.conversation.messages || []);
+                if (!activeId) {
+                  setActiveId(data.conversation._id);
+                  fetchConversations();
+                } else {
+                  setConversations(prev =>
+                    prev.map(c => c._id === activeId ? data.conversation : c)
+                  );
+                }
+              }
+            } catch (e) {
+              console.error("JSON parse error:", e);
+            }
+          }
         }
       }
     } catch (err) {
-      console.error(err);
-      setError("AI assistant is temporarily busy. Retrying connection...");
-      // Remove the last message from user if failed so they can resend
-      setMessages(prev => prev.slice(0, -1));
+      if (err.name === "AbortError") {
+        console.log("AI stream aborted by user.");
+      } else {
+        console.error(err);
+        setError("AI assistant is temporarily busy. Check connection and retry.");
+        // Remove the empty message block if we failed before receiving anything
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last && last.role === "model" && !last.content) {
+            return prev.slice(0, -1);
+          }
+          return prev;
+        });
+      }
     } finally {
+      setLoading(false);
+      abortRef.current = null;
+    }
+  };
+
+  const stopGeneration = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
       setLoading(false);
     }
   };
 
-  // MARKDOWN ELEMENT PARSER
+  // MARKDOWN ELEMENT & CODE BLOCK PARSER
   const renderFormattedContent = (content) => {
     if (!content) return null;
-    const lines = content.split("\n");
-    return lines.map((line, index) => {
-      const trimmed = line.trim();
-      
-      if (trimmed.startsWith("###")) {
+
+    // Split content into blocks: code blocks vs text blocks
+    const parts = content.split(/(```[\s\S]*?```)/g);
+
+    return parts.map((part, index) => {
+      if (part.startsWith("```")) {
+        // Code block
+        const match = part.match(/```(\w*)\n([\s\S]*?)```/);
+        const language = match ? match[1] : "";
+        const code = match ? match[2] : part.slice(3, -3);
+
         return (
-          <h5 key={index} className="text-warning mt-3 mb-2 fw-bold">
-            {parseBoldText(trimmed.replace(/^###\s*/, ""))}
-          </h5>
+          <div key={index} className="my-3 rounded-4 overflow-hidden border border-secondary border-opacity-30 bg-black bg-opacity-70">
+            <div className="d-flex justify-content-between align-items-center bg-dark bg-opacity-50 px-3 py-2 border-bottom border-secondary border-opacity-20">
+              <span className="text-muted small text-uppercase" style={{ fontSize: "11px", fontWeight: "600" }}>{language || "code"}</span>
+              <button
+                className="btn btn-link btn-sm text-warning p-0 text-decoration-none small fw-bold"
+                onClick={() => {
+                  navigator.clipboard.writeText(code);
+                  alert("Copied code to clipboard! 📋");
+                }}
+                style={{ fontSize: "12px" }}
+              >
+                Copy 📋
+              </button>
+            </div>
+            <pre className="p-3 m-0 overflow-x-auto text-start" style={{ fontFamily: "monospace", fontSize: "14px", color: "#f8f8f2", backgroundColor: "#1e1e24" }}>
+              <code>{code}</code>
+            </pre>
+          </div>
         );
+      } else {
+        // Standard text block
+        const lines = part.split("\n");
+        return lines.map((line, lIdx) => {
+          const trimmed = line.trim();
+
+          if (trimmed.startsWith("###")) {
+            return (
+              <h5 key={`${index}-${lIdx}`} className="text-warning mt-3 mb-2 fw-bold">
+                {parseInlineFormatting(trimmed.replace(/^###\s*/, ""))}
+              </h5>
+            );
+          }
+          if (trimmed.startsWith("##")) {
+            return (
+              <h4 key={`${index}-${lIdx}`} className="text-warning mt-4 mb-2 fw-bold border-bottom pb-2 border-secondary border-opacity-20">
+                {parseInlineFormatting(trimmed.replace(/^##\s*/, ""))}
+              </h4>
+            );
+          }
+          if (trimmed.startsWith("#")) {
+            return (
+              <h3 key={`${index}-${lIdx}`} className="text-warning mt-4 mb-3 fw-bold border-bottom pb-2 border-secondary border-opacity-20">
+                {parseInlineFormatting(trimmed.replace(/^#\s*/, ""))}
+              </h3>
+            );
+          }
+          if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+            return (
+              <li key={`${index}-${lIdx}`} className="ms-3 mb-2" style={{ listStyleType: "disc", color: "#ddd" }}>
+                {parseInlineFormatting(trimmed.substring(2))}
+              </li>
+            );
+          }
+          if (trimmed.startsWith("---")) {
+            return <hr key={`${index}-${lIdx}`} className="border-secondary border-opacity-30 my-4" />;
+          }
+          if (!trimmed) {
+            return <div key={`${index}-${lIdx}`} className="my-2" />;
+          }
+          return (
+            <p key={`${index}-${lIdx}`} className="mb-2" style={{ color: "#eee" }}>
+              {parseInlineFormatting(line)}
+            </p>
+          );
+        });
       }
-      if (trimmed.startsWith("##")) {
-        return (
-          <h4 key={index} className="text-warning mt-4 mb-2 fw-bold border-bottom pb-2 border-secondary">
-            {parseBoldText(trimmed.replace(/^##\s*/, ""))}
-          </h4>
-        );
-      }
-      if (trimmed.startsWith("#")) {
-        return (
-          <h3 key={index} className="text-warning mt-4 mb-3 fw-bold border-bottom pb-2 border-secondary">
-            {parseBoldText(trimmed.replace(/^#\s*/, ""))}
-          </h3>
-        );
-      }
-      if (trimmed.startsWith("-") || trimmed.startsWith("*")) {
-        return (
-          <li key={index} className="ms-3 mb-2" style={{ listStyleType: "disc", color: "#ddd" }}>
-            {parseBoldText(trimmed.replace(/^[-*]\s*/, ""))}
-          </li>
-        );
-      }
-      if (!trimmed) {
-        return <div key={index} className="my-2" />;
-      }
-      return (
-        <p key={index} className="mb-2" style={{ color: "#eee" }}>
-          {parseBoldText(line)}
-        </p>
-      );
     });
   };
 
-  const parseBoldText = (text) => {
-    const parts = text.split(/\*\*([^*]+)\*\*/g);
-    return parts.map((part, i) => {
+  const parseInlineFormatting = (text) => {
+    // First, split by inline code blocks
+    const codeParts = text.split(/`([^`]+)`/g);
+    return codeParts.map((part, i) => {
       if (i % 2 === 1) {
-        return <strong key={i} className="text-warning fw-bold">{part}</strong>;
+        // Inline code segment
+        return (
+          <code key={i} className="px-2 py-0.5 rounded bg-dark border border-secondary border-opacity-30 text-warning" style={{ fontSize: "13px", fontFamily: "monospace" }}>
+            {part}
+          </code>
+        );
       }
-      return part;
+      
+      // Split bold segments
+      const boldParts = part.split(/\*\*([^*]+)\*\*/g);
+      return boldParts.map((bPart, j) => {
+        if (j % 2 === 1) {
+          return <strong key={`${i}-${j}`} className="text-warning fw-bold">{bPart}</strong>;
+        }
+        return bPart;
+      });
     });
   };
 
@@ -397,7 +530,7 @@ function AI() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
-                      askAI();
+                      if (!loading) askAI();
                     }
                   }}
                   disabled={loading}
@@ -406,19 +539,34 @@ function AI() {
                     boxShadow: "none",
                   }}
                 />
-                <button
-                  className="btn btn-warning h-100 px-4 rounded-4 shadow-sm"
-                  onClick={askAI}
-                  disabled={loading || !question.trim()}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: "58px",
-                  }}
-                >
-                  <FaPaperPlane />
-                </button>
+                {loading ? (
+                  <button
+                    className="btn btn-danger h-100 px-4 rounded-4 shadow-sm fw-bold d-flex align-items-center gap-2"
+                    onClick={stopGeneration}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: "58px",
+                    }}
+                  >
+                    <span>Stop ⏹️</span>
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-warning h-100 px-4 rounded-4 shadow-sm"
+                    onClick={askAI}
+                    disabled={!question.trim()}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: "58px",
+                    }}
+                  >
+                    <FaPaperPlane />
+                  </button>
+                )}
               </div>
 
             </div>
