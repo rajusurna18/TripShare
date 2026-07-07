@@ -55,6 +55,10 @@ const friendSchema =
 
   );
 
+friendSchema.index({ sender: 1, receiver: 1 });
+friendSchema.index({ receiver: 1, status: 1 });
+friendSchema.index({ sender: 1, status: 1 });
+
 export default mongoose.model(
 
   "Friend",

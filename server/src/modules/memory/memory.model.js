@@ -103,6 +103,9 @@ const memorySchema =
 
   );
 
+memorySchema.index({ trip: 1, createdAt: -1 });
+memorySchema.index({ user: 1 });
+
 export default mongoose.model(
   "Memory",
   memorySchema

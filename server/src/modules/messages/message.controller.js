@@ -97,12 +97,20 @@ export const getMessages = async (req, res) => {
       });
     }
 
-    const messages = await getMessagesService(req.params.tripId);
+    const { page, limit } = req.query;
+    const result = await getMessagesService(req.params.tripId, { page, limit });
+
+    if (Array.isArray(result)) {
+      return res.status(200).json({
+        success: true,
+        totalMessages: result.length,
+        messages: result,
+      });
+    }
 
     res.status(200).json({
       success: true,
-      totalMessages: messages.length,
-      messages,
+      ...result,
     });
   } catch (err) {
     res.status(400).json({

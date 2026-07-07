@@ -93,38 +93,34 @@ export const createTrip =
 
 export const getTrips =
   async (req, res) => {
-
     try {
-
-      const trips =
+      const { page, limit } = req.query;
+      const result =
         await getTripsService(
-          req.user.id
+          req.user.id,
+          { page, limit }
         );
 
+      if (Array.isArray(result)) {
+        return res.status(200).json({
+          success: true,
+          totalTrips:
+            result.length,
+          trips: result,
+        });
+      }
+
       res.status(200).json({
-
         success: true,
-
-        totalTrips:
-          trips.length,
-
-        trips,
-
+        ...result,
       });
-
     } catch (err) {
-
       res.status(400).json({
-
         success: false,
-
         message:
           err.message,
-
       });
-
     }
-
 };
 
 // JOIN TRIP

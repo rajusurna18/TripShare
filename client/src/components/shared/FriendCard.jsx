@@ -312,4 +312,4 @@ function FriendCard({
   );
 }
 
-export default FriendCard;
+export default React.memo(FriendCard);

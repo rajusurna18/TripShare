@@ -636,12 +636,13 @@ export const getSuggestedTravelersService =
     }
 
     const candidates = await User.find(userMatch)
-      .select("name email profileImage travelStyle destinationPreference interests trustScore followersCount followingCount followers following totalTrips profileCompletion isVerified");
+      .select("name email profileImage travelStyle destinationPreference interests trustScore followersCount followingCount followers following totalTrips profileCompletion isVerified")
+      .lean();
 
-    const currentUser = await User.findById(userId);
+    const currentUser = await User.findById(userId).lean();
 
     const suggestions = candidates.map(candidate => {
-      const candidateObj = candidate.toObject();
+      const candidateObj = candidate;
       const score = calculateMatchScore(currentUser, candidateObj);
       const isFollowing = currentUser.following && currentUser.following.some(
         id => id.toString() === candidate._id.toString()

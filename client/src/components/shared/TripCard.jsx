@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import API from "../../services/api";
 import SaveButton from "./SaveButton";
 import ShareButton from "./ShareButton";
@@ -276,4 +276,4 @@ const sendJoinRequest =
 
 }
 
-export default TripCard;
+export default memo(TripCard);

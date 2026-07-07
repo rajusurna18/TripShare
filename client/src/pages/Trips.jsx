@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getTrips } from "../services/trip.api";
 
 import TripCard from "../components/shared/TripCard";
+import { useDebounce } from "../hooks/useDebounce";
 
 function Trips() {
 
@@ -14,6 +15,8 @@ function Trips() {
 
   const [search, setSearch] =
     useState("");
+
+  const debouncedSearch = useDebounce(search, 300);
 
   const [loading, setLoading] =
     useState(true);
@@ -32,20 +35,20 @@ function Trips() {
     trip.destination
       ?.toLowerCase()
       .includes(
-        search.toLowerCase()
+        debouncedSearch.toLowerCase()
       ) ||
 
     trip.title
       ?.toLowerCase()
       .includes(
-        search.toLowerCase()
+        debouncedSearch.toLowerCase()
       )
 
   );
 
     setFilteredTrips(filtered);
 
-  }, [search, trips]);
+  }, [debouncedSearch, trips]);
 
   // FETCH TRIPS
 

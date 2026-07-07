@@ -93,40 +93,69 @@ export const createTripService =
 // GET ALL TRIPS
 
 export const getTripsService =
-  async (userId) => {
-
-    return await Trip.find({
-
+  async (userId, options = {}) => {
+    const { page, limit } = options;
+    const query = {
       $or: [
-
         {
           createdBy:
             userId,
         },
-
         {
           members:
             userId,
         },
-
       ],
+    };
 
-    })
+    if (page === undefined && limit === undefined) {
+      return await Trip.find(query)
+        .populate(
+          "createdBy",
+          "name email profileImage"
+        )
+        .populate(
+          "members",
+          "name profileImage travelStyle"
+        )
+        .sort({
+          createdAt: -1,
+        })
+        .lean();
+    }
 
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10) || 10;
+    const skipNum = (pageNum - 1) * limitNum;
+
+    const totalResults = await Trip.countDocuments(query);
+    const totalPages = Math.ceil(totalResults / limitNum);
+
+    const trips = await Trip.find(query)
       .populate(
         "createdBy",
         "name email profileImage"
       )
-
       .populate(
         "members",
         "name profileImage travelStyle"
       )
-
       .sort({
         createdAt: -1,
-      });
+      })
+      .skip(skipNum)
+      .limit(limitNum)
+      .lean();
 
+    return {
+      trips,
+      page: pageNum,
+      limit: limitNum,
+      totalPages,
+      totalResults,
+      hasNextPage: pageNum < totalPages,
+      hasPreviousPage: pageNum > 1,
+    };
 };
 
 // JOIN TRIP

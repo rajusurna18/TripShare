@@ -5,6 +5,7 @@ import BlogCard from "../components/blog/BlogCard";
 import BlogSkeleton from "../components/blog/BlogSkeleton";
 import EmptyState from "../components/blog/EmptyState";
 import toast from "react-hot-toast";
+import { useDebounce } from "../hooks/useDebounce";
 
 function Blogs() {
   const [blogs, setBlogs] = useState([]);
@@ -16,6 +17,8 @@ function Blogs() {
   // Search & Filter state
   const [search, setSearch] = useState("");
   const [destination, setDestination] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
+  const debouncedDestination = useDebounce(destination, 400);
   const [selectedTag, setSelectedTag] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -35,9 +38,15 @@ function Blogs() {
     fetchTrending();
   }, []);
 
+  // Reset page when queries change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, debouncedDestination, selectedTag]);
+
+  // Fetch blogs when pagination, tag, or debounced search changes
   useEffect(() => {
     fetchBlogs(page);
-  }, [page, selectedTag]);
+  }, [page, selectedTag, debouncedSearch, debouncedDestination]);
 
   const fetchBlogs = async (pageNum = 1) => {
     try {
@@ -47,8 +56,8 @@ function Blogs() {
         limit: 6,
       });
 
-      if (search.trim()) queryParams.append("search", search.trim());
-      if (destination.trim()) queryParams.append("destination", destination.trim());
+      if (debouncedSearch.trim()) queryParams.append("search", debouncedSearch.trim());
+      if (debouncedDestination.trim()) queryParams.append("destination", debouncedDestination.trim());
       if (selectedTag) queryParams.append("tag", selectedTag);
 
       const res = await API.get(`/blogs?${queryParams.toString()}`);

@@ -62,7 +62,7 @@ export const computeStatsObj = async (user, userId) => {
   const [tripsCreated, tripsJoined, reviews, blogsCount] = await Promise.all([
     Trip.countDocuments({ createdBy: userId }),
     Trip.countDocuments({ members: userId }),
-    Review.find({ reviewFor: userId }),
+    Review.find({ reviewFor: userId }).select("rating").lean(),
     Blog.countDocuments({ author: userId }),
   ]);
 

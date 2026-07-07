@@ -1,75 +1,63 @@
 import { Routes, Route } from "react-router-dom";
+import React, { Suspense, lazy } from "react";
 
 import Home from "./pages/Home";
-
 import Navbar from "./components/shared/Navbar";
-
-import Matches from "./pages/Matches";
-
-import Chat from "./pages/Chat";
-
-import AI from "./pages/AI";
-
-import Trips from "./pages/Trips";
-
-import Dashboard from "./pages/Dashboard";
-
-import CreateTrip from "./pages/CreateTrip";
-
-import Login from "./pages/Login";
-
-import Register from "./pages/Register";
-
-import ForgotPassword from "./pages/ForgotPassword";
-
-import VerifyOTP from "./pages/VerifyOTP";
-
-import ResetPassword from "./pages/ResetPassword";
-
-import Expenses from "./pages/Expenses";
-
-import Notifications from "./pages/Notifications";
-
-import Itinerary from "./pages/Itinerary";
-
-import Profile from "./pages/Profile";
-
-import TripDetails from "./pages/TripDetails";
-
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-import Friends
-from "./pages/Friends";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyOTP from "./pages/VerifyOTP";
+import ResetPassword from "./pages/ResetPassword";
 
-import LiveTracking
-from "./pages/LiveTracking";
+// Statically loaded routes (frequently used/layout/auth)
+import Matches from "./pages/Matches";
+import Chat from "./pages/Chat";
+import Trips from "./pages/Trips";
+import CreateTrip from "./pages/CreateTrip";
+import Notifications from "./pages/Notifications";
+import Itinerary from "./pages/Itinerary";
+import Profile from "./pages/Profile";
+import TripDetails from "./pages/TripDetails";
+import Friends from "./pages/Friends";
+import LiveTracking from "./pages/LiveTracking";
+import Reviews from "./pages/Reviews";
+import PublicProfile from "./pages/PublicProfile";
+import JoinRequests from "./pages/JoinRequests";
+import Recommendations from "./pages/Recommendations";
+import Discover from "./pages/Discover";
 
-import Reviews
-from "./pages/Reviews";
+// Lazy loaded heavy routes
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AI = lazy(() => import("./pages/AI"));
+const Blogs = lazy(() => import("./pages/Blogs"));
+const BlogDetails = lazy(() => import("./pages/BlogDetails"));
+const CreateBlog = lazy(() => import("./pages/CreateBlog"));
+const EditBlog = lazy(() => import("./pages/EditBlog"));
+const TripMemories = lazy(() => import("./pages/TripMemories"));
+const Expenses = lazy(() => import("./pages/Expenses"));
+const AIPackingList = lazy(() => import("./pages/AIPackingList"));
+const AIExpenses = lazy(() => import("./pages/AIExpenses"));
+const SavedTrips = lazy(() => import("./pages/SavedTrips"));
 
-import PublicProfile
-from "./pages/PublicProfile";
-
-import JoinRequests
-from "./pages/JoinRequests";
-
-import TripMemories
-from "./pages/TripMemories";
-
-import Recommendations
-from "./pages/Recommendations";
-
-import Discover
-from "./pages/Discover";
-
-import SavedTrips from "./pages/SavedTrips";
-
-import Blogs from "./pages/Blogs";
-import BlogDetails from "./pages/BlogDetails";
-import CreateBlog from "./pages/CreateBlog";
-import EditBlog from "./pages/EditBlog";
-import AIPackingList from "./pages/AIPackingList";
-import AIExpenses from "./pages/AIExpenses";
+// Fallback Skeleton Loader
+const PageSkeleton = () => (
+  <div className="container py-5 mt-5 text-light text-center" style={{ minHeight: "80vh" }}>
+    <div className="glass-card p-5 mx-auto" style={{ maxWidth: "800px", borderRadius: "24px", background: "rgba(25, 25, 25, 0.45)", backdropFilter: "blur(12px)", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
+      <div className="spinner-border text-warning mb-4" style={{ width: "3.5rem", height: "3.5rem" }} />
+      <h3 className="fw-bold text-white mb-2">Loading trip details...</h3>
+      <p className="text-secondary small mb-4">Please wait while we prepare your space</p>
+      
+      <div className="d-flex flex-column gap-3 align-items-center mt-5">
+        <div className="bg-secondary bg-opacity-20 rounded skeleton-shimmer" style={{ width: "90%", height: "24px" }} />
+        <div className="bg-secondary bg-opacity-20 rounded skeleton-shimmer" style={{ width: "70%", height: "16px" }} />
+        <div className="bg-secondary bg-opacity-20 rounded skeleton-shimmer" style={{ width: "80%", height: "16px" }} />
+        <div className="bg-secondary bg-opacity-20 rounded skeleton-shimmer" style={{ width: "50%", height: "16px" }} />
+      </div>
+    </div>
+  </div>
+);
 
 function App() {
 
@@ -79,7 +67,8 @@ function App() {
 
       <Navbar />
 
-      <Routes>
+      <Suspense fallback={<PageSkeleton />}>
+        <Routes>
 
         {/* HOME */}
 
@@ -431,7 +420,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-      </Routes>
+        </Routes>
+      </Suspense>
 
     </>
 

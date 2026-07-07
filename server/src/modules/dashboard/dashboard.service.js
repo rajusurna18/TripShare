@@ -25,24 +25,13 @@ export const getDashboardStatsService = async (userId) => {
     reviews,
     totalMemories,
     unreadNotifications,
-    expenseResult,
-    totalBlogs,
-    latestBlog,
-    popularBlog,
-    mostViewedBlog,
-    recentDraft,
-
-    // LATEST WIDGETS
     latestTrip,
     latestFriendDoc,
     latestReview,
     latestMemory,
-
-    // TREND CHARTS AGGREGATIONS
-    tripsTrendCreated,
-    tripsTrendJoined,
-    expenseCategoryStats,
-    expenseMonthlyTrend,
+    tripsTrendResult,
+    expenseFacetResult,
+    blogFacetResult,
     memoriesMonthlyTrend,
     reviewsWrittenTrend
   ] = await Promise.all([
@@ -70,7 +59,7 @@ export const getDashboardStatsService = async (userId) => {
 
     Review.find({
       reviewFor: userId,
-    }),
+    }).select("rating").lean(),
 
     Memory.countDocuments({
       user: userId,
@@ -81,97 +70,129 @@ export const getDashboardStatsService = async (userId) => {
       read: false,
     }),
 
-    Expense.aggregate([
-      {
-        $match: {
-          paidBy: user._id,
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: {
-            $sum: "$amount",
-          },
-        },
-      },
-    ]),
-
-    Blog.countDocuments({
-      author: userId,
-    }),
-
-    Blog.findOne({ author: userId }).sort({ createdAt: -1 }),
-    Blog.findOne({ author: userId }).sort({ likesCount: -1, createdAt: -1 }),
-    Blog.findOne({ author: userId }).sort({ viewsCount: -1, createdAt: -1 }),
-    Blog.findOne({ author: userId, visibility: "private" }).sort({ createdAt: -1 }),
-
     // LATEST TRIP WIDGET
     Trip.findOne({
       $or: [{ createdBy: userId }, { members: userId }]
-    }).sort({ createdAt: -1 }).populate("createdBy", "name profileImage"),
+    }).sort({ createdAt: -1 }).populate("createdBy", "name profileImage").lean(),
 
     // LATEST FRIEND
     Friend.findOne({
       $or: [{ sender: userId }, { receiver: userId }],
       status: "accepted"
-    }).sort({ updatedAt: -1 }).populate("sender receiver", "name profileImage"),
+    }).sort({ updatedAt: -1 }).populate("sender receiver", "name profileImage").lean(),
 
     // LATEST REVIEW
     Review.findOne({
       reviewFor: userId
-    }).sort({ createdAt: -1 }).populate("createdBy", "name profileImage").populate("trip", "title destination"),
+    }).sort({ createdAt: -1 }).populate("createdBy", "name profileImage").populate("trip", "title destination").lean(),
 
     // LATEST MEMORY
     Memory.findOne({
       user: userId
-    }).sort({ createdAt: -1 }).populate("trip", "title destination"),
+    }).sort({ createdAt: -1 }).populate("trip", "title destination").lean(),
 
-    // TRIPS CREATED MONTHLY TREND
+    // COMBINED TRIP MONTHLY TRENDS (Created + Joined)
     Trip.aggregate([
-      { $match: { createdBy: new mongoose.Types.ObjectId(userId) } },
+      {
+        $match: {
+          $or: [
+            { createdBy: new mongoose.Types.ObjectId(userId) },
+            { members: new mongoose.Types.ObjectId(userId) }
+          ]
+        }
+      },
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
-          count: { $sum: 1 }
+          createdCount: {
+            $sum: {
+              $cond: [
+                { $eq: ["$createdBy", new mongoose.Types.ObjectId(userId)] },
+                1,
+                0
+              ]
+            }
+          },
+          joinedCount: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $in: [new mongoose.Types.ObjectId(userId), "$members"] },
+                    { $ne: ["$createdBy", new mongoose.Types.ObjectId(userId)] }
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          }
         }
       },
       { $sort: { _id: 1 } }
     ]),
 
-    // TRIPS JOINED MONTHLY TREND
-    Trip.aggregate([
-      { $match: { members: new mongoose.Types.ObjectId(userId), createdBy: { $ne: new mongoose.Types.ObjectId(userId) } } },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]),
-
-    // EXPENSE CATEGORY STATS
+    // EXPENSE FACET AGGREGATION
     Expense.aggregate([
       { $match: { paidBy: new mongoose.Types.ObjectId(userId) } },
       {
-        $group: {
-          _id: "$category",
-          value: { $sum: "$amount" }
+        $facet: {
+          totalExpense: [
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$amount" }
+              }
+            }
+          ],
+          categoryStats: [
+            {
+              $group: {
+                _id: "$category",
+                value: { $sum: "$amount" }
+              }
+            }
+          ],
+          monthlyTrend: [
+            {
+              $group: {
+                _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+                amount: { $sum: "$amount" }
+              }
+            },
+            { $sort: { _id: 1 } }
+          ]
         }
       }
     ]),
 
-    // EXPENSE MONTHLY TREND
-    Expense.aggregate([
-      { $match: { paidBy: new mongoose.Types.ObjectId(userId) } },
+    // BLOG FACET AGGREGATION
+    Blog.aggregate([
+      { $match: { author: new mongoose.Types.ObjectId(userId) } },
       {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
-          amount: { $sum: "$amount" }
+        $facet: {
+          count: [
+            { $count: "count" }
+          ],
+          latest: [
+            { $sort: { createdAt: -1 } },
+            { $limit: 1 }
+          ],
+          popular: [
+            { $sort: { likesCount: -1, createdAt: -1 } },
+            { $limit: 1 }
+          ],
+          mostViewed: [
+            { $sort: { viewsCount: -1, createdAt: -1 } },
+            { $limit: 1 }
+          ],
+          recentDraft: [
+            { $match: { visibility: "private" } },
+            { $sort: { createdAt: -1 } },
+            { $limit: 1 }
+          ]
         }
-      },
-      { $sort: { _id: 1 } }
+      }
     ]),
 
     // MEMORIES MONTHLY TREND
@@ -209,8 +230,20 @@ export const getDashboardStatsService = async (userId) => {
     reviews,
   });
 
-  const totalExpenses =
-    expenseResult[0]?.total || 0;
+  const expenseFacet = expenseFacetResult?.[0] || {};
+  const totalExpenses = expenseFacet.totalExpense?.[0]?.total || 0;
+  const expenseCategoryStats = expenseFacet.categoryStats || [];
+  const expenseMonthlyTrend = expenseFacet.monthlyTrend || [];
+
+  const blogFacet = blogFacetResult?.[0] || {};
+  const totalBlogs = blogFacet.count?.[0]?.count || 0;
+  const latestBlog = blogFacet.latest?.[0] || null;
+  const popularBlog = blogFacet.popular?.[0] || null;
+  const mostViewedBlog = blogFacet.mostViewed?.[0] || null;
+  const recentDraft = blogFacet.recentDraft?.[0] || null;
+
+  const tripsTrendCreated = tripsTrendResult.map(t => ({ _id: t._id, count: t.createdCount }));
+  const tripsTrendJoined = tripsTrendResult.map(t => ({ _id: t._id, count: t.joinedCount }));
 
   // Resolve Latest Friend Name & Avatar relative to User ID
   let resolvedLatestFriend = null;

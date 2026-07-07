@@ -10,17 +10,48 @@ export const saveMessageService = async (data) => {
     .populate("trip", "title destination members");
 };
 
-// GET TRIP MESSAGES
-export const getMessagesService = async (tripId) => {
-  return await Message.find({
-    trip: tripId,
-  })
+export const getMessagesService = async (tripId, options = {}) => {
+  const { page, limit } = options;
+  const query = { trip: tripId };
+
+  if (page === undefined && limit === undefined) {
+    return await Message.find(query)
+      .populate("sender", "name profileImage")
+      .populate("reactions.user", "name profileImage")
+      .lean()
+      .sort({
+        createdAt: 1,
+      });
+  }
+
+  const pageNum = parseInt(page, 10) || 1;
+  const limitNum = parseInt(limit, 10) || 50;
+  const skipNum = (pageNum - 1) * limitNum;
+
+  const totalMessages = await Message.countDocuments(query);
+  const totalPages = Math.ceil(totalMessages / limitNum);
+
+  const messages = await Message.find(query)
     .populate("sender", "name profileImage")
     .populate("reactions.user", "name profileImage")
-    .lean()
     .sort({
-      createdAt: 1,
-    });
+      createdAt: -1,
+    })
+    .skip(skipNum)
+    .limit(limitNum)
+    .lean();
+
+  messages.reverse();
+
+  return {
+    messages,
+    page: pageNum,
+    limit: limitNum,
+    totalPages,
+    totalMessages,
+    hasNextPage: pageNum < totalPages,
+    hasPreviousPage: pageNum > 1,
+  };
 };
 
 // GET RECENT MESSAGES

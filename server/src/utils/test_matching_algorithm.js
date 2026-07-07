@@ -44,6 +44,8 @@ const runTests = async () => {
       personality: "Introvert",
       destinationPreference: "Goa",
       budgetPreference: 5000,
+      budgetRange: { min: 1000, max: 10000 },
+      mbti: "INFJ",
       preferredTripCategories: ["Adventure", "Beach"],
       visitedPlaces: ["Delhi", "Mumbai"],
       completedTrips: 2,
@@ -76,6 +78,8 @@ const runTests = async () => {
       personality: "Introvert",
       destinationPreference: "Goa",
       budgetPreference: 5000,
+      budgetRange: { min: 1000, max: 10000 },
+      mbti: "INFJ",
       preferredTripCategories: ["Adventure", "Beach"],
       visitedPlaces: ["Delhi", "Mumbai"],
       completedTrips: 2,
@@ -94,6 +98,8 @@ const runTests = async () => {
       personality: "Extrovert", // Complementary match (8 pts)
       destinationPreference: "Goa", // Match (25 pts)
       budgetPreference: 10000, // Budget variance
+      budgetRange: { min: 4000, max: 15000 },
+      mbti: "ENFP",
       preferredTripCategories: ["Leisure"], // Mismatch
       visitedPlaces: ["Delhi"], // 1 common visited place
       completedTrips: 5,
