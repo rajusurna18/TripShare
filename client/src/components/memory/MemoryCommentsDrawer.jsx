@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import API from "../../services/api";
 import Avatar from "../shared/Avatar";
 import toast from "react-hot-toast";
@@ -111,8 +112,23 @@ function MemoryCommentsDrawer({ memoryId, onClose, onCommentUpdated, memoryOwner
   };
 
   return (
-    <div className="comments-drawer-backdrop" onClick={onClose}>
-      <div className="comments-drawer glass-card" onClick={e => e.stopPropagation()}>
+    <motion.div
+      className="comments-drawer-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{ zIndex: 1100 }}
+    >
+      <motion.div
+        className="comments-drawer glass-card"
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
+        onClick={e => e.stopPropagation()}
+        style={{ background: "rgba(15,15,15,0.95)" }}
+      >
         <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
           <h4 className="m-0 text-warning">Comments 💬</h4>
           <button className="btn-close btn-close-white" onClick={onClose}></button>
@@ -242,8 +258,8 @@ function MemoryCommentsDrawer({ memoryId, onClose, onCommentUpdated, memoryOwner
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

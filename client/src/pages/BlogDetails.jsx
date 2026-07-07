@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import API from "../services/api";
 import BlogHero from "../components/blog/BlogHero";
 import BlogToolbar from "../components/blog/BlogToolbar";
@@ -212,24 +213,28 @@ function BlogDetails() {
       />
 
       {/* Comments Drawer component */}
-      {showComments && (
-        <BlogCommentDrawer
-          blogId={blog._id}
-          blogOwnerId={blogOwnerId}
-          onClose={() => setShowComments(false)}
-          onCommentUpdated={handleCommentUpdated}
-        />
-      )}
+      <AnimatePresence>
+        {showComments && (
+          <BlogCommentDrawer
+            blogId={blog._id}
+            blogOwnerId={blogOwnerId}
+            onClose={() => setShowComments(false)}
+            onCommentUpdated={handleCommentUpdated}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Share Modal component */}
-      {showShare && (
-        <ShareModal
-          blogId={blog._id}
-          blogTitle={blog.title}
-          onClose={() => setShowShare(false)}
-          onShareIncrement={handleShareIncrement}
-        />
-      )}
+      <AnimatePresence>
+        {showShare && (
+          <ShareModal
+            blogId={blog._id}
+            blogTitle={blog.title}
+            onClose={() => setShowShare(false)}
+            onShareIncrement={handleShareIncrement}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

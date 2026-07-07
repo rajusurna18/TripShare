@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import API from "../../services/api";
 import Avatar from "../shared/Avatar";
 import toast from "react-hot-toast";
@@ -110,8 +111,23 @@ function BlogCommentDrawer({ blogId, onClose, onCommentUpdated, blogOwnerId }) {
   };
 
   return (
-    <div className="comments-drawer-backdrop" onClick={onClose} style={{ zIndex: 1100 }}>
-      <div className="comments-drawer glass-card" onClick={(e) => e.stopPropagation()} style={{ background: "rgba(15,15,15,0.95)" }}>
+    <motion.div
+      className="comments-drawer-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{ zIndex: 1100 }}
+    >
+      <motion.div
+        className="comments-drawer glass-card"
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
+        onClick={(e) => e.stopPropagation()}
+        style={{ background: "rgba(15,15,15,0.95)" }}
+      >
         <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-30">
           <h4 className="m-0 text-warning">Comments 💬</h4>
           <button className="btn-close btn-close-white" onClick={onClose}></button>
@@ -247,8 +263,8 @@ function BlogCommentDrawer({ blogId, onClose, onCommentUpdated, blogOwnerId }) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

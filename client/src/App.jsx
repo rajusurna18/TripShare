@@ -1,5 +1,7 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation, Outlet } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
+import { AnimatePresence } from "framer-motion";
+import { PageTransition } from "./components/shared/PageTransition";
 
 import Home from "./pages/Home";
 import Navbar from "./components/shared/Navbar";
@@ -59,6 +61,17 @@ const PageSkeleton = () => (
   </div>
 );
 
+const AnimatedLayout = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <PageTransition key={location.pathname}>
+        <Outlet />
+      </PageTransition>
+    </AnimatePresence>
+  );
+};
+
 function App() {
 
   return (
@@ -69,6 +82,7 @@ function App() {
 
       <Suspense fallback={<PageSkeleton />}>
         <Routes>
+          <Route element={<AnimatedLayout />}>
 
         {/* HOME */}
 
@@ -420,6 +434,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+          </Route>
         </Routes>
       </Suspense>
 

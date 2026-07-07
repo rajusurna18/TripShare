@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState, memo } from "react";
+import { motion } from "framer-motion";
 import API from "../../services/api";
 import SaveButton from "./SaveButton";
 import ShareButton from "./ShareButton";
@@ -67,7 +68,16 @@ const sendJoinRequest =
 
   return (
 
-    <div className="trip-card glass-card">
+    <motion.div
+      className="trip-card glass-card"
+      whileHover={{
+        scale: 1.022,
+        y: -4,
+        boxShadow: "0 15px 30px rgba(255, 193, 7, 0.08)"
+      }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 350, damping: 22 }}
+    >
 
       {/* IMAGE */}
 
@@ -270,7 +280,7 @@ const sendJoinRequest =
 
       </div>
 
-    </div>
+    </motion.div>
 
   );
 

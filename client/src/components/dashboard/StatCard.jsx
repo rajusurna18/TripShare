@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 function StatCard({
 
   title,
@@ -14,14 +16,17 @@ function StatCard({
 
     <div className="col-lg-4 col-md-6 col-12">
 
-      <div
+      <motion.div
         className="glass-card p-4 h-100 position-relative overflow-hidden"
+        whileHover={{
+          scale: 1.025,
+          boxShadow: "0 15px 30px rgba(0, 0, 0, 0.35)",
+          borderColor: "rgba(255, 193, 7, 0.2)"
+        }}
+        transition={{ type: "spring", stiffness: 350, damping: 22 }}
         style={{
 
           borderRadius: "24px",
-
-          transition:
-            "all 0.3s ease",
 
           minHeight: "180px",
 
@@ -79,7 +84,7 @@ function StatCard({
 
             fontSize: "42px",
 
-          }}
+            }}
         >
 
           {value}
@@ -108,7 +113,7 @@ function StatCard({
 
         </div>
 
-      </div>
+      </motion.div>
 
     </div>
 

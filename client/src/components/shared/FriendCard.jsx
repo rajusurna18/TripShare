@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Avatar from "./Avatar";
 
 function FriendCard({
@@ -35,15 +36,22 @@ function FriendCard({
   const match = matchScore ?? user.matchScore ?? 0;
 
   return (
-    <div
-      className="glass-card p-4 d-flex flex-column justify-content-between h-100 transition-all hover-lift"
+    <motion.div
+      className="glass-card p-4 d-flex flex-column justify-content-between h-100 transition-all"
+      whileHover={{
+        scale: 1.02,
+        y: -3,
+        boxShadow: "0 15px 30px rgba(0, 0, 0, 0.4)",
+        borderColor: "rgba(255, 193, 7, 0.2)"
+      }}
+      whileTap={{ scale: 0.995 }}
+      transition={{ type: "spring", stiffness: 350, damping: 22 }}
       style={{
         background: "rgba(25, 25, 25, 0.65)",
         backdropFilter: "blur(10px)",
         border: "1px solid rgba(255, 255, 255, 0.08)",
         borderRadius: "16px",
         marginBottom: "20px",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
       }}
     >
       {/* Top Banner Accent */}
@@ -308,7 +316,7 @@ function FriendCard({
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

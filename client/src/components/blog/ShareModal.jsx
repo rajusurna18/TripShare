@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import API from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -47,14 +48,20 @@ function ShareModal({ blogId, blogTitle, onClose, onShareIncrement }) {
   };
 
   return (
-    <div
+    <motion.div
       className="modal fade show d-block"
       tabIndex="-1"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
       style={{ background: "rgba(0,0,0,0.7)", zIndex: 1200 }}
       onClick={onClose}
     >
-      <div
+      <motion.div
         className="modal-dialog modal-dialog-centered"
+        initial={{ scale: 0.9, y: 15 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 350, damping: 25 }}
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: "400px" }}
       >
@@ -123,8 +130,8 @@ function ShareModal({ blogId, blogTitle, onClose, onShareIncrement }) {
 
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

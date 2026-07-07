@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import Avatar from "../shared/Avatar";
+import { motion } from "framer-motion";
 import API from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -55,19 +56,20 @@ function BlogCard({ blog, currentUserId, onBlogDeleted }) {
   const coverUrl = blog.coverImage || defaultCover;
 
   return (
-    <div
+    <motion.div
       className="glass-card h-100 d-flex flex-column overflow-hidden position-relative"
+      whileHover={{
+        scale: 1.02,
+        y: -3,
+        boxShadow: "0 15px 30px rgba(0, 0, 0, 0.35)",
+        borderColor: "rgba(255, 193, 7, 0.2)"
+      }}
+      whileTap={{ scale: 0.995 }}
+      transition={{ type: "spring", stiffness: 350, damping: 22 }}
       style={{
-        transition: "transform 0.25s ease, box-shadow 0.25s ease",
-        borderRadius: "16px",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-5px)";
-        e.currentTarget.style.boxShadow = "0 10px 20px rgba(0,0,0,0.3)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "none";
+        background: "rgba(18, 18, 30, 0.75)",
+        border: "1px solid rgba(255, 255, 255, 0.08)",
+        borderRadius: "20px",
       }}
     >
       {/* Cover Image & Destination */}
@@ -159,7 +161,7 @@ function BlogCard({ blog, currentUserId, onBlogDeleted }) {
           <span title="Shares">🔗 {blog.shareCount || 0} shares</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

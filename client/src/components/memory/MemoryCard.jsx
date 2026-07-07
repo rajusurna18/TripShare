@@ -2,6 +2,7 @@ import { useState } from "react";
 import Avatar from "../shared/Avatar";
 import API from "../../services/api";
 import MemoryCommentsDrawer from "./MemoryCommentsDrawer";
+import { AnimatePresence } from "framer-motion";
 
 function MemoryCard({
   memory,
@@ -87,14 +88,16 @@ function MemoryCard({
         </button>
       </div>
 
-      {showComments && (
-        <MemoryCommentsDrawer
-          memoryId={memory._id}
-          memoryOwnerId={memory.user?._id || memory.user?.id || memory.user}
-          onClose={() => setShowComments(false)}
-          onCommentUpdated={fetchMemories}
-        />
-      )}
+      <AnimatePresence>
+        {showComments && (
+          <MemoryCommentsDrawer
+            memoryId={memory._id}
+            memoryOwnerId={memory.user?._id || memory.user?.id || memory.user}
+            onClose={() => setShowComments(false)}
+            onCommentUpdated={fetchMemories}
+          />
+        )}
+      </AnimatePresence>
 
     </div>
   );

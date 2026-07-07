@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { shareTrip } from "../../services/tripSave.api";
+import { motion, AnimatePresence } from "framer-motion";
 
 function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, onShareSuccess }) {
   const [copied, setCopied] = useState(false);
-
-  if (!isOpen) return null;
 
   const tripUrl = `${window.location.origin}/trip/${tripId}`;
   const shareText = `Check out this amazing trip to ${tripDestination || "our destination"} on TripShare AI: ${tripTitle || "Adventure"} ✈️ Let's travel together! Link: ${tripUrl}`;
@@ -46,37 +45,46 @@ function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, o
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-        backdropFilter: "blur(12px)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1100,
-        padding: "20px",
-      }}
-      onClick={onClose}
-    >
-      <div
-        className="glass-card"
-        style={{
-          width: "100%",
-          maxWidth: "480px",
-          background: "linear-gradient(145deg, rgba(20, 20, 35, 0.9) 0%, rgba(10, 10, 18, 0.95) 100%)",
-          border: "1px solid rgba(255, 255, 255, 0.08)",
-          borderRadius: "24px",
-          padding: "30px",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
-          animation: "fadeUp 0.3s ease",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backdropFilter: "blur(12px)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1100,
+            padding: "20px",
+          }}
+          onClick={onClose}
+        >
+          <motion.div
+            className="glass-card"
+            initial={{ scale: 0.9, y: 15 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 15 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            style={{
+              width: "100%",
+              maxWidth: "480px",
+              background: "linear-gradient(145deg, rgba(20, 20, 35, 0.9) 0%, rgba(10, 10, 18, 0.95) 100%)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "24px",
+              padding: "30px",
+              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
         {/* HEADER */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h3 className="text-warning m-0 fw-bold" style={{ fontSize: "22px" }}>
@@ -174,8 +182,10 @@ function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, o
             Instagram tip: Tap bio link or add a Link sticker on stories!
           </small>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
   );
 }
 
