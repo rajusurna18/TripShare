@@ -13,6 +13,7 @@ import {
 
 import { protect }
 from "../../middleware/auth.middleware.js";
+import { aiExpenseLimiter } from "../../middleware/rateLimiters.js";
 
 const router =
   express.Router();
@@ -58,6 +59,8 @@ router.get(
   "/ai/:tripId/insights",
 
   protect,
+
+  aiExpenseLimiter,
 
   getExpenseAIInsights
 

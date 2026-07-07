@@ -28,6 +28,14 @@ const socket =
 
   );
 
+// Intercept connection calls to dynamically attach token
+const originalConnect = socket.connect;
+socket.connect = function () {
+  const token = localStorage.getItem("token");
+  this.auth = { token };
+  return originalConnect.apply(this, arguments);
+};
+
 // CONNECTION EVENTS
 
 socket.on(

@@ -5,6 +5,10 @@ dotenv.config();
 import express from "express";
 
 import cors from "cors";
+import helmet from "helmet";
+import { nosqlSanitizer } from "./middleware/nosqlSanitize.middleware.js";
+import { xssSanitizer } from "./middleware/xssSanitize.middleware.js";
+import { validateObjectIds } from "./middleware/validateObjectIds.middleware.js";
 
 import http from "http";
 
@@ -15,29 +19,16 @@ from "socket.io";
 
 import { setIo, getOnlineUsers } from "./utils/socketRegistry.js";
 
-// CUSTOM RATE LIMITER MIDDLEWARE
-const rateLimit = (limit, windowMs) => {
-  const ipRequests = new Map();
-  return (req, res, next) => {
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    const now = Date.now();
-    if (!ipRequests.has(ip)) {
-      ipRequests.set(ip, []);
-    }
-    const timestamps = ipRequests.get(ip).filter(time => now - time < windowMs);
-    if (timestamps.length >= limit) {
-      return res.status(429).json({
-        success: false,
-        message: "Too many requests from this IP, please try again later."
-      });
-    }
-    timestamps.push(now);
-    ipRequests.set(ip, timestamps);
-    next();
-  };
-};
-
-const authLimiter = rateLimit(30, 60 * 1000); // 30 requests per minute
+import {
+  authenticationLimiter,
+  aiChatLimiter,
+  aiPackingLimiter,
+  aiExpenseLimiter,
+  blogsLimiter,
+  tripsLimiter,
+  messagesLimiter,
+  generalLimiter,
+} from "./middleware/rateLimiters.js";
 
 import connectDB
 from "./config/db.js";
@@ -96,10 +87,18 @@ from "./modules/recommendation/recommendation.routes.js";
 import matchRoutes
 from "./modules/match/match.routes.js";
 
+import aiPackingRoutes
+from "./modules/ai/aiPacking.routes.js";
+
 import Trip
 from "./modules/trip/trip.model.js";
 
 const app = express();
+
+// HELMET SECURITY HEADERS (CORS Compatible)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // MIDDLEWARES
 
@@ -117,6 +116,11 @@ app.use(
 );
 
 app.use(express.json());
+
+// INPUT SANITIZATION
+app.use(nosqlSanitizer);
+app.use(xssSanitizer);
+app.use(validateObjectIds);
 
 // STATIC FILES
 
@@ -180,72 +184,91 @@ migrateNotificationCategories();
 
 app.use(
   "/api/auth",
-  authLimiter,
+  authenticationLimiter,
   authRoutes
 );
 
 app.use(
   "/api/trips",
+  tripsLimiter,
   tripRoutes
 );
 
 app.use(
   "/api/expenses",
+  generalLimiter,
   expenseRoutes
 );
 
 app.use(
   "/api/profile",
+  generalLimiter,
   profileRoutes
 );
 
 app.use(
   "/api/ai",
+  generalLimiter,
   aiRoutes
 );
 
 app.use(
+  "/api/ai/packing",
+  aiPackingLimiter,
+  aiPackingRoutes
+);
+
+app.use(
   "/api/messages",
+  messagesLimiter,
   messageRoutes
 );
 
 app.use(
   "/api/notifications",
+  generalLimiter,
   notificationRoutes
 );
 
 app.use(
   "/api/activities",
+  generalLimiter,
   activityRoutes
 );
 
 app.use(
   "/api/friends",
+  generalLimiter,
   friendRoutes
 );
 
 app.use(
   "/api/reviews",
+  generalLimiter,
   reviewRoutes
 );
 
 app.use(
   "/api/dashboard",
+  generalLimiter,
   dashboardRoutes
 );
 
 app.use(
   "/api/join-requests",
+  generalLimiter,
   joinRequestRoutes
 );
 
 app.use(
   "/api/memories",
+  generalLimiter,
   memoryRoutes
 );
 
 app.use(
   "/api/blogs",
+  blogsLimiter,
   blogRoutes
 );
 

@@ -1,4 +1,6 @@
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+import Trip from "../modules/trip/trip.model.js";
 
 let io;
 
@@ -21,6 +23,21 @@ export const initSocket =
 
     });
 
+    // Enforce JWT handshake authentication
+    io.use((socket, next) => {
+      const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(" ")[1];
+      if (!token) {
+        return next(new Error("Authentication error: No token provided"));
+      }
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        socket.user = decoded;
+        next();
+      } catch (err) {
+        return next(new Error("Authentication error: Invalid token"));
+      }
+    });
+
     io.on(
       "connection",
       (socket) => {
@@ -34,16 +51,24 @@ export const initSocket =
 
         socket.on(
           "join_trip",
-          (tripId) => {
-
-            socket.join(
-              tripId
-            );
-
-            console.log(
-              `Joined room: ${tripId}`
-            );
-
+          async (tripId) => {
+            try {
+              const trip = await Trip.findById(tripId);
+              if (!trip) {
+                return socket.emit("error_msg", { message: "Trip not found" });
+              }
+              const isCreator = trip.createdBy.toString() === socket.user.id.toString();
+              const isMember = trip.members.some(
+                (m) => m.toString() === socket.user.id.toString()
+              );
+              if (!isCreator && !isMember) {
+                return socket.emit("error_msg", { message: "Access denied: You are not a member of this trip" });
+              }
+              socket.join(tripId);
+              console.log(`User ${socket.user.id} joined room: ${tripId}`);
+            } catch (err) {
+              socket.emit("error_msg", { message: "Failed to join room" });
+            }
           }
         );
 
@@ -51,23 +76,37 @@ export const initSocket =
 
         socket.on(
           "send_message",
-          (data) => {
+          async (data) => {
+            try {
+              const trip = await Trip.findById(data.tripId);
+              if (!trip) {
+                return socket.emit("error_msg", { message: "Trip not found" });
+              }
+              const isCreator = trip.createdBy.toString() === socket.user.id.toString();
+              const isMember = trip.members.some(
+                (m) => m.toString() === socket.user.id.toString()
+              );
+              if (!isCreator && !isMember) {
+                return socket.emit("error_msg", { message: "Access denied" });
+              }
 
-            console.log(
-              "Message received:",
-              data
-            );
+              console.log(
+                "Message received:",
+                data
+              );
 
-            io.to(
-              data.tripId
-            ).emit(
+              io.to(
+                data.tripId
+              ).emit(
 
-              "receive_message",
+                "receive_message",
 
-              data
+                data
 
-            );
-
+              );
+            } catch (err) {
+              socket.emit("error_msg", { message: "Failed to send message" });
+            }
           }
         );
 

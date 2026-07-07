@@ -220,6 +220,25 @@ export const getBlogByIdService = async (blogId, identifier, userId = null) => {
     throw new Error("Blog not found");
   }
 
+  // Visibility Check:
+  if (blog.visibility === "private") {
+    if (!userId || blog.author._id.toString() !== userId.toString()) {
+      throw new Error("Access denied: This blog is private");
+    }
+  } else if (blog.visibility === "followers_only") {
+    if (!userId) {
+      throw new Error("Access denied: Log in to view this blog");
+    }
+    if (blog.author._id.toString() !== userId.toString()) {
+      // Check if user is follower
+      const authorUser = await User.findById(blog.author._id).select("followers");
+      const isFollowing = authorUser?.followers?.some((id) => id.toString() === userId.toString()) || false;
+      if (!isFollowing) {
+        throw new Error("Access denied: You are not following this author");
+      }
+    }
+  }
+
   // Record unique view
   if (identifier) {
     try {

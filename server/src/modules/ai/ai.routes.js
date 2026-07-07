@@ -10,6 +10,7 @@ import {
 } from "./ai.controller.js";
 
 import { protect } from "../../middleware/auth.middleware.js";
+import { aiChatLimiter } from "../../middleware/rateLimiters.js";
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ const router = express.Router();
 router.post(
   "/chat",
   protect,
+  aiChatLimiter,
   generateAIReply
 );
 
