@@ -340,16 +340,7 @@ function AI() {
           
           {/* SIDEBAR: CHAT SESSIONS */}
           <div className="col-12 col-md-3">
-            <div
-              className="glass-card p-4 h-100"
-              style={{
-                background: "rgba(25, 25, 30, 0.65)",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                borderRadius: "20px",
-                minHeight: "75vh",
-                backdropFilter: "blur(12px)",
-              }}
-            >
+            <div className="glass-card p-4 h-100 ai-sidebar">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h5 className="fw-bold text-light mb-0 d-flex align-items-center gap-2">
                   🤖 Chats History
@@ -410,16 +401,7 @@ function AI() {
 
           {/* MAIN CHAT AREA */}
           <div className="col-12 col-md-9">
-            <div
-              className="glass-card p-4 d-flex flex-column"
-              style={{
-                background: "rgba(20, 20, 25, 0.7)",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                borderRadius: "25px",
-                height: "75vh",
-                backdropFilter: "blur(12px)",
-              }}
-            >
+            <div className="glass-card p-4 d-flex flex-column ai-chat-main">
               
               {/* CHAT HEADER */}
               <div className="border-bottom border-secondary border-opacity-20 pb-3 mb-3 d-flex align-items-center justify-content-between">

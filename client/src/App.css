@@ -4624,3 +4624,63 @@ button,
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite linear;
 }
+
+/* =========================================
+   RESPONSIVE DESIGN ADDITIONS & FIXES
+========================================= */
+
+/* AI page layout responsiveness */
+.ai-sidebar {
+  background: rgba(25, 25, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  min-height: 75vh;
+  backdrop-filter: blur(12px);
+}
+
+.ai-chat-main {
+  background: rgba(20, 20, 25, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 25px;
+  height: 75vh;
+  backdrop-filter: blur(12px);
+}
+
+@media (max-width: 768px) {
+  .ai-sidebar {
+    min-height: auto !important;
+    max-height: 250px;
+    margin-bottom: 20px;
+  }
+  .ai-chat-main {
+    height: 70vh !important;
+  }
+  .comments-drawer {
+    padding: 16px !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* Touch targets optimization */
+.form-control,
+.form-select,
+.btn {
+  min-height: 44px;
+}
+
+/* Flex wrap and card scaling safeguards */
+.trip-buttons-mobile {
+  flex-direction: row;
+}
+
+@media (max-width: 480px) {
+  .trip-buttons-mobile {
+    flex-direction: column !important;
+  }
+  .trip-buttons-mobile > a, 
+  .trip-buttons-mobile > button {
+    width: 100% !important;
+    text-align: center;
+    margin-left: 0 !important;
+  }
+}
