@@ -117,7 +117,7 @@ function SavedTrips() {
               <input
                 type="text"
                 placeholder="Search by destination or title..."
-                className="form-control trip-search-input py-2.5 px-4"
+                className="form-control trip-search-input py-2 px-4"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 style={{
@@ -278,7 +278,7 @@ function SavedTrips() {
                           </div>
                         )}
                         <span
-                          className="position-absolute top-3 end-3 badge px-3 py-1.5 rounded-pill text-capitalize"
+                          className="position-absolute top-3 end-3 badge px-3 py-2 rounded-pill text-capitalize"
                           style={{
                             background:
                               trip.status === "upcoming"

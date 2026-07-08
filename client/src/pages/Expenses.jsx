@@ -265,7 +265,7 @@ function Expenses() {
           </div>
 
           <button
-            className="btn btn-outline-warning rounded-4 px-4 py-2.5 fw-bold shadow-sm"
+            className="btn btn-outline-warning rounded-4 px-4 py-2 fw-bold shadow-sm"
             onClick={() => navigate(`/expense-ai/${tripId}`)}
           >
             🤖 Run AI Settlement Insights

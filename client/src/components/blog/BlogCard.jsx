@@ -113,9 +113,9 @@ function BlogCard({ blog, currentUserId, onBlogDeleted }) {
       </div>
 
       {/* Card Body */}
-      <div className="p-3.5 d-flex flex-column flex-grow-1">
+      <div className="p-3 d-flex flex-column flex-grow-1">
         {/* Author details */}
-        <div className="d-flex align-items-center gap-2 mb-2.5">
+        <div className="d-flex align-items-center gap-2 mb-2">
           <Avatar src={blog.author?.profileImage} size={28} className="border border-secondary shadow-sm" />
           <div className="d-flex flex-column">
             <span className="text-white-50 fw-semibold" style={{ fontSize: "0.75rem" }}>
@@ -152,8 +152,8 @@ function BlogCard({ blog, currentUserId, onBlogDeleted }) {
         </div>
 
         {/* Footer Metrics */}
-        <div className="d-flex justify-content-between align-items-center pt-2.5 border-top border-secondary border-opacity-30 text-secondary" style={{ fontSize: "0.75rem" }}>
-          <div className="d-flex align-items-center gap-2.5">
+        <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-30 text-secondary" style={{ fontSize: "0.75rem" }}>
+          <div className="d-flex align-items-center gap-2">
             <span title="Views">👁️ {blog.viewsCount || 0}</span>
             <span title="Likes">❤️ {blog.likesCount || 0}</span>
             <span title="Comments">💬 {blog.commentsCount || 0}</span>

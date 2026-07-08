@@ -284,7 +284,7 @@ function AIPackingList() {
                     <div className="col-12 col-md-6 print-w-100" key={cIdx}>
                       <div className="glass-card p-4 h-100 print-card">
                         <h5 className="fw-bold text-warning border-bottom pb-2 border-secondary border-opacity-20 mb-3">{cat.name}</h5>
-                        <div className="d-flex flex-column gap-2.5">
+                        <div className="d-flex flex-column gap-2">
                           {cat.items.map((item, iIdx) => (
                             <label className="d-flex align-items-start gap-3 cursor-pointer check-row py-1 px-2 rounded-3" key={item._id || iIdx} style={{ cursor: "pointer" }}>
                               <input type="checkbox" className="form-check-input mt-1 border-secondary" checked={item.checked} onChange={() => handleToggle(cat.name, item._id)} />

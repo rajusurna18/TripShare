@@ -932,7 +932,7 @@ function Dashboard() {
                             <p className="text-secondary small italic mb-0">No expense records found.</p>
                           </div>
                         ) : (
-                          <div className="d-flex flex-column gap-3.5">
+                          <div className="d-flex flex-column gap-3">
                             {dashboardStats.analytics.expenseCategoryStats.slice(0, 5).map((item, idx) => {
                               const totalVal = dashboardStats.analytics.expenseCategoryStats.reduce((sum, c) => sum + c.value, 0) || 1;
                               const pct = Math.round((item.value / totalVal) * 100);

@@ -302,7 +302,7 @@ function EditBlog() {
         </div>
 
         {/* Blocks Editor */}
-        <div className="glass-card p-4 d-flex flex-column gap-3.5">
+        <div className="glass-card p-4 d-flex flex-column gap-3">
           <label className="form-label text-white-50 fw-semibold d-flex justify-content-between">
             <span>Story Content Blocks</span>
             <small className="text-secondary">Notion-style interactive rich text</small>
@@ -312,7 +312,7 @@ function EditBlog() {
             {blocks.map((block, index) => (
               <div 
                 key={block.id} 
-                className="d-flex gap-2.5 align-items-start p-2.5 rounded bg-dark bg-opacity-25 border border-secondary border-opacity-10 position-relative"
+                className="d-flex gap-2 align-items-start p-2 rounded bg-dark bg-opacity-25 border border-secondary border-opacity-10 position-relative"
               >
                 {/* Control Handles */}
                 <div className="d-flex flex-column gap-1">
@@ -389,7 +389,7 @@ function EditBlog() {
                         <small className="text-secondary">Code Snippet</small>
                         <input
                           type="text"
-                          className="form-control bg-dark border-secondary border-opacity-40 text-white-50 small py-0.5 px-2 w-auto"
+                          className="form-control bg-dark border-secondary border-opacity-40 text-white-50 small py-1 px-2 w-auto"
                           value={block.data.language || "javascript"}
                           onChange={(e) => handleUpdateBlock(block.id, { language: e.target.value })}
                         />
@@ -527,7 +527,7 @@ function EditBlog() {
           </div>
 
           {/* Add Block Toolbar */}
-          <div className="d-flex flex-wrap gap-2 justify-content-center border-top border-secondary border-opacity-20 pt-3.5 mt-3">
+          <div className="d-flex flex-wrap gap-2 justify-content-center border-top border-secondary border-opacity-20 pt-3 mt-3">
             <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => handleAddBlock("paragraph")}>
               ＋ Text Block 📝
             </button>
@@ -557,7 +557,7 @@ function EditBlog() {
             {tags.map((tag) => (
               <span 
                 key={tag} 
-                className="badge bg-warning bg-opacity-10 text-warning px-3 py-2 d-flex align-items-center gap-1.5"
+                className="badge bg-warning bg-opacity-10 text-warning px-3 py-2 d-flex align-items-center gap-2"
                 style={{ borderRadius: "20px" }}
               >
                 #{tag}

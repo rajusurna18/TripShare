@@ -14,7 +14,7 @@ function BlogSkeleton({ count = 3 }) {
             />
 
             {/* Content Shimmer */}
-            <div className="p-3.5 d-flex flex-column flex-grow-1 gap-2.5">
+            <div className="p-3 d-flex flex-column flex-grow-1 gap-2">
               {/* Author Row */}
               <div className="d-flex align-items-center gap-2">
                 <div

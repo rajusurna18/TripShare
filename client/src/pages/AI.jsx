@@ -305,7 +305,7 @@ function AI() {
       if (i % 2 === 1) {
         // Inline code segment
         return (
-          <code key={i} className="px-2 py-0.5 rounded bg-dark border border-secondary border-opacity-30 text-warning" style={{ fontSize: "13px", fontFamily: "monospace" }}>
+          <code key={i} className="px-2 py-1 rounded bg-dark border border-secondary border-opacity-30 text-warning" style={{ fontSize: "13px", fontFamily: "monospace" }}>
             {part}
           </code>
         );

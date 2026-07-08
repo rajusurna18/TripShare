@@ -86,7 +86,7 @@ function ShareModal({ blogId, blogTitle, onClose, onShareIncrement }) {
               <button
                 onClick={handleWhatsApp}
                 disabled={loading}
-                className="btn btn-outline-success rounded-circle d-flex flex-column align-items-center justify-content-center gap-1.5"
+                className="btn btn-outline-success rounded-circle d-flex flex-column align-items-center justify-content-center gap-1"
                 style={{ width: "70px", height: "70px", border: "1px solid rgba(40, 167, 69, 0.3)" }}
               >
                 <span style={{ fontSize: "1.6rem" }}>💬</span>
@@ -97,7 +97,7 @@ function ShareModal({ blogId, blogTitle, onClose, onShareIncrement }) {
               <button
                 onClick={handleTelegram}
                 disabled={loading}
-                className="btn btn-outline-info rounded-circle d-flex flex-column align-items-center justify-content-center gap-1.5"
+                className="btn btn-outline-info rounded-circle d-flex flex-column align-items-center justify-content-center gap-1"
                 style={{ width: "70px", height: "70px", border: "1px solid rgba(23, 162, 184, 0.3)" }}
               >
                 <span style={{ fontSize: "1.6rem" }}>✈️</span>
@@ -108,7 +108,7 @@ function ShareModal({ blogId, blogTitle, onClose, onShareIncrement }) {
               <button
                 onClick={handleCopyLink}
                 disabled={loading}
-                className="btn btn-outline-warning rounded-circle d-flex flex-column align-items-center justify-content-center gap-1.5"
+                className="btn btn-outline-warning rounded-circle d-flex flex-column align-items-center justify-content-center gap-1"
                 style={{ width: "70px", height: "70px", border: "1px solid rgba(255, 193, 7, 0.3)" }}
               >
                 <span style={{ fontSize: "1.6rem" }}>📋</span>

@@ -35,6 +35,9 @@ from "./modules/blog/blog.routes.js";
 import tripSaveRoutes
 from "./modules/tripSave/tripSave.routes.js";
 
+import timelineRoutes
+from "./modules/timeline/timeline.routes.js";
+
 import { protect }
 from "./middleware/auth.middleware.js";
 
@@ -119,6 +122,11 @@ app.use(
 app.use(
   "/api/saves",
   tripSaveRoutes
+);
+
+app.use(
+  "/api/timeline",
+  timelineRoutes
 );
 
 app.use(

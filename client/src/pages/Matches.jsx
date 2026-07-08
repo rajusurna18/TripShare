@@ -479,7 +479,7 @@ function Matches() {
                           {/* SCORE BREAKDOWN COLLAPSIBLE */}
                           <div className="mt-3">
                             <button
-                              className="btn btn-sm btn-outline-warning w-100 py-1.5 rounded-3 fw-semibold border-secondary border-opacity-25 hover-warning-btn"
+                              className="btn btn-sm btn-outline-warning w-100 py-2 rounded-3 fw-semibold border-secondary border-opacity-25 hover-warning-btn"
                               onClick={(e) => {
                                 const el = document.getElementById(`breakdown-${item.user?._id}`);
                                 if (el) {

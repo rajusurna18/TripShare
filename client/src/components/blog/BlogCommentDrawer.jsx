@@ -235,7 +235,7 @@ function BlogCommentDrawer({ blogId, onClose, onCommentUpdated, blogOwnerId }) {
         {/* INPUT FORM */}
         <form onSubmit={handleSubmit} className="border-top border-secondary border-opacity-30 pt-3">
           {replyTo && (
-            <div className="d-flex justify-content-between align-items-center mb-2 px-2.5 py-1.5 rounded bg-warning bg-opacity-10 text-warning small">
+            <div className="d-flex justify-content-between align-items-center mb-2 px-3 py-2 rounded bg-warning bg-opacity-10 text-warning small">
               <span>
                 Replying to <strong>{replyTo.userName}</strong>
               </span>

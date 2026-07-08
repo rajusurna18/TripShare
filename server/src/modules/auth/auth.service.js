@@ -334,3 +334,99 @@ export const resetPasswordService =
     };
 
 };
+
+// EXCHANGE GOOGLE CODE FOR ACCESS TOKEN AND RETRIEVE PROFILE DETAILS
+export const verifyGoogleOAuthCodeService = async (code) => {
+  if (!code) {
+    throw new Error("Authorization code is required from Google redirect");
+  }
+
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const callbackUrl = process.env.GOOGLE_CALLBACK_URL;
+
+  if (!clientId || !clientSecret || !callbackUrl) {
+    throw new Error("Google OAuth configuration keys are missing in env");
+  }
+
+  // 1. Exchange code for access tokens
+  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: callbackUrl,
+      grant_type: "authorization_code",
+    }),
+  });
+
+  if (!tokenResponse.ok) {
+    const errorText = await tokenResponse.text();
+    console.error("Google token exchange failure payload:", errorText);
+    throw new Error("Google OAuth authorization code exchange failed");
+  }
+
+  const tokens = await tokenResponse.json();
+  const accessToken = tokens.access_token;
+
+  if (!accessToken) {
+    throw new Error("Google did not return a valid Access Token");
+  }
+
+  // 2. Fetch user profile from google userinfo API
+  const profileResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!profileResponse.ok) {
+    throw new Error("Failed to retrieve Google user profile details");
+  }
+
+  const payload = await profileResponse.json();
+  if (!payload.email) {
+    throw new Error("Google account profile lacks a valid email address");
+  }
+
+  const email = payload.email.trim().toLowerCase();
+  let user = await User.findOne({ email });
+
+  if (user) {
+    if (!user.isVerified) {
+      user.isVerified = true;
+      await user.save();
+    }
+  } else {
+    // Generate secure random password
+    const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).toUpperCase().slice(-4) + "1";
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    user = await User.create({
+      name: payload.name || payload.given_name || "Google Traveler",
+      email,
+      password: hashedPassword,
+      profileImage: payload.picture || "",
+      isVerified: true
+    });
+  }
+
+  const token = jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+  const safeUser = user.toObject();
+  delete safeUser.password;
+
+  return {
+    user: safeUser,
+    token,
+  };
+};

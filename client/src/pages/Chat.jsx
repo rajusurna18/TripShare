@@ -656,7 +656,7 @@ function Chat() {
               className="w-100 h-100 rounded border border-warning"
               style={{ objectFit: "cover" }}
             />
-            <span className="position-absolute bottom-0 start-0 bg-dark text-warning px-2 py-0.5 rounded-end" style={{ fontSize: "11px" }}>
+            <span className="position-absolute bottom-0 start-0 bg-dark text-warning px-2 py-1 rounded-end" style={{ fontSize: "11px" }}>
               You
             </span>
           </div>

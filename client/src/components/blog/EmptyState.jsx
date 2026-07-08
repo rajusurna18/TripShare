@@ -9,7 +9,7 @@ function EmptyState({ title = "No blogs found", description = "Be the first to s
       <div className="display-1 mb-4 text-warning" style={{ opacity: 0.7 }}>
         📝
       </div>
-      <h3 className="fw-bold mb-2.5 text-light">{title}</h3>
+      <h3 className="fw-bold mb-2 text-light">{title}</h3>
       <p className="text-secondary mb-4 small" style={{ lineHeight: "1.5" }}>
         {description}
       </p>

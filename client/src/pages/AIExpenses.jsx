@@ -161,7 +161,7 @@ function AIExpenses() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-dark bg-opacity-30 border border-secondary border-opacity-10 p-3.5 rounded-4 text-center mb-3">
+                <div className="bg-dark bg-opacity-30 border border-secondary border-opacity-10 p-4 rounded-4 text-center mb-3">
                   <p className="text-muted small mb-0">✅ No heuristic duplicate entries or spike limits hit.</p>
                 </div>
               )}
@@ -239,7 +239,7 @@ function AIExpenses() {
                 Tailored cost management suggestions based on current category aggregates.
               </p>
 
-              <div className="d-flex flex-column gap-3.5">
+              <div className="d-flex flex-column gap-3">
                 {insights?.budgetAdviser?.map((item, idx) => (
                   <div key={idx} className="d-flex gap-3">
                     <div className="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold" style={{ minWidth: "24px", height: "24px", fontSize: "12px" }}>

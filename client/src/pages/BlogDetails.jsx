@@ -126,7 +126,7 @@ function BlogDetails() {
         return (
           <ListTag key={block.id} className="mb-4 text-white-50 ps-4">
             {block.data.items?.map((item, idx) => (
-              <li key={idx} className="mb-1.5" style={{ fontSize: "1.05rem" }}>
+              <li key={idx} className="mb-2" style={{ fontSize: "1.05rem" }}>
                 {item}
               </li>
             ))}

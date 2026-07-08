@@ -42,6 +42,7 @@ const Expenses = lazy(() => import("./pages/Expenses"));
 const AIPackingList = lazy(() => import("./pages/AIPackingList"));
 const AIExpenses = lazy(() => import("./pages/AIExpenses"));
 const SavedTrips = lazy(() => import("./pages/SavedTrips"));
+const Timeline = lazy(() => import("./pages/Timeline"));
 
 // Fallback Skeleton Loader
 const PageSkeleton = () => (
@@ -319,6 +320,17 @@ function App() {
             <ProtectedRoute>
 
               <TripDetails />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/timeline/:tripId"
+          element={
+            <ProtectedRoute>
+
+              <Timeline />
 
             </ProtectedRoute>
           }

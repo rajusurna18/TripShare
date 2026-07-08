@@ -708,6 +708,12 @@ function TripDetails() {
           Open Chat 💬
         </Link>
         <Link
+          to={`/timeline/${tripId}`}
+          className="btn btn-outline-warning text-warning"
+        >
+          📅 Travel Timeline
+        </Link>
+        <Link
           to={`/expenses/${tripId}`}
           className="btn btn-outline-warning"
         >

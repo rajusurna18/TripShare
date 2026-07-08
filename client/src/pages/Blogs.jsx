@@ -132,13 +132,13 @@ function Blogs() {
         )}
       </div>
 
-      <div className="row g-4.5">
+      <div className="row g-4">
         
         {/* Left Side: Filter and Blogs Grid */}
-        <div className="col-12 col-lg-8.5 order-2 order-lg-1">
+        <div className="col-12 col-lg-8 order-2 order-lg-1">
           
           {/* Filters Form */}
-          <form onSubmit={handleSearchSubmit} className="glass-card p-4 mb-4.5">
+          <form onSubmit={handleSearchSubmit} className="glass-card p-4 mb-4">
             <div className="row g-3">
               <div className="col-12 col-md-5">
                 <input
@@ -245,10 +245,10 @@ function Blogs() {
         </div>
 
         {/* Right Side: Sidebar */}
-        <div className="col-12 col-lg-3.5 order-1 order-lg-2">
+        <div className="col-12 col-lg-4 order-1 order-lg-2">
           {/* Trending Blogs list */}
           <div className="glass-card p-4 position-sticky" style={{ top: "90px" }}>
-            <h5 className="fw-bold text-warning mb-4.5 d-flex align-items-center gap-2">
+            <h5 className="fw-bold text-warning mb-4 d-flex align-items-center gap-2">
               <span>🔥 Trending Journals</span>
             </h5>
             

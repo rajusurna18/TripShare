@@ -171,6 +171,17 @@ const tripSchema =
 
       },
 
+      travelStory: {
+        type: String,
+        default: "",
+      },
+
+      tripSummary: {
+        type: mongoose.Schema.Types.Mixed,
+        default: null,
+      },
+
+
     },
 
     {

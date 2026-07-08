@@ -76,7 +76,7 @@ function BlogToolbar({ blogId, likesCount, commentsCount, hasLiked: initialHasLi
       {/* Share Button */}
       <button
         onClick={onOpenShare}
-        className="btn btn-link text-white-50 p-0 d-flex align-items-center gap-1.5 text-decoration-none border-0 hover-warning"
+        className="btn btn-link text-white-50 p-0 d-flex align-items-center gap-1 text-decoration-none border-0 hover-warning"
         title="Share Post"
         style={{ fontSize: "1rem" }}
       >

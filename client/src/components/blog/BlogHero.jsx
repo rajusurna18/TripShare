@@ -39,7 +39,7 @@ function BlogHero({ blog }) {
               📍 {blog.destination}
             </span>
             {blog.visibility !== "public" && (
-              <span className="badge bg-dark border border-secondary text-secondary px-2.5 py-1.5" style={{ borderRadius: "20px", fontSize: "0.75rem" }}>
+              <span className="badge bg-dark border border-secondary text-secondary px-3 py-2" style={{ borderRadius: "20px", fontSize: "0.75rem" }}>
                 🔒 {blog.visibility === "followers_only" ? "Followers Only" : "Private"}
               </span>
             )}
@@ -86,7 +86,7 @@ function BlogHero({ blog }) {
             {blog.tags?.map((tag, idx) => (
               <span 
                 key={idx} 
-                className="badge bg-light bg-opacity-10 text-light border border-secondary border-opacity-30 py-1.5 px-3 text-lowercase"
+                className="badge bg-light bg-opacity-10 text-light border border-secondary border-opacity-30 py-2 px-3 text-lowercase"
                 style={{ borderRadius: "20px", fontSize: "0.75rem" }}
               >
                 #{tag}

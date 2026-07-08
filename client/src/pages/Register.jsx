@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   useNavigate,
@@ -23,6 +23,24 @@ function Register() {
       email: "",
       password: "",
     });
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const token = searchParams.get("token");
+    const userStr = searchParams.get("user");
+
+    if (token && userStr) {
+      try {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", userStr);
+        toast.success("Registration & Login successful with Google 🚀");
+        navigate("/dashboard");
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to parse social login credentials");
+      }
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
 
@@ -190,7 +208,7 @@ Password must contain:
 
         <div className="social-login mt-4">
 
-          <p className="text-center text-light">
+          <p className="text-center text-light mb-3">
 
             Or continue with
 
@@ -198,19 +216,25 @@ Password must contain:
 
           <div className="d-flex justify-content-center gap-3 mt-3">
 
-            <button className="social-btn">
-
+            <button
+              type="button"
+              className="social-btn"
+              onClick={() => {
+                const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+                window.location.href = `${apiBase}/auth/google`;
+              }}
+              title="Continue with Google"
+            >
               <i className="fab fa-google"></i>
-
             </button>
 
-            <button className="social-btn">
+            <button type="button" className="social-btn" onClick={() => toast("GitHub login integration coming soon!")}>
 
               <i className="fab fa-github"></i>
 
             </button>
 
-            <button className="social-btn">
+            <button type="button" className="social-btn" onClick={() => toast("Facebook login integration coming soon!")}>
 
               <i className="fab fa-facebook-f"></i>
 
