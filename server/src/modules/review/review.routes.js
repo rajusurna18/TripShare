@@ -7,6 +7,10 @@ import {
 
   getUserReviews,
 
+  editReview,
+
+  deleteReview,
+
 } from "./review.controller.js";
 
 import { protect }
@@ -30,5 +34,9 @@ router.get(
   protect,
   getUserReviews
 );
+
+// EDIT & DELETE REVIEW (NEW)
+router.put("/:id", protect, editReview);
+router.delete("/:id", protect, deleteReview);
 
 export default router;

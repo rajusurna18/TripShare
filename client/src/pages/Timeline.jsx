@@ -5,7 +5,9 @@ import {
   getTimeline,
   saveTimelineNote,
   logTimelineLocation,
-  generateTimelineAIStory
+  generateTimelineAIStory,
+  editTimelineEvent,
+  deleteTimelineEvent
 } from "../services/timeline.api";
 import Avatar from "../components/shared/Avatar";
 
@@ -38,6 +40,18 @@ function Timeline() {
 
   // Expanded details state (keyed by event id)
   const [expandedEvents, setExpandedEvents] = useState({});
+
+  // Editing event states
+  const [editingEventId, setEditingEventId] = useState(null);
+  const [editingEventType, setEditingEventType] = useState("");
+  const [editEventForm, setEditEventForm] = useState({
+    noteText: "",
+    place: "",
+    city: "",
+    lat: "",
+    lng: "",
+    timestamp: ""
+  });
 
   useEffect(() => {
     fetchTimelineData();
@@ -146,6 +160,49 @@ function Timeline() {
       toast.error("Gemini AI failed to compile travel story");
     } finally {
       setAiGenerating(false);
+    }
+  };
+
+  const handleStartEditEvent = (evt) => {
+    setEditingEventId(evt._id);
+    setEditingEventType(evt.type);
+    setEditEventForm({
+      noteText: evt.type === "Note" ? evt.description : "",
+      place: evt.type === "Location" ? evt.title : "",
+      city: evt.type === "Location" ? evt.details.locationData?.city : "",
+      lat: evt.type === "Location" ? evt.details.locationData?.lat || "" : "",
+      lng: evt.type === "Location" ? evt.details.locationData?.lng || "" : "",
+      timestamp: evt.timestamp ? new Date(evt.timestamp).toISOString().slice(0, 16) : ""
+    });
+  };
+
+  const handleSaveEditEvent = async () => {
+    try {
+      setActionLoading(true);
+      await editTimelineEvent(tripId, editingEventId, editEventForm);
+      toast.success("Timeline event updated successfully! 🎉");
+      setEditingEventId(null);
+      fetchTimelineData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to update event");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!window.confirm("Are you sure you want to delete this event from the timeline?")) return;
+    try {
+      setActionLoading(true);
+      await deleteTimelineEvent(tripId, eventId);
+      toast.success("Event deleted from timeline 🗑️");
+      fetchTimelineData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete event");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -460,13 +517,34 @@ function Timeline() {
                         <p className="text-secondary small m-0 mb-2">{evt.description}</p>
                         
                         {/* Event Details Expand Toggle */}
-                        <button 
-                          className="btn btn-xs btn-link text-warning p-0 text-decoration-none small"
-                          onClick={() => toggleEventDetails(evt._id || `${day.dayNumber}-${idx}`)}
-                          style={{ fontSize: "12px" }}
-                        >
-                          {expandedEvents[evt._id || `${day.dayNumber}-${idx}`] ? "Hide Details ▲" : "View Details ▼"}
-                        </button>
+                        <div className="d-flex align-items-center justify-content-between mt-2 flex-wrap gap-2">
+                          <button 
+                            className="btn btn-xs btn-link text-warning p-0 text-decoration-none small"
+                            onClick={() => toggleEventDetails(evt._id || `${day.dayNumber}-${idx}`)}
+                            style={{ fontSize: "12px" }}
+                          >
+                            {expandedEvents[evt._id || `${day.dayNumber}-${idx}`] ? "Hide Details ▲" : "View Details ▼"}
+                          </button>
+                          
+                          {evt.details?.createdById && currentUser && (evt.details.createdById === currentUser._id || evt.details.createdById === currentUser.id) && (evt.type === "Note" || evt.type === "Location") && (
+                            <div className="d-flex gap-2">
+                              <button 
+                                className="btn btn-xs btn-outline-secondary text-light px-2"
+                                onClick={() => handleStartEditEvent(evt)}
+                                style={{ fontSize: "11px", padding: "1px 5px" }}
+                              >
+                                ✏️ Edit
+                              </button>
+                              <button 
+                                className="btn btn-xs btn-outline-danger px-2"
+                                onClick={() => handleDeleteEvent(evt._id)}
+                                style={{ fontSize: "11px", padding: "1px 5px" }}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
 
                         {/* Collapsible Details Content */}
                         {expandedEvents[evt._id || `${day.dayNumber}-${idx}`] && (
@@ -533,6 +611,100 @@ function Timeline() {
             ))}
           </div>
         )}
+        {editingEventId && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "rgba(0, 0, 0, 0.8)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1100,
+          padding: "20px"
+        }}>
+          <div className="glass-card p-4" style={{ width: "100%", maxWidth: "500px", background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "90vh", overflowY: "auto" }}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h3 className="m-0 text-warning">Edit Timeline Event ✏️</h3>
+              <button className="btn-close btn-close-white" onClick={() => setEditingEventId(null)}></button>
+            </div>
+            
+            <label className="form-label text-light">Event Timestamp</label>
+            <input
+              type="datetime-local"
+              className="form-control mb-3 bg-dark text-light border-secondary"
+              value={editEventForm.timestamp}
+              onChange={(e) => setEditEventForm({ ...editEventForm, timestamp: e.target.value })}
+            />
+
+            {editingEventType === "Note" && (
+              <>
+                <label className="form-label text-light">Note Text</label>
+                <textarea
+                  className="form-control mb-4 bg-dark text-light border-secondary"
+                  rows={4}
+                  value={editEventForm.noteText}
+                  onChange={(e) => setEditEventForm({ ...editEventForm, noteText: e.target.value })}
+                  placeholder="Note description..."
+                />
+              </>
+            )}
+
+            {editingEventType === "Location" && (
+              <>
+                <label className="form-label text-light">Place Name</label>
+                <input
+                  type="text"
+                  className="form-control mb-3 bg-dark text-light border-secondary"
+                  value={editEventForm.place}
+                  onChange={(e) => setEditEventForm({ ...editEventForm, place: e.target.value })}
+                  placeholder="e.g. Baga Beach"
+                />
+                
+                <label className="form-label text-light">City/Region</label>
+                <input
+                  type="text"
+                  className="form-control mb-3 bg-dark text-light border-secondary"
+                  value={editEventForm.city}
+                  onChange={(e) => setEditEventForm({ ...editEventForm, city: e.target.value })}
+                  placeholder="e.g. Goa"
+                />
+
+                <div className="row g-2 mb-3">
+                  <div className="col-6">
+                    <label className="form-label text-light">Latitude</label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      className="form-control bg-dark text-light border-secondary"
+                      value={editEventForm.lat}
+                      onChange={(e) => setEditEventForm({ ...editEventForm, lat: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-6">
+                    <label className="form-label text-light">Longitude</label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      className="form-control bg-dark text-light border-secondary"
+                      value={editEventForm.lng}
+                      onChange={(e) => setEditEventForm({ ...editEventForm, lng: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            
+            <div className="d-flex justify-content-end gap-2">
+              <button className="btn btn-secondary" onClick={() => setEditingEventId(null)}>Cancel</button>
+              <button className="btn btn-warning text-dark fw-bold" onClick={handleSaveEditEvent}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     </div>
   );

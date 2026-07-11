@@ -15,3 +15,11 @@ export const logTimelineLocation = (tripId, data) =>
 // GENERATE AI STORY & SUMMARY
 export const generateTimelineAIStory = (tripId) =>
   API.post(`/timeline/${tripId}/ai-story`);
+
+// EDIT EVENT
+export const editTimelineEvent = (tripId, eventId, data) =>
+  API.put(`/timeline/${tripId}/events/${eventId}`, data);
+
+// DELETE EVENT
+export const deleteTimelineEvent = (tripId, eventId) =>
+  API.delete(`/timeline/${tripId}/events/${eventId}`);

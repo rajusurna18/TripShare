@@ -2,6 +2,8 @@ import {
   saveMessageService,
   getMessagesService,
   reactToMessageService,
+  editMessageService,
+  deleteMessageService,
 } from "./message.service.js";
 import Trip from "../trip/trip.model.js";
 import Message from "./message.model.js";
@@ -167,6 +169,49 @@ export const reactToMessage = async (req, res) => {
       success: true,
       message: "Reaction updated successfully",
       data: message,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// EDIT MESSAGE
+export const editMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { message: newText } = req.body;
+    if (!newText) {
+      return res.status(400).json({
+        success: false,
+        message: "message text is required",
+      });
+    }
+    const message = await editMessageService(messageId, req.user.id, newText);
+    res.status(200).json({
+      success: true,
+      message: "Message updated successfully",
+      data: message,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// DELETE MESSAGE
+export const deleteMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const result = await deleteMessageService(messageId, req.user.id);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.data,
     });
   } catch (err) {
     res.status(400).json({

@@ -16,6 +16,10 @@ import {
 
   deleteComment,
 
+  editMemory,
+
+  deleteMemory,
+
 } from "./memory.controller.js";
 
 import { protect }
@@ -58,6 +62,10 @@ router.put(
   likeMemory
 
 );
+
+// EDIT & DELETE MEMORY (NEW)
+router.put("/:id", protect, editMemory);
+router.delete("/:id", protect, deleteMemory);
 
 // COMMENTS & REPLIES ROUTES
 router.post(

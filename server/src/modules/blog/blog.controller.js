@@ -11,6 +11,9 @@ import {
   deleteBlogCommentService,
   shareBlogService,
   getTrendingBlogsService,
+  saveBlogService,
+  unsaveBlogService,
+  getSavedBlogsService,
 } from "./blog.service.js";
 
 // CREATE BLOG
@@ -327,5 +330,37 @@ export const getTrendingBlogs = async (req, res) => {
       success: false,
       message: err.message,
     });
+  }
+};
+
+// SAVE BLOG
+export const saveBlog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await saveBlogService(id, req.user.id);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// UNSAVE BLOG
+export const unsaveBlog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await unsaveBlogService(id, req.user.id);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// GET SAVED BLOGS
+export const getSavedBlogs = async (req, res) => {
+  try {
+    const blogs = await getSavedBlogsService(req.user.id);
+    res.status(200).json({ success: true, blogs });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
   }
 };

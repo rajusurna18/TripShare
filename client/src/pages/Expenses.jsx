@@ -39,6 +39,15 @@ function Expenses() {
   const [loading, setLoading] =
     useState(true);
 
+  // Edit Expense States
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editAmount, setEditAmount] = useState("");
+  const [editCategory, setEditCategory] = useState("Food");
+  const [editPaymentMethod, setEditPaymentMethod] = useState("Cash");
+  const [editNote, setEditNote] = useState("");
+  const [editSplitAmong, setEditSplitAmong] = useState([]);
+
   useEffect(() => {
 
     fetchTrip();
@@ -208,6 +217,61 @@ function Expenses() {
 
       }
 
+  };
+
+  const handleEditClick = (expense) => {
+    setEditingExpense(expense);
+    setEditTitle(expense.title || "");
+    setEditAmount(expense.amount || "");
+    setEditCategory(expense.category || "Food");
+    setEditPaymentMethod(expense.paymentMethod || "Cash");
+    setEditNote(expense.note || "");
+    setEditSplitAmong((expense.splitAmong || []).map((m) => m._id || m));
+  };
+
+  const submitEditExpense = async () => {
+    if (!editTitle.trim() || !editAmount) {
+      alert("Please enter a title and amount.");
+      return;
+    }
+    if (editSplitAmong.length === 0) {
+      alert("Please select at least one member to split the expense with.");
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      await API.put(`/expenses/${editingExpense._id}`, {
+        title: editTitle,
+        amount: Number(editAmount),
+        category: editCategory,
+        paymentMethod: editPaymentMethod,
+        note: editNote,
+        splitAmong: editSplitAmong
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setEditingExpense(null);
+      fetchBalances();
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to update expense");
+    }
+  };
+
+  const handleDeleteExpense = async (expenseId) => {
+    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await API.delete(`/expenses/${expenseId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchBalances();
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to delete expense");
+    }
   };
 
   // =====================
@@ -481,6 +545,8 @@ function Expenses() {
                           expense={
                             expense
                           }
+                          onEdit={handleEditClick}
+                          onDelete={handleDeleteExpense}
 
                         />
 
@@ -501,6 +567,109 @@ function Expenses() {
         </div>
 
       </div>
+
+      {editingExpense && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "rgba(0, 0, 0, 0.8)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1100,
+          padding: "20px"
+        }}>
+          <div className="glass-card p-4" style={{ width: "100%", maxWidth: "500px", background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "90vh", overflowY: "auto" }}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h3 className="m-0 text-warning">Edit Expense ✏️</h3>
+              <button className="btn-close btn-close-white" onClick={() => setEditingExpense(null)}></button>
+            </div>
+            
+            <label className="form-label text-light">Title</label>
+            <input
+              type="text"
+              className="form-control mb-3 bg-dark text-light border-secondary"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+            />
+            
+            <label className="form-label text-light">Amount</label>
+            <input
+              type="number"
+              className="form-control mb-3 bg-dark text-light border-secondary"
+              value={editAmount}
+              onChange={(e) => setEditAmount(e.target.value)}
+            />
+            
+            <label className="form-label text-light">Category</label>
+            <select
+              className="form-select mb-3 bg-dark text-light border-secondary"
+              value={editCategory}
+              onChange={(e) => setEditCategory(e.target.value)}
+            >
+              <option>Food</option>
+              <option>Hotel</option>
+              <option>Fuel</option>
+              <option>Flight</option>
+              <option>Activities</option>
+            </select>
+            
+            <label className="form-label text-light">Payment Method</label>
+            <select
+              className="form-select mb-3 bg-dark text-light border-secondary"
+              value={editPaymentMethod}
+              onChange={(e) => setEditPaymentMethod(e.target.value)}
+            >
+              <option>Cash</option>
+              <option>UPI</option>
+              <option>Card</option>
+            </select>
+            
+            <label className="form-label text-light">Note</label>
+            <textarea
+              className="form-control mb-3 bg-dark text-light border-secondary"
+              value={editNote}
+              onChange={(e) => setEditNote(e.target.value)}
+            />
+            
+            {trip?.members && trip.members.length > 0 && (
+              <div className="mb-4">
+                <label className="form-label text-light d-block fw-bold">Split Among:</label>
+                <div className="d-flex flex-wrap gap-3">
+                  {trip.members.map((member) => (
+                    <div key={member._id} className="form-check form-check-inline">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id={`edit-split-${member._id}`}
+                        checked={editSplitAmong.includes(member._id)}
+                        onChange={() => {
+                          if (editSplitAmong.includes(member._id)) {
+                            setEditSplitAmong(editSplitAmong.filter(id => id !== member._id));
+                          } else {
+                            setEditSplitAmong([...editSplitAmong, member._id]);
+                          }
+                        }}
+                      />
+                      <label className="form-check-label text-light" htmlFor={`edit-split-${member._id}`}>
+                        {member.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="d-flex justify-content-end gap-2">
+              <button className="btn btn-secondary" onClick={() => setEditingExpense(null)}>Cancel</button>
+              <button className="btn btn-warning text-dark fw-bold" onClick={submitEditExpense}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
 

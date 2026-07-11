@@ -116,7 +116,8 @@ export const getTimelineService = async (tripId) => {
       details: {
         noteText: evt.noteText,
         locationData: evt.locationData,
-        createdBy: evt.createdBy?.name
+        createdBy: evt.createdBy?.name,
+        createdById: evt.createdBy?._id || evt.createdBy,
       }
     });
   });
@@ -344,4 +345,66 @@ Return only the raw JSON. Do not put markdown codes (like \`\`\`json) around it.
   });
 
   return parsedOutput;
+};
+
+// EDIT EVENT
+export const editTimelineEventService = async (tripId, eventId, userId, updateData) => {
+  const event = await TimelineEvent.findById(eventId);
+  if (!event) {
+    throw new Error("Timeline event not found");
+  }
+  if (event.trip.toString() !== tripId.toString()) {
+    throw new Error("Unauthorized: Event does not belong to this trip");
+  }
+  if (event.createdBy.toString() !== userId.toString()) {
+    throw new Error("Unauthorized: Only the creator of the event can edit it");
+  }
+
+  if (event.type === "Note") {
+    if (updateData.noteText !== undefined) {
+      event.noteText = updateData.noteText;
+      event.description = updateData.noteText;
+    }
+  } else if (event.type === "Location") {
+    if (updateData.city !== undefined || updateData.place !== undefined || updateData.lat !== undefined || updateData.lng !== undefined) {
+      event.locationData = {
+        ...event.locationData,
+        city: updateData.city !== undefined ? updateData.city : event.locationData.city,
+        place: updateData.place !== undefined ? updateData.place : event.locationData.place,
+        lat: updateData.lat !== undefined ? Number(updateData.lat) : event.locationData.lat,
+        lng: updateData.lng !== undefined ? Number(updateData.lng) : event.locationData.lng,
+      };
+      event.description = `${event.locationData.city || "Unknown City"} (${event.locationData.lat || 0}, ${event.locationData.lng || 0})`;
+      if (event.locationData.place) {
+        event.title = event.locationData.place;
+      }
+    }
+  }
+
+  if (updateData.timestamp) {
+    event.timestamp = new Date(updateData.timestamp);
+    if (event.type === "Location") {
+      event.locationData.visitTime = event.timestamp;
+    }
+  }
+
+  await event.save();
+  return event;
+};
+
+// DELETE EVENT
+export const deleteTimelineEventService = async (tripId, eventId, userId) => {
+  const event = await TimelineEvent.findById(eventId);
+  if (!event) {
+    throw new Error("Timeline event not found");
+  }
+  if (event.trip.toString() !== tripId.toString()) {
+    throw new Error("Unauthorized: Event does not belong to this trip");
+  }
+  if (event.createdBy.toString() !== userId.toString()) {
+    throw new Error("Unauthorized: Only the creator of the event can delete it");
+  }
+
+  await TimelineEvent.deleteOne({ _id: eventId });
+  return { success: true, message: "Timeline event deleted successfully", data: event };
 };

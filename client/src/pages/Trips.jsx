@@ -57,7 +57,7 @@ function Trips() {
     try {
 
       const res =
-        await getTrips();
+        await getTrips(true);
 
       setTrips(
         res.data.trips || []

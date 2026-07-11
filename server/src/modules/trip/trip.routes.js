@@ -10,6 +10,8 @@ import {
   leaveTrip,
   removeMember,
   transferOwnership,
+  archiveTrip,
+  inviteMember,
 } from "./trip.controller.js";
 
 import { protect }
@@ -74,6 +76,18 @@ router.post(
   "/:id/transfer-ownership",
   protect,
   transferOwnership
+);
+
+router.put(
+  "/:id/archive",
+  protect,
+  archiveTrip
+);
+
+router.post(
+  "/:id/invite",
+  protect,
+  inviteMember
 );
 
 export default router;

@@ -98,3 +98,33 @@ export const reactToMessageService = async (messageId, userId, emoji) => {
     .populate("sender", "name profileImage")
     .populate("reactions.user", "name profileImage");
 };
+
+// EDIT MESSAGE
+export const editMessageService = async (messageId, userId, newText) => {
+  const message = await Message.findById(messageId);
+  if (!message) {
+    throw new Error("Message not found");
+  }
+  if (message.sender.toString() !== userId.toString()) {
+    throw new Error("Unauthorized: You can only edit your own messages");
+  }
+  message.message = newText;
+  message.isEdited = true;
+  await message.save();
+  return await Message.findById(messageId)
+    .populate("sender", "name profileImage")
+    .populate("reactions.user", "name profileImage");
+};
+
+// DELETE MESSAGE
+export const deleteMessageService = async (messageId, userId) => {
+  const message = await Message.findById(messageId);
+  if (!message) {
+    throw new Error("Message not found");
+  }
+  if (message.sender.toString() !== userId.toString()) {
+    throw new Error("Unauthorized: You can only delete your own messages");
+  }
+  await Message.deleteOne({ _id: messageId });
+  return { success: true, message: "Message deleted successfully", data: message };
+};

@@ -9,6 +9,10 @@ import {
   calculateBalances,
   getExpenseAIInsights,
 
+  editExpense,
+
+  deleteExpense,
+
 } from "./expense.controller.js";
 
 import { protect }
@@ -65,5 +69,9 @@ router.get(
   getExpenseAIInsights
 
 );
+
+// EDIT & DELETE EXPENSE (NEW)
+router.put("/:id", protect, editExpense);
+router.delete("/:id", protect, deleteExpense);
 
 export default router;

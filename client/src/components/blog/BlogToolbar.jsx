@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import API from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -6,6 +6,26 @@ function BlogToolbar({ blogId, likesCount, commentsCount, hasLiked: initialHasLi
   const [liked, setLiked] = useState(initialHasLiked);
   const [count, setCount] = useState(likesCount);
   const [loading, setLoading] = useState(false);
+
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const checkSaved = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const res = await API.get("/blogs/saved", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const savedBlogs = res.data.blogs || [];
+        setSaved(savedBlogs.some(b => b._id === blogId));
+      } catch (err) {
+        console.error("Failed to check saved blogs:", err);
+      }
+    };
+    checkSaved();
+  }, [blogId]);
 
   const handleLike = async () => {
     if (loading) return;
@@ -23,6 +43,35 @@ function BlogToolbar({ blogId, likesCount, commentsCount, hasLiked: initialHasLi
       toast.error(err.response?.data?.message || "Failed to register like");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveToggle = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please login to bookmark blogs");
+      return;
+    }
+    if (saving) return;
+    try {
+      setSaving(true);
+      if (saved) {
+        await API.delete(`/blogs/${blogId}/save`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSaved(false);
+        toast.success("Removed from bookmarks");
+      } else {
+        await API.post(`/blogs/${blogId}/save`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSaved(true);
+        toast.success("Saved to bookmarks");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update bookmark");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -72,6 +121,20 @@ function BlogToolbar({ blogId, likesCount, commentsCount, hasLiked: initialHasLi
       </button>
 
       <div className="vr bg-secondary border-opacity-30" style={{ height: "20px" }} />
+
+      {/* Bookmark Button */}
+      <button
+        onClick={handleSaveToggle}
+        disabled={saving}
+        className={`btn btn-link p-0 d-flex align-items-center gap-1 text-decoration-none border-0 hover-warning transition-all ${
+          saved ? "text-warning fw-bold" : "text-white-50"
+        }`}
+        title={saved ? "Bookmarked" : "Bookmark"}
+        style={{ fontSize: "1rem" }}
+      >
+        <span>🔖</span>
+        <span className="d-none d-sm-inline">{saved ? "Saved" : "Save"}</span>
+      </button>
 
       {/* Share Button */}
       <button

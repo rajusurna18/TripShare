@@ -8,8 +8,8 @@ export const createTrip = (data) =>
   );
 
 // GET TRIPS
-export const getTrips = () =>
-  API.get("/trips");
+export const getTrips = (explore = false) =>
+  API.get(`/trips${explore ? "?explore=true" : ""}`);
 
 // JOIN TRIP
 export const joinTrip = (id) =>

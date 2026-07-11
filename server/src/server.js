@@ -15,7 +15,7 @@ import http from "http";
 import jwt from "jsonwebtoken";
 
 import { Server }
-from "socket.io";
+  from "socket.io";
 
 import { setIo, getOnlineUsers } from "./utils/socketRegistry.js";
 
@@ -31,67 +31,73 @@ import {
 } from "./middleware/rateLimiters.js";
 
 import connectDB
-from "./config/db.js";
+  from "./config/db.js";
 
 import genAI
-from "./config/gemini.js";
+  from "./config/gemini.js";
 
 // ROUTES
 
 import authRoutes
-from "./modules/auth/auth.routes.js";
+  from "./modules/auth/auth.routes.js";
 
 import tripRoutes
-from "./modules/trip/trip.routes.js";
+  from "./modules/trip/trip.routes.js";
 
 import expenseRoutes
-from "./modules/expense/expense.routes.js";
+  from "./modules/expense/expense.routes.js";
 
 import aiRoutes
-from "./modules/ai/ai.routes.js";
+  from "./modules/ai/ai.routes.js";
 
 import profileRoutes
-from "./modules/profile/profile.routes.js";
+  from "./modules/profile/profile.routes.js";
 
 import messageRoutes
-from "./modules/messages/message.routes.js";
+  from "./modules/messages/message.routes.js";
 
 import notificationRoutes
-from "./modules/notification/notification.routes.js";
+  from "./modules/notification/notification.routes.js";
 
 import Notification from "./modules/notification/notification.model.js";
 
 import activityRoutes from "./modules/activity/activity.routes.js";
 
 import friendRoutes
-from "./modules/friend/friend.routes.js";
+  from "./modules/friend/friend.routes.js";
 
 import reviewRoutes
-from "./modules/review/review.routes.js";
+  from "./modules/review/review.routes.js";
 
 import dashboardRoutes
-from "./modules/dashboard/dashboard.routes.js";
+  from "./modules/dashboard/dashboard.routes.js";
 
 import joinRequestRoutes
-from "./modules/joinRequest/joinRequest.routes.js";
+  from "./modules/joinRequest/joinRequest.routes.js";
 
 import memoryRoutes
-from "./modules/memory/memory.routes.js";
+  from "./modules/memory/memory.routes.js";
 
 import blogRoutes
-from "./modules/blog/blog.routes.js";
+  from "./modules/blog/blog.routes.js";
+
+import timelineRoutes
+  from "./modules/timeline/timeline.routes.js";
+
+import tripSaveRoutes
+  from "./modules/tripSave/tripSave.routes.js";
 
 import recommendationRoutes
-from "./modules/recommendation/recommendation.routes.js";
+  from "./modules/recommendation/recommendation.routes.js";
 
 import matchRoutes
-from "./modules/match/match.routes.js";
+  from "./modules/match/match.routes.js";
 
 import aiPackingRoutes
-from "./modules/ai/aiPacking.routes.js";
+  from "./modules/ai/aiPacking.routes.js";
 
 import Trip
-from "./modules/trip/trip.model.js";
+  from "./modules/trip/trip.model.js";
 
 const app = express();
 
@@ -272,6 +278,16 @@ app.use(
   blogRoutes
 );
 
+app.use(
+  "/api/timeline",
+  timelineRoutes
+);
+
+app.use(
+  "/api/saves",
+  tripSaveRoutes
+);
+
 
 app.use(
   "/api/recommendations",
@@ -307,13 +323,9 @@ app.get(
 
     try {
 
-      const model =
-        genAI.getGenerativeModel({
-
-          model:
-            "models/gemini-1.5-flash",
-
-        });
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+      });
 
       const result =
         await model.generateContent(
@@ -590,6 +602,28 @@ io.on(
           data.message
 
         );
+
+      }
+
+    );
+
+    // DELETE MESSAGE
+
+    socket.on(
+
+      "delete_message",
+
+      (data) => {
+
+        io.to(data.tripId)
+
+          .emit(
+
+            "message_deleted",
+
+            data
+
+          );
 
       }
 

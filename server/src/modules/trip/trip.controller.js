@@ -9,6 +9,8 @@ import {
   leaveTripService,
   removeMemberService,
   transferOwnershipService,
+  archiveTripService,
+  inviteMemberService,
 
 } from "./trip.service.js";
 
@@ -94,11 +96,11 @@ export const createTrip =
 export const getTrips =
   async (req, res) => {
     try {
-      const { page, limit } = req.query;
+      const { page, limit, explore } = req.query;
       const result =
         await getTripsService(
           req.user.id,
-          { page, limit }
+          { page, limit, explore: explore === "true" }
         );
 
       if (Array.isArray(result)) {
@@ -173,7 +175,8 @@ export const getTripById =
 
       const trip =
         await getTripByIdService(
-          req.params.id
+          req.params.id,
+          req.user.id
         );
 
       res.status(200).json({
@@ -300,6 +303,47 @@ export const transferOwnership = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Trip ownership transferred successfully",
+      trip,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// ARCHIVE TRIP
+export const archiveTrip = async (req, res) => {
+  try {
+    const trip = await archiveTripService(req.params.id, req.user.id);
+    res.status(200).json({
+      success: true,
+      message: trip.archived ? "Trip archived successfully 📦" : "Trip unarchived successfully 📂",
+      trip,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// INVITE MEMBER
+export const inviteMember = async (req, res) => {
+  try {
+    const { targetUserId } = req.body;
+    if (!targetUserId) {
+      return res.status(400).json({
+        success: false,
+        message: "targetUserId is required",
+      });
+    }
+    const trip = await inviteMemberService(req.params.id, targetUserId, req.user.id);
+    res.status(200).json({
+      success: true,
+      message: "Teammate added to trip successfully 👥",
       trip,
     });
   } catch (err) {

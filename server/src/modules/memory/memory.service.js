@@ -312,3 +312,36 @@ export const deleteCommentService = async (commentId, userId) => {
 
   return { deletedCount };
 };
+
+// EDIT MEMORY
+export const editMemoryService = async (memoryId, userId, newCaption) => {
+  const memory = await Memory.findById(memoryId);
+  if (!memory) {
+    throw new Error("Memory not found");
+  }
+  if (memory.user.toString() !== userId.toString()) {
+    throw new Error("Unauthorized: You can only edit your own memories");
+  }
+  memory.caption = newCaption;
+  await memory.save();
+  return await Memory.findById(memoryId).populate("user", "name profileImage");
+};
+
+// DELETE MEMORY
+export const deleteMemoryService = async (memoryId, userId) => {
+  const memory = await Memory.findById(memoryId);
+  if (!memory) {
+    throw new Error("Memory not found");
+  }
+  const trip = await Trip.findById(memory.trip);
+  const isUploader = memory.user.toString() === userId.toString();
+  const isHost = trip && trip.createdBy.toString() === userId.toString();
+
+  if (!isUploader && !isHost) {
+    throw new Error("Unauthorized: Only the uploader or the trip host can delete this memory");
+  }
+
+  await MemoryComment.deleteMany({ memory: memoryId });
+  await Memory.deleteOne({ _id: memoryId });
+  return { success: true, message: "Memory deleted successfully", data: memory };
+};

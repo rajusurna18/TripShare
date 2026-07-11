@@ -254,3 +254,19 @@ export const rejectJoinRequestService =
     return request;
 
 };
+
+// CANCEL REQUEST
+export const cancelJoinRequestService = async (tripId, userId) => {
+  const request = await JoinRequest.findOne({
+    trip: tripId,
+    user: userId,
+    status: "pending",
+  });
+
+  if (!request) {
+    throw new Error("No pending join request found");
+  }
+
+  await JoinRequest.deleteOne({ _id: request._id });
+  return { success: true, message: "Join request cancelled successfully" };
+};

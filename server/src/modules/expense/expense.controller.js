@@ -3,6 +3,8 @@ import {
   getTripExpensesService,
   calculateBalancesService,
   getExpenseAIInsightsService,
+  editExpenseService,
+  deleteExpenseService,
 } from "./expense.service.js";
 
 import Trip from "../trip/trip.model.js";
@@ -226,6 +228,42 @@ export const getExpenseAIInsights = async (req, res) => {
     res.status(500).json({
       success: false,
       message: err.message || "Failed to fetch AI insights",
+    });
+  }
+};
+
+// EDIT EXPENSE
+export const editExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const expense = await editExpenseService(id, req.user.id, req.body);
+    res.status(200).json({
+      success: true,
+      message: "Expense updated successfully",
+      expense,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// DELETE EXPENSE
+export const deleteExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteExpenseService(id, req.user.id);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.data,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
     });
   }
 };

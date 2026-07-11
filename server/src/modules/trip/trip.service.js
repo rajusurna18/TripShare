@@ -94,19 +94,23 @@ export const createTripService =
 
 export const getTripsService =
   async (userId, options = {}) => {
-    const { page, limit } = options;
-    const query = {
-      $or: [
-        {
-          createdBy:
-            userId,
-        },
-        {
-          members:
-            userId,
-        },
-      ],
-    };
+    const { page, limit, explore } = options;
+    const query = explore
+      ? {
+          createdBy: { $ne: userId },
+          members: { $ne: userId },
+          archived: { $ne: true },
+        }
+      : {
+          $or: [
+            {
+              createdBy: userId,
+            },
+            {
+              members: userId,
+            },
+          ],
+        };
 
     if (page === undefined && limit === undefined) {
       return await Trip.find(query)
@@ -170,7 +174,7 @@ export const joinTripService =
 // GET SINGLE TRIP
 
 export const getTripByIdService =
-  async (tripId) => {
+  async (tripId, userId) => {
 
     const trip =
       await Trip.findById(
@@ -203,6 +207,14 @@ export const getTripByIdService =
       trip.maxMembers -
       totalMembers;
 
+    const pendingRequest = userId
+      ? await JoinRequest.findOne({
+          trip: tripId,
+          user: userId,
+          status: "pending",
+        })
+      : null;
+
     return {
 
       ...trip.toObject(),
@@ -210,6 +222,8 @@ export const getTripByIdService =
       totalMembers,
 
       seatsLeft,
+
+      hasPendingRequest: !!pendingRequest,
 
     };
 
@@ -422,11 +436,55 @@ export const transferOwnershipService = async (tripId, newOwnerId, userId) => {
     userId
   );
 
-  // Update cached stats for both old and new owner
   await Promise.all([
     updateUserStatsCache(userId),
     updateUserStatsCache(newOwnerId)
   ]);
+
+  return await Trip.findById(tripId)
+    .populate("createdBy", "name email profileImage")
+    .populate("members", "name profileImage travelStyle");
+};
+
+// ARCHIVE TRIP
+export const archiveTripService = async (tripId, userId) => {
+  const trip = await Trip.findById(tripId);
+  if (!trip) {
+    throw new Error("Trip not found");
+  }
+  if (trip.createdBy.toString() !== userId.toString()) {
+    throw new Error("Unauthorized: Only the trip owner can archive it");
+  }
+  trip.archived = !trip.archived;
+  await trip.save();
+  return trip;
+};
+
+// INVITE MEMBER
+export const inviteMemberService = async (tripId, targetUserId, inviterId) => {
+  const trip = await Trip.findById(tripId);
+  if (!trip) {
+    throw new Error("Trip not found");
+  }
+  const isMember = trip.members.some((id) => id.toString() === targetUserId.toString());
+  if (isMember) {
+    throw new Error("User is already a member of this trip");
+  }
+
+  trip.members.push(targetUserId);
+  await trip.save();
+
+  const inviter = await User.findById(inviterId);
+  await createNotificationService(
+    targetUserId,
+    `${inviter.name} added you to the trip "${trip.title}" ✈️`,
+    "trip_invite",
+    `/trip/${tripId}`,
+    inviterId
+  );
+
+  // Update target user's stats cache
+  await updateUserStatsCache(targetUserId);
 
   return await Trip.findById(tripId)
     .populate("createdBy", "name email profileImage")

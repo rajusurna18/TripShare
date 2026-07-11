@@ -8,6 +8,8 @@ import {
 
   rejectJoinRequestService,
 
+  cancelJoinRequestService,
+
 } from "./joinRequest.service.js";
 
 import Trip from "../trip/trip.model.js";
@@ -189,4 +191,20 @@ export const rejectJoinRequest =
 
     }
 
+};
+
+// CANCEL JOIN REQUEST
+export const cancelJoinRequest = async (req, res) => {
+  try {
+    const result = await cancelJoinRequestService(req.params.tripId, req.user.id);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
 };

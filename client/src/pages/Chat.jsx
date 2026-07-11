@@ -34,6 +34,10 @@ function Chat() {
   // EMOJI PICKER POPUP
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
+  // EDITING STATES
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editMessageText, setEditMessageText] = useState("");
+
   // REACTION POPOVER FOR MESSAGES
   const [activeReactionMenuId, setActiveReactionMenuId] = useState(null);
 
@@ -271,10 +275,63 @@ function Chat() {
     }, 10);
   };
 
+  const handleStartEdit = (msg) => {
+    setEditingMessageId(msg._id);
+    setEditMessageText(msg.message);
+    setMessage(msg.message);
+    setActiveReactionMenuId(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditMessageText("");
+    setMessage("");
+  };
+
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
+    try {
+      await API.delete(`/messages/${messageId}`);
+      setMessages((prev) => prev.filter((m) => m._id !== messageId));
+      socket.emit("delete_message", { messageId, tripId });
+      setActiveReactionMenuId(null);
+      toast.success("Message deleted");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete message");
+    }
+  };
+
+  const updateMessage = async () => {
+    if (!message.trim() || sending) return;
+    try {
+      setSending(true);
+      const res = await API.put(`/messages/${editingMessageId}`, { message });
+      setMessages((prev) =>
+        prev.map((m) => (m._id === editingMessageId ? res.data.data : m))
+      );
+      socket.emit("send_message", res.data.data);
+      setMessage("");
+      setEditingMessageId(null);
+      setEditMessageText("");
+      setShowEmojiPicker(false);
+      toast.success("Message updated");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update message");
+    } finally {
+      setSending(false);
+    }
+  };
+
   // ======================
   // SEND MESSAGE
   // ======================
   const sendMessage = async () => {
+    if (editingMessageId) {
+      await updateMessage();
+      return;
+    }
     if ((!message.trim() && !file && !audioBlob) || sending) return;
 
     try {
@@ -452,12 +509,15 @@ function Chat() {
         )
       );
     };
-    const onMessageReactionUpdate = (data) => {
+     const onMessageReactionUpdate = (data) => {
       setMessages((prev) =>
         prev.map((msg) =>
           msg._id === data.messageId ? { ...msg, reactions: data.reactions } : msg
         )
       );
+    };
+    const onMessageDeleted = (data) => {
+      setMessages((prev) => prev.filter((m) => m._id !== data.messageId));
     };
 
     socket.on("connect", onConnect);
@@ -470,6 +530,7 @@ function Chat() {
     socket.on("video_call_ended", onVideoCallEnded);
     socket.on("message_seen_update", onMessageSeenUpdate);
     socket.on("message_reaction_update", onMessageReactionUpdate);
+    socket.on("message_deleted", onMessageDeleted);
 
     return () => {
       socket.off("connect", onConnect);
@@ -482,6 +543,7 @@ function Chat() {
       socket.off("video_call_ended", onVideoCallEnded);
       socket.off("message_seen_update", onMessageSeenUpdate);
       socket.off("message_reaction_update", onMessageReactionUpdate);
+      socket.off("message_deleted", onMessageDeleted);
       clearTimeout(typingTimeoutRef.current);
       clearInterval(recordTimerRef.current);
     };
@@ -838,7 +900,7 @@ function Chat() {
                       {/* 3. POPUP REACTIONS PICKER (Step 14) */}
                       {activeReactionMenuId === msg._id && (
                         <div
-                          className="d-flex gap-2 p-2 bg-dark border border-secondary mt-1 rounded-pill shadow-lg animate-fade"
+                          className="d-flex align-items-center gap-2 p-2 bg-dark border border-secondary mt-1 rounded-pill shadow-lg animate-fade"
                           style={{
                             background: "#222",
                             zIndex: 80,
@@ -855,6 +917,26 @@ function Chat() {
                               {emoji}
                             </button>
                           ))}
+                          {isMe && (
+                            <div className="d-flex align-items-center gap-2 border-start border-secondary ps-2 ms-1" style={{ borderColor: "rgba(255,255,255,0.15) !important" }}>
+                              <button
+                                className="btn btn-link p-0 text-info hover-lift text-decoration-none"
+                                onClick={() => handleStartEdit(msg)}
+                                style={{ fontSize: "15px" }}
+                                title="Edit message"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                className="btn btn-link p-0 text-danger hover-lift text-decoration-none"
+                                onClick={() => handleDeleteMessage(msg._id)}
+                                style={{ fontSize: "15px" }}
+                                title="Delete message"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -926,6 +1008,22 @@ function Chat() {
 
           <button className="btn btn-outline-danger btn-sm" onClick={handleCancelAudio}>
             Remove ✖
+          </button>
+        </div>
+      )}
+
+      {/* C. Editing message preview */}
+      {editingMessageId && (
+        <div
+          className="p-3 border-top border-secondary bg-dark d-flex align-items-center justify-content-between"
+          style={{ background: "#1a1a1a", borderTopColor: "rgba(255,255,255,0.08) !important" }}
+        >
+          <div className="d-flex align-items-center gap-2">
+            <span style={{ fontSize: "14px" }}>✏️ Editing Message:</span>
+            <span className="text-secondary small text-truncate" style={{ maxWidth: "350px" }}>"{editMessageText}"</span>
+          </div>
+          <button className="btn btn-outline-danger btn-sm" onClick={handleCancelEdit}>
+            Cancel ✖
           </button>
         </div>
       )}

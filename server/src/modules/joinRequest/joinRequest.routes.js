@@ -10,6 +10,8 @@ import {
 
   rejectJoinRequest,
 
+  cancelJoinRequest,
+
 } from "./joinRequest.controller.js";
 
 import { protect }
@@ -64,6 +66,13 @@ router.put(
 
   rejectJoinRequest
 
+);
+
+// CANCEL
+router.delete(
+  "/cancel/:tripId",
+  protect,
+  cancelJoinRequest
 );
 
 export default router;

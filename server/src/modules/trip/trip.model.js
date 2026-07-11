@@ -181,6 +181,11 @@ const tripSchema =
         default: null,
       },
 
+      archived: {
+        type: Boolean,
+        default: false,
+      },
+
 
     },
 

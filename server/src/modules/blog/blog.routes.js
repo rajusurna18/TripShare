@@ -15,6 +15,9 @@ import {
   deleteBlogComment,
   shareBlog,
   getTrendingBlogs,
+  saveBlog,
+  unsaveBlog,
+  getSavedBlogs,
 } from "./blog.controller.js";
 
 const router = express.Router();
@@ -37,6 +40,7 @@ const optionalProtect = (req, res, next) => {
 // BLOGS MAIN CRUD
 router.get("/", optionalProtect, getBlogs);
 router.get("/trending", getTrendingBlogs);
+router.get("/saved", protect, getSavedBlogs); // Placed before /:id
 router.get("/:id", optionalProtect, getBlogById);
 router.post("/", protect, upload.any(), createBlog);
 router.put("/:id", protect, upload.any(), updateBlog);
@@ -46,6 +50,8 @@ router.delete("/:id", protect, deleteBlog);
 router.post("/:id/like", protect, likeBlog);
 router.delete("/:id/like", protect, likeBlog); // REST Toggle convenience
 router.post("/:id/share", optionalProtect, shareBlog);
+router.post("/:id/save", protect, saveBlog);
+router.delete("/:id/save", protect, unsaveBlog);
 
 // COMMENTS
 router.get("/:id/comments", getBlogComments);

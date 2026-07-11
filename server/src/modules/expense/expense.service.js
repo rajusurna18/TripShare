@@ -426,4 +426,47 @@ export const getExpenseAIInsightsService = async (tripId) => {
     },
     anomalies
   };
+};
+
+// EDIT EXPENSE
+export const editExpenseService = async (expenseId, userId, updateData) => {
+  const expense = await Expense.findById(expenseId);
+  if (!expense) {
+    throw new Error("Expense not found");
+  }
+  const trip = await Trip.findById(expense.trip);
+  const isPayer = expense.paidBy.toString() === userId.toString();
+  const isHost = trip && trip.createdBy.toString() === userId.toString();
+
+  if (!isPayer && !isHost) {
+    throw new Error("Unauthorized: Only the payer or the trip host can edit this expense");
+  }
+
+  const allowedUpdates = ["title", "amount", "paidBy", "splitAmong", "category", "paymentMethod", "note"];
+  allowedUpdates.forEach(key => {
+    if (updateData[key] !== undefined) {
+      expense[key] = updateData[key];
+    }
+  });
+
+  await expense.save();
+  return await Expense.findById(expenseId).populate("paidBy", "name profileImage").populate("splitAmong", "name profileImage");
+};
+
+// DELETE EXPENSE
+export const deleteExpenseService = async (expenseId, userId) => {
+  const expense = await Expense.findById(expenseId);
+  if (!expense) {
+    throw new Error("Expense not found");
+  }
+  const trip = await Trip.findById(expense.trip);
+  const isPayer = expense.paidBy.toString() === userId.toString();
+  const isHost = trip && trip.createdBy.toString() === userId.toString();
+
+  if (!isPayer && !isHost) {
+    throw new Error("Unauthorized: Only the payer or the trip host can delete this expense");
+  }
+
+  await Expense.deleteOne({ _id: expenseId });
+  return { success: true, message: "Expense deleted successfully", data: expense };
 };

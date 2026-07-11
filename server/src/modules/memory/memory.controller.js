@@ -14,6 +14,10 @@ import {
 
   deleteCommentService,
 
+  editMemoryService,
+
+  deleteMemoryService,
+
 } from "./memory.service.js";
 
 import Trip from "../trip/trip.model.js";
@@ -314,6 +318,29 @@ export const deleteComment = async (req, res) => {
     const { commentId } = req.params;
     const { deletedCount } = await deleteCommentService(commentId, req.user.id);
     res.json({ success: true, message: "Comment deleted successfully", deletedCount });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// EDIT MEMORY
+export const editMemory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { caption } = req.body;
+    const memory = await editMemoryService(id, req.user.id, caption);
+    res.json({ success: true, message: "Memory updated successfully", data: memory });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// DELETE MEMORY
+export const deleteMemory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteMemoryService(id, req.user.id);
+    res.json({ success: true, message: result.message, data: result.data });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }

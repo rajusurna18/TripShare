@@ -3,6 +3,7 @@ import BlogLike from "./blogLike.model.js";
 import BlogComment from "./blogComment.model.js";
 import BlogView from "./blogView.model.js";
 import BlogShare from "./blogShare.model.js";
+import BlogSave from "./blogSave.model.js";
 import User from "../auth/auth.model.js";
 import { createNotificationService } from "../notification/notification.service.js";
 import { logActivityService } from "../activity/activity.service.js";
@@ -608,4 +609,46 @@ export const getTrendingBlogsService = async (limit = 5) => {
     .populate("author", "name profileImage travelStyle isVerified")
     .sort({ likesCount: -1, viewsCount: -1, createdAt: -1 })
     .limit(limitNum);
+};
+
+// SAVE/BOOKMARK BLOG
+export const saveBlogService = async (blogId, userId) => {
+  const blog = await Blog.findById(blogId);
+  if (!blog) {
+    throw new Error("Blog not found");
+  }
+
+  const existingSave = await BlogSave.findOne({ user: userId, blog: blogId });
+  if (existingSave) {
+    throw new Error("Blog already saved");
+  }
+
+  await BlogSave.create({ user: userId, blog: blogId });
+  return { success: true, message: "Blog bookmarked successfully" };
+};
+
+// UNSAVE/UNBOOKMARK BLOG
+export const unsaveBlogService = async (blogId, userId) => {
+  const existingSave = await BlogSave.findOne({ user: userId, blog: blogId });
+  if (!existingSave) {
+    throw new Error("Blog not bookmarked");
+  }
+
+  await BlogSave.deleteOne({ _id: existingSave._id });
+  return { success: true, message: "Blog removed from bookmarks successfully" };
+};
+
+// GET SAVED BLOGS
+export const getSavedBlogsService = async (userId) => {
+  const saves = await BlogSave.find({ user: userId })
+    .populate({
+      path: "blog",
+      populate: {
+        path: "author",
+        select: "name profileImage travelStyle isVerified",
+      },
+    })
+    .sort({ createdAt: -1 });
+
+  return saves.map(s => s.blog).filter(Boolean);
 };

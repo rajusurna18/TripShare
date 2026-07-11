@@ -3,7 +3,9 @@ import {
   getTimelineService,
   createOrUpdateNoteService,
   addLocationCheckpointService,
-  generateAITravelStoryService
+  generateAITravelStoryService,
+  editTimelineEventService,
+  deleteTimelineEventService
 } from "./timeline.service.js";
 
 // MIDDLEWARE CHECK: AUTHORIZE TRIP MEMBER OR OWNER
@@ -118,6 +120,58 @@ export const generateAITravelStory = async (req, res) => {
     res.status(500).json({
       success: false,
       message: err.message || "Gemini AI failed to compile travel story"
+    });
+  }
+};
+
+// EDIT EVENT (NEW)
+export const editTimelineEvent = async (req, res) => {
+  try {
+    const { tripId, eventId } = req.params;
+    const hasAccess = await checkTripAccess(tripId, req.user.id);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: You are not a member of this trip"
+      });
+    }
+
+    const updatedEvent = await editTimelineEventService(tripId, eventId, req.user.id, req.body);
+    res.status(200).json({
+      success: true,
+      message: "Timeline event updated successfully",
+      updatedEvent
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    });
+  }
+};
+
+// DELETE EVENT (NEW)
+export const deleteTimelineEvent = async (req, res) => {
+  try {
+    const { tripId, eventId } = req.params;
+    const hasAccess = await checkTripAccess(tripId, req.user.id);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: You are not a member of this trip"
+      });
+    }
+
+    const result = await deleteTimelineEventService(tripId, eventId, req.user.id);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.data
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
     });
   }
 };

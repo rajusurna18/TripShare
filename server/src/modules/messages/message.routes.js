@@ -3,6 +3,8 @@ import {
   saveMessage,
   getMessages,
   reactToMessage,
+  editMessage,
+  deleteMessage,
 } from "./message.controller.js";
 import { protect } from "../../middleware/auth.middleware.js";
 import upload from "../../config/multer.js";
@@ -31,5 +33,11 @@ router.get("/:tripId", protect, getMessages);
 
 // REACT TO MESSAGE (NEW)
 router.put("/:messageId/react", protect, reactToMessage);
+
+// EDIT MESSAGE (NEW)
+router.put("/:messageId", protect, editMessage);
+
+// DELETE MESSAGE (NEW)
+router.delete("/:messageId", protect, deleteMessage);
 
 export default router;

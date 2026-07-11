@@ -159,11 +159,17 @@ function TripDetails() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   
   // Selected member for actions
   const [selectedMember, setSelectedMember] = useState(null);
   const [showRemoveMemberModal, setShowRemoveMemberModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
+
+  // Invite states
+  const [friends, setFriends] = useState([]);
+  const [loadingFriends, setLoadingFriends] = useState(false);
+  const [inviteSearch, setInviteSearch] = useState("");
 
   // Edit form state
   const [editData, setEditData] = useState({
@@ -281,6 +287,80 @@ function TripDetails() {
       checkSavedStatus();
     }
   }, [tripId, trip]);
+
+  // FETCH FRIENDS EFFECT
+  useEffect(() => {
+    if (showInviteModal) {
+      fetchFriends();
+    }
+  }, [showInviteModal]);
+
+  const fetchFriends = async () => {
+    try {
+      setLoadingFriends(true);
+      const token = localStorage.getItem("token");
+      const res = await API.get("/friends", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFriends(res.data.friends || res.data.data || []);
+    } catch (err) {
+      console.error("Failed to fetch friends:", err);
+    } finally {
+      setLoadingFriends(false);
+    }
+  };
+
+  const handleInviteFriend = async (friendId, friendName) => {
+    try {
+      const token = localStorage.getItem("token");
+      await API.post(`/trips/${tripId}/invite`, { targetUserId: friendId }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(`Added ${friendName} to the trip! 🎉`);
+      fetchTrip();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to add friend");
+    }
+  };
+
+  const handleArchiveToggle = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await API.put(`/trips/${tripId}/archive`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(res.data.message);
+      fetchTrip();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to change archive status");
+    }
+  };
+
+  const handleSendJoinRequest = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await API.post(`/join-requests/${tripId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("Join request sent successfully! ✈️");
+      fetchTrip();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send join request");
+    }
+  };
+
+  const handleCancelJoinRequest = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await API.delete(`/join-requests/cancel/${tripId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("Join request cancelled ❌");
+      fetchTrip();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to cancel join request");
+    }
+  };
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80";
@@ -433,6 +513,13 @@ function TripDetails() {
   return (
     <div style={styles.container}>
       
+      {trip.archived && (
+        <div className="alert alert-warning mb-4 rounded-3 d-flex align-items-center gap-2 border-0 bg-warning bg-opacity-10 text-warning px-4 py-3">
+          <span style={{ fontSize: "20px" }}>📦</span>
+          <span className="fw-semibold">This trip is archived. Content is preserved in read-only mode.</span>
+        </div>
+      )}
+      
       {/* TRIP HEADER CARD */}
       <div style={styles.headerCard}>
         <div className="row">
@@ -506,6 +593,9 @@ function TripDetails() {
 
                 {isOwner && (
                   <>
+                    <button className="btn btn-outline-info btn-sm px-3" onClick={handleArchiveToggle}>
+                      {trip.archived ? "📂 Unarchive" : "📦 Archive"}
+                    </button>
                     <button className="btn btn-warning btn-sm px-3" onClick={openEditModal}>
                       ✏️ Edit
                     </button>
@@ -518,6 +608,17 @@ function TripDetails() {
                   <button className="btn btn-outline-danger btn-sm px-3" onClick={() => setShowLeaveModal(true)}>
                     🚪 Leave Trip
                   </button>
+                )}
+                {!isOwner && !isMember && (
+                  trip.hasPendingRequest ? (
+                    <button className="btn btn-outline-warning btn-sm px-3" onClick={handleCancelJoinRequest}>
+                      ❌ Cancel Request
+                    </button>
+                  ) : (
+                    <button className="btn btn-warning btn-sm px-3" onClick={handleSendJoinRequest}>
+                      ✈️ Request Join
+                    </button>
+                  )
                 )}
               </div>
             </div>
@@ -538,9 +639,14 @@ function TripDetails() {
         <div style={styles.ownerCard}>
           <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <h3 className="m-0" style={{ fontWeight: "700", color: "#ffc107" }}>🛠️ Owner Administration</h3>
-            <Link to={`/join-requests/${tripId}`} className="btn btn-warning px-4">
-              Manage Join Requests 👥
-            </Link>
+            <div className="d-flex gap-2">
+              <button className="btn btn-outline-warning px-4" onClick={() => setShowInviteModal(true)}>
+                Invite Friend 👥
+              </button>
+              <Link to={`/join-requests/${tripId}`} className="btn btn-warning px-4">
+                Manage Join Requests 👥
+              </Link>
+            </div>
           </div>
 
           <h5 className="mb-3 text-secondary">Trip Teammates ({trip.members?.length})</h5>
@@ -985,6 +1091,64 @@ function TripDetails() {
               <button className="btn btn-warning" onClick={handleTransferConfirm}>
                 Transfer Ownership
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INVITE MODAL */}
+      {showInviteModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h3 className="m-0" style={{ fontWeight: "700" }}>Invite Friend 👥</h3>
+              <button 
+                className="btn-close btn-close-white" 
+                onClick={() => {
+                  setShowInviteModal(false);
+                  setInviteSearch("");
+                }}
+              ></button>
+            </div>
+            
+            <input
+              type="text"
+              placeholder="Search friends by name..."
+              style={styles.input}
+              value={inviteSearch}
+              onChange={(e) => setInviteSearch(e.target.value)}
+            />
+            
+            <div style={{ maxHeight: "250px", overflowY: "auto", marginTop: "10px" }}>
+              {loadingFriends ? (
+                <p className="text-secondary text-center my-3">Loading friends...</p>
+              ) : friends.length === 0 ? (
+                <p className="text-secondary text-center my-3">No friends found. Go to Friends page to add some!</p>
+              ) : (
+                friends
+                  .filter(f => f.name?.toLowerCase().includes(inviteSearch.toLowerCase()))
+                  .map(f => {
+                    const isAlreadyMember = trip.members?.some(m => m._id === f._id || m === f._id);
+                    return (
+                      <div key={f._id} className="d-flex justify-content-between align-items-center p-2 mb-2 rounded" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div className="d-flex align-items-center gap-2">
+                          <Avatar src={f.profileImage} alt={f.name} size={32} />
+                          <span>{f.name}</span>
+                        </div>
+                        {isAlreadyMember ? (
+                          <span className="text-success small fw-semibold px-2">Joined</span>
+                        ) : (
+                          <button
+                            className="btn btn-warning btn-sm"
+                            onClick={() => handleInviteFriend(f._id, f.name)}
+                          >
+                            Add
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })
+              )}
             </div>
           </div>
         </div>

@@ -161,3 +161,40 @@ export const getUserReviewsService =
     };
 
 };
+
+// EDIT REVIEW
+export const editReviewService = async (reviewId, userId, updateData) => {
+  const review = await Review.findById(reviewId);
+  if (!review) {
+    throw new Error("Review not found");
+  }
+  if (review.reviewer.toString() !== userId.toString()) {
+    throw new Error("Unauthorized to edit this review");
+  }
+
+  if (updateData.rating !== undefined) {
+    review.rating = updateData.rating;
+  }
+  if (updateData.comment !== undefined) {
+    review.comment = updateData.comment;
+  }
+
+  await review.save();
+  await updateUserStatsCache(review.reviewFor);
+  return review;
+};
+
+// DELETE REVIEW
+export const deleteReviewService = async (reviewId, userId) => {
+  const review = await Review.findById(reviewId);
+  if (!review) {
+    throw new Error("Review not found");
+  }
+  if (review.reviewer.toString() !== userId.toString()) {
+    throw new Error("Unauthorized to delete this review");
+  }
+
+  await Review.deleteOne({ _id: reviewId });
+  await updateUserStatsCache(review.reviewFor);
+  return { success: true, message: "Review deleted successfully", data: review };
+};
