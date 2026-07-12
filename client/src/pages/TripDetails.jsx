@@ -248,7 +248,7 @@ function TripDetails() {
   }, [tripId]);
 
   // FETCH TRIP IMPLEMENTATION
-  const fetchTrip = async () => {
+  async function fetchTrip() {
     try {
       const token = localStorage.getItem("token");
       const res = await API.get(`/trips/${tripId}`, {
@@ -295,7 +295,7 @@ function TripDetails() {
     }
   }, [showInviteModal]);
 
-  const fetchFriends = async () => {
+  async function fetchFriends() {
     try {
       setLoadingFriends(true);
       const token = localStorage.getItem("token");

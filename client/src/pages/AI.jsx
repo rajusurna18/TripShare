@@ -36,7 +36,7 @@ function AI() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const fetchConversations = async () => {
+  async function fetchConversations() {
     try {
       const res = await API.get("/ai/conversations");
       if (res.data.success) {

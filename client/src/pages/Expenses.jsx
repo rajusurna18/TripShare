@@ -58,8 +58,7 @@ function Expenses() {
 
   }, []);
 
-  const fetchTrip =
-    async () => {
+  async function fetchTrip() {
 
       try {
 
@@ -84,8 +83,7 @@ function Expenses() {
   // FETCH BALANCES
   // =====================
 
-  const fetchBalances =
-    async () => {
+  async function fetchBalances() {
 
       try {
 
@@ -128,8 +126,7 @@ function Expenses() {
   // FETCH EXPENSES
   // =====================
 
-  const fetchExpenses =
-    async () => {
+  async function fetchExpenses() {
 
       try {
 

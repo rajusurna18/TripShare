@@ -42,8 +42,7 @@ function Matches() {
 
   useEffect(() => {
 
-    const fetchMatches =
-      async () => {
+    async function fetchMatches() {
 
         try {
 

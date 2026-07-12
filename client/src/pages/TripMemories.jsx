@@ -12,7 +12,7 @@ function TripMemories() {
   const [memories, setMemories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchMemories = async () => {
+  async function fetchMemories() {
     try {
       const res = await API.get(`/memories/${tripId}`);
 

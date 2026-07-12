@@ -23,8 +23,7 @@ function Navbar() {
 
   // FETCH PROFILE
 
-  const fetchProfile =
-    async () => {
+  async function fetchProfile() {
 
       try {
 
@@ -66,8 +65,7 @@ function Navbar() {
 
   // FETCH NOTIFICATIONS
 
-  const fetchNotifications =
-    async () => {
+  async function fetchNotifications() {
 
       try {
 

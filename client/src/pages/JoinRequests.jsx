@@ -31,8 +31,7 @@ function JoinRequests() {
 
   // FETCH REQUESTS
 
-  const fetchRequests =
-    async () => {
+  async function fetchRequests() {
 
       try {
 

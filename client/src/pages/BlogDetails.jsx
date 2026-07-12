@@ -31,7 +31,7 @@ function BlogDetails() {
     fetchBlog();
   }, [id]);
 
-  const fetchBlog = async () => {
+  async function fetchBlog() {
     try {
       setLoading(true);
       const res = await API.get(`/blogs/${id}`);

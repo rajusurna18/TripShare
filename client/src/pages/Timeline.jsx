@@ -14,6 +14,7 @@ import Avatar from "../components/shared/Avatar";
 function Timeline() {
   const { tripId } = useParams();
   const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   const [trip, setTrip] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -57,7 +58,7 @@ function Timeline() {
     fetchTimelineData();
   }, [tripId]);
 
-  const fetchTimelineData = async () => {
+  async function fetchTimelineData() {
     try {
       setLoading(true);
       const res = await getTimeline(tripId);

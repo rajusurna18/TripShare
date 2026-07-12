@@ -48,7 +48,7 @@ function Blogs() {
     fetchBlogs(page);
   }, [page, selectedTag, debouncedSearch, debouncedDestination]);
 
-  const fetchBlogs = async (pageNum = 1) => {
+  async function fetchBlogs(pageNum = 1) {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
@@ -73,7 +73,7 @@ function Blogs() {
     }
   };
 
-  const fetchTrending = async () => {
+  async function fetchTrending() {
     try {
       setLoadingTrending(true);
       const res = await API.get("/blogs/trending?limit=4");

@@ -96,6 +96,9 @@ import matchRoutes
 import aiPackingRoutes
   from "./modules/ai/aiPacking.routes.js";
 
+import contactRoutes
+  from "./modules/contact/contact.routes.js";
+
 import Trip
   from "./modules/trip/trip.model.js";
 
@@ -286,6 +289,11 @@ app.use(
 app.use(
   "/api/saves",
   tripSaveRoutes
+);
+
+app.use(
+  "/api/contact",
+  contactRoutes
 );
 
 

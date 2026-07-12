@@ -26,7 +26,7 @@ function BlogCommentDrawer({ blogId, onClose, onCommentUpdated, blogOwnerId }) {
     fetchComments(1, true);
   }, [blogId]);
 
-  const fetchComments = async (pageNum = 1, replace = false) => {
+  async function fetchComments(pageNum = 1, replace = false) {
     try {
       setLoading(true);
       const res = await API.get(`/blogs/${blogId}/comments?page=${pageNum}&limit=10`);

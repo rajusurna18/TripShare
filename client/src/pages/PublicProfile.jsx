@@ -25,7 +25,7 @@ function PublicProfile() {
     fetchProfile();
   }, [userId]);
 
-  const fetchProfile = async () => {
+  async function fetchProfile() {
     try {
       const res = await API.get(`/profile/public/${userId}`);
       setUser(res.data);

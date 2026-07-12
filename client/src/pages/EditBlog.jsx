@@ -24,7 +24,7 @@ function EditBlog() {
     fetchBlog();
   }, [id]);
 
-  const fetchBlog = async () => {
+  async function fetchBlog() {
     try {
       setFetching(true);
       const res = await API.get(`/blogs/${id}`);

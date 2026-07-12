@@ -43,8 +43,7 @@ function Reviews() {
 
   // FETCH REVIEWS
 
-  const fetchReviews =
-    async () => {
+  async function fetchReviews() {
 
       try {
 

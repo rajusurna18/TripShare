@@ -15,7 +15,7 @@ function AIExpenses() {
     fetchAIInsights();
   }, [tripId]);
 
-  const fetchAIInsights = async () => {
+  async function fetchAIInsights() {
     try {
       setLoading(true);
       setError("");

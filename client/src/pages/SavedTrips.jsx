@@ -39,7 +39,7 @@ function SavedTrips() {
     fetchSaves(1);
   }, [debouncedSearch, budgetMax, travelStyle, status]);
 
-  const fetchSaves = async (pageNum = 1) => {
+  async function fetchSaves(pageNum = 1) {
     try {
       setLoading(true);
       const params = {

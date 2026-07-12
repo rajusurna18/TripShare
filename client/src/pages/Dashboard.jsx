@@ -43,7 +43,7 @@ function Dashboard() {
 
   // FETCH TRIPS
 
-  const fetchTrips = async () => {
+  async function fetchTrips() {
 
     try {
 
@@ -80,7 +80,7 @@ function Dashboard() {
 
   // FETCH PROFILE
 
-  const fetchProfile = async () => {
+  async function fetchProfile() {
 
     try {
 
@@ -109,8 +109,7 @@ function Dashboard() {
 
   //fetch dashboardstats
 
-  const fetchDashboardStats =
-    async () => {
+  async function fetchDashboardStats() {
 
       try {
 
@@ -152,7 +151,7 @@ function Dashboard() {
     };
 
   // FETCH PERSONALIZED FEED
-  const fetchFeed = async (pageNum = 1) => {
+  async function fetchFeed(pageNum = 1) {
     try {
       setLoadingFeed(true);
       const token = localStorage.getItem("token");

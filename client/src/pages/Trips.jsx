@@ -52,7 +52,7 @@ function Trips() {
 
   // FETCH TRIPS
 
-  const fetchTrips = async () => {
+  async function fetchTrips() {
 
     try {
 

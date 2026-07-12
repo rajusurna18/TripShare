@@ -26,7 +26,7 @@ function MemoryCommentsDrawer({ memoryId, onClose, onCommentUpdated, memoryOwner
     fetchComments(1, true);
   }, [memoryId]);
 
-  const fetchComments = async (pageNum = 1, replace = false) => {
+  async function fetchComments(pageNum = 1, replace = false) {
     try {
       setLoading(true);
       const res = await API.get(`/memories/${memoryId}/comments?page=${pageNum}&limit=10`);

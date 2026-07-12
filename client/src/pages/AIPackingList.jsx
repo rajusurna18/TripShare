@@ -24,7 +24,7 @@ function AIPackingList() {
     fetchTripAndList();
   }, [tripId]);
 
-  const fetchTripAndList = async () => {
+  async function fetchTripAndList() {
     try {
       setLoading(true);
       setError("");

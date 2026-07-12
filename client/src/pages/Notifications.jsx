@@ -22,7 +22,7 @@ function Notifications() {
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   // FETCH NOTIFICATIONS
-  const fetchNotifications = async (pageNumber = 1, selectedCategory = "ALL") => {
+  async function fetchNotifications(pageNumber = 1, selectedCategory = "ALL") {
     try {
       setLoading(true);
       const categoryQuery = selectedCategory !== "ALL" ? `&category=${selectedCategory}` : "";

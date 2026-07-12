@@ -76,7 +76,7 @@ function Chat() {
   // ======================
   // FETCH TRIP & MESSAGES
   // ======================
-  const fetchTrip = async () => {
+  async function fetchTrip() {
     try {
       const res = await API.get(`/trips/${tripId}`);
       setTrip(res.data.trip || res.data);
@@ -85,7 +85,7 @@ function Chat() {
     }
   };
 
-  const fetchMessages = async () => {
+  async function fetchMessages() {
     try {
       const res = await API.get(`/messages/${tripId}`);
       setMessages(res.data.messages || []);

@@ -40,7 +40,7 @@ function Profile() {
   }, []);
 
   // FETCH PROFILE
-  const fetchProfile = async () => {
+  async function fetchProfile() {
     try {
       const res = await API.get("/api/profile");
       const profile = res.data.user || res.data;

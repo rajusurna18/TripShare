@@ -8,7 +8,7 @@ import {
   getShareAnalytics,
 } from "./tripSave.controller.js";
 import { protect } from "../../middleware/auth.middleware.js";
-import { customRateLimiter } from "../../middleware/rateLimiter.middleware.js";
+import { tripsLimiter } from "../../middleware/rateLimiters.js";
 
 const router = express.Router();
 
@@ -28,15 +28,15 @@ const optionalProtect = (req, res, next) => {
 };
 
 // Route mapping
-router.post("/:tripId", protect, customRateLimiter(10, 60000), saveTrip);
-router.delete("/:tripId", protect, customRateLimiter(10, 60000), unsaveTrip);
+router.post("/:tripId", protect, tripsLimiter, saveTrip);
+router.delete("/:tripId", protect, tripsLimiter, unsaveTrip);
 router.get("/", protect, getSavedTrips);
 
 // Share trip accepts guests but tracks and rate limits them strictly (5 shares / minute)
 router.post(
   "/:tripId/share",
   optionalProtect,
-  customRateLimiter(5, 60000),
+  tripsLimiter,
   shareTrip
 );
 

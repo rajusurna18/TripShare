@@ -17,8 +17,7 @@ function Recommendations() {
   const [loading, setLoading] =
     useState(true);
 
-  const fetchRecommendations =
-    async () => {
+  async function fetchRecommendations() {
 
       try {
 

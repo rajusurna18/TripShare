@@ -31,6 +31,9 @@ import Recommendations from "./pages/Recommendations";
 import Discover from "./pages/Discover";
 
 // Lazy loaded heavy routes
+const About = lazy(() => import("./pages/About"));
+const Features = lazy(() => import("./pages/Features"));
+const Contact = lazy(() => import("./pages/Contact"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AI = lazy(() => import("./pages/AI"));
 const Blogs = lazy(() => import("./pages/Blogs"));
@@ -90,6 +93,21 @@ function App() {
         <Route
           path="/"
           element={<Home />}
+        />
+
+        <Route
+          path="/about"
+          element={<About />}
+        />
+
+        <Route
+          path="/features"
+          element={<Features />}
+        />
+
+        <Route
+          path="/contact"
+          element={<Contact />}
         />
 
         {/* AUTH */}
@@ -356,15 +374,6 @@ function App() {
             }
           />
 
-      
-         <Route
-           path="/reviews/:userId"
-           element={
-             <ProtectedRoute>
-               <Reviews />
-              </ProtectedRoute>
-            }
-           />  
 
           <Route
             path="/join-requests/:tripId"
