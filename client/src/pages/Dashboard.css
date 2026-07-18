@@ -1,0 +1,12 @@
+.dashboard-action-card {
+  transition: all 0.3s ease;
+  background: rgba(25, 25, 30, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-action-card:hover {
+  transform: translateY(-5px);
+  background: rgba(25, 25, 30, 0.7);
+  border-color: rgba(255, 193, 7, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
