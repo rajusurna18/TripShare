@@ -111,7 +111,7 @@ function Home() {
                 </div>
               </motion.div>
             </div>
-            
+
             <div className="col-lg-6">
               {/* IMPACT STATISTICS */}
               <motion.div className="row g-4" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
@@ -172,7 +172,7 @@ function Home() {
               </div>
             ))}
           </motion.div>
-          
+
           <div className="mt-5 text-center">
             <Link to="/features" className="btn btn-outline-warning rounded-pill px-4 py-2">Explore All Features</Link>
           </div>
@@ -187,48 +187,113 @@ function Home() {
             <p className="landing-subtitle">Instead of traditional travel apps.</p>
           </motion.div>
 
-          <motion.div className="comparison-table-wrapper" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-            <table className="comparison-table table-responsive">
+          <motion.div
+            className="comparison-table-wrapper overflow-x-auto"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+          >
+            <table className="comparison-table w-full border-collapse overflow-hidden rounded-[2rem] shadow-[0_25px_60px_rgba(0,0,0,0.45)]">
               <thead>
-                <tr>
-                  <th>Feature</th>
-                  <th className="traditional-col">Traditional Apps</th>
-                  <th className="highlight-col">TripShare</th>
+                <tr className="bg-gradient-to-r from-[#1A2235] via-[#232F47] to-[#1A2235]">
+                  <th className="px-8 py-6 text-left text-lg font-bold text-white uppercase tracking-wider border-b border-[#D4AF37]/30">
+                    Feature
+                  </th>
+
+                  <th className="traditional-col px-8 py-6 text-center text-lg font-bold text-white uppercase tracking-wider border-b border-[#D4AF37]/30">
+                    Traditional Apps
+                  </th>
+
+                  <th className="highlight-col px-8 py-6 text-center text-lg font-bold text-[#D4AF37] uppercase tracking-wider border-b border-[#D4AF37]/50">
+                    ⭐ TripShare
+                  </th>
                 </tr>
               </thead>
+
               <tbody>
-                <tr><td className="feature-name">AI Assistant</td><td className="traditional-col">—</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
-                <tr><td className="feature-name">Traveler Matching</td><td className="traditional-col">—</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
-                <tr><td className="feature-name">Travel Timeline</td><td className="traditional-col"><i className="fas fa-check"></i> (Basic)</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
-                <tr><td className="feature-name">Expense Settlement</td><td className="traditional-col">—</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
-                <tr><td className="feature-name">Packing Assistant</td><td className="traditional-col">—</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
-                <tr><td className="feature-name">Real-Time Chat</td><td className="traditional-col"><i className="fas fa-check"></i> (Limited)</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
-                <tr><td className="feature-name">Travel Story Generator</td><td className="traditional-col">—</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
-                <tr><td className="feature-name">Live Tracking</td><td className="traditional-col">—</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
-                <tr><td className="feature-name">Analytics Dashboard</td><td className="traditional-col">—</td><td className="highlight-col"><i className="fas fa-check-circle"></i></td></tr>
+                <tr>
+                  <td className="feature-name">AI Assistant</td>
+                  <td className="traditional-col">—</td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="feature-name">Traveler Matching</td>
+                  <td className="traditional-col">—</td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="feature-name">Travel Timeline</td>
+                  <td className="traditional-col">
+                    <i className="fas fa-check"></i> (Basic)
+                  </td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="feature-name">Expense Settlement</td>
+                  <td className="traditional-col">—</td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="feature-name">Packing Assistant</td>
+                  <td className="traditional-col">—</td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="feature-name">Real-Time Chat</td>
+                  <td className="traditional-col">
+                    <i className="fas fa-check"></i> (Limited)
+                  </td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="feature-name">Travel Story Generator</td>
+                  <td className="traditional-col">—</td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="feature-name">Live Tracking</td>
+                  <td className="traditional-col">—</td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="feature-name">Analytics Dashboard</td>
+                  <td className="traditional-col">—</td>
+                  <td className="highlight-col">
+                    <i className="fas fa-check-circle"></i>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </motion.div>
         </div>
       </section>
 
-      {/* 5. TECHNOLOGY STACK */}
-      <section className="landing-section" style={{ background: "#050505" }}>
-        <div className="container text-center">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-            <h2 className="landing-title mb-5">Technology Stack</h2>
-          </motion.div>
-          <motion.div className="row justify-content-center g-4" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}>
-            {["React", "Bootstrap", "Framer Motion", "Node.js", "Express", "MongoDB", "Socket.io", "Gemini AI"].map((tech, idx) => (
-               <div className="col-lg-3 col-md-4 col-6" key={idx}>
-                 <motion.div className="glass-card p-4 rounded-4 h-100 border border-secondary" variants={fadeUp}>
-                   <h5 className="fw-bold text-white mb-0">{tech}</h5>
-                 </motion.div>
-               </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+
 
       {/* 6. LIVE TRAVEL FEED (Rendered only if logged in) */}
       {token && (
@@ -236,7 +301,7 @@ function Home() {
           <div className="container" style={{ maxWidth: "800px" }}>
             <h2 className="section-title text-center text-warning fw-bold mb-4">🌍 Live Travel Feed</h2>
             <p className="text-secondary text-center mb-5" style={{ fontSize: "15px" }}>See what travelers are planning and sharing in real-time.</p>
-            
+
             {activities.length === 0 && !loadingFeed ? (
               <div className="glass-card p-4 text-center">
                 <p className="text-secondary mb-0">No public activities yet. Be the first to share your journey!</p>
@@ -299,7 +364,7 @@ function Home() {
                 <a href="https://twitter.com" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
               </div>
             </div>
-            
+
             <div className="col-lg-2 col-md-4 col-6">
               <h5 className="footer-col-title">Product</h5>
               <ul className="footer-links">
@@ -327,7 +392,7 @@ function Home() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-top border-secondary pt-4 text-center">
             <p className="text-secondary mb-1" style={{ fontSize: "0.9rem" }}>TripShare AI © 2026. All rights reserved.</p>
           </div>

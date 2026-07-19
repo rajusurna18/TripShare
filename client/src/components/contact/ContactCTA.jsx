@@ -85,13 +85,37 @@ export default function ContactCTA() {
           transition={{ duration: 1, ease: EASE, delay: 0.4 }}
           className="mt-14 flex flex-col items-center gap-6 sm:flex-row"
         >
-          <ContactButton
-            variant="gold"
-            className="h-16 px-12 text-lg rounded-full font-bold text-[#0A0A0C] flex items-center justify-center shadow-[0_10px_30px_rgba(212,175,55,0.3)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.4)] hover:-translate-y-1 transition-all duration-300"
+          <button
             onClick={() => navigate("/create-trip")}
+            className="
+             h-16
+             px-12
+             rounded-full
+             bg-[#D4AF37]
+             text-[#0A0A0C]
+             text-lg
+             font-bold
+             flex
+            items-center
+            justify-center
+            gap-3
+            shadow-[0_10px_30px_rgba(212,175,55,0.3)]
+            hover:bg-[#E5C158]
+            hover:shadow-[0_20px_50px_rgba(212,175,55,0.4)]
+            hover:-translate-y-1
+            transition-all
+            duration-300
+           "
           >
-            Create Your First Trip <Compass className="ml-3 h-5 w-5" />
-          </ContactButton>
+            <span className="text-[#0A0A0C]">
+              Create Your First Trip
+            </span>
+
+            <Compass
+              size={20}
+              className="text-[#0A0A0C]"
+            />
+          </button>
 
           <ContactButton
             variant="ghost"

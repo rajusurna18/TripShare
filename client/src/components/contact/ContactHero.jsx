@@ -124,12 +124,42 @@ export default function ContactHero() {
         >
           <ContactButton
             variant="gold"
-            className="h-16 px-12 text-lg rounded-full shadow-[0_10px_30px_rgba(212,175,55,0.2)] hover:shadow-[0_20px_50px_rgba(212,175,55,0.3)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center text-[#0A0A0C] font-bold"
             onClick={() =>
-              document.getElementById("contact-options")?.scrollIntoView({ behavior: "smooth" })
+              document
+                .getElementById("contact-options")
+                ?.scrollIntoView({ behavior: "smooth" })
             }
+            className="
+    h-16
+    px-12
+    rounded-full
+    text-lg
+    font-bold
+    bg-[#D4AF37]
+    text-black
+    border-0
+    shadow-[0_10px_30px_rgba(212,175,55,0.25)]
+    hover:bg-[#E5C158]
+    hover:text-black
+    hover:shadow-[0_20px_50px_rgba(212,175,55,0.35)]
+    hover:-translate-y-1
+    transition-all
+    duration-300
+    flex
+    items-center
+    justify-center
+    gap-3
+    whitespace-nowrap
+  "
           >
-            Contact Support <ArrowRight className="ml-3 h-5 w-5" />
+            <span className="text-black font-bold">
+              Contact Support
+            </span>
+
+            <ArrowRight
+              size={20}
+              className="text-black flex-shrink-0"
+            />
           </ContactButton>
           <ContactButton
             variant="ghost"

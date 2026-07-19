@@ -106,11 +106,24 @@ export default function ContactForm() {
         {/* Left Side: Illustration / Support Info */}
         <div className="lg:col-span-5 flex flex-col gap-12 lg:sticky lg:top-40">
           <div>
-            <motion.h2 variants={fadeUp} className="font-['Cormorant_Garamond'] text-[3.5rem] sm:text-[4.5rem] font-bold text-white leading-[1.1]">
-              Luxury <br /> Support Center
+            <motion.h2
+              variants={fadeUp}
+              className="
+    font-['Cormorant_Garamond']
+    text-[2.8rem]
+    sm:text-[3.2rem]
+    lg:text-[3.5rem]
+    font-bold
+    text-white
+    leading-tight
+    whitespace-nowrap
+  "
+            >
+              Luxury <br />
+              Support Center
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-6 font-['Manrope'] text-xl font-light text-gray-300 leading-relaxed max-w-md">
-              We believe every great journey requires an incredible support team behind the scenes. Connect directly with our experts.
+              We believe every great journey requires an incredible support team behind the scenes. Connect d
             </motion.p>
           </div>
 
@@ -252,15 +265,43 @@ export default function ContactForm() {
                     </div>
                   </div>
 
-                  <div className="sm:col-span-2 pt-4">
-                    <ContactButton type="submit" variant="gold" className="w-full h-16 text-lg rounded-full flex items-center justify-center font-bold text-[#0A0A0C]">
+                  <div className="sm:col-span-2 pt-6">
+                    <ContactButton
+                      type="submit"
+                      variant="gold"
+                      disabled={status === "loading"}
+                      className="
+                        w-full
+                        h-[72px]
+                        rounded-2xl
+                        bg-gradient-to-r
+                       from-[#F4D06F]
+                       via-[#D4AF37]
+                        to-[#B8860B]
+                        text-[#0A0A0C]
+                        text-lg
+                       font-bold
+                        flex
+                       items-center
+                      justify-center
+                        shadow-[0_15px_40px_rgba(212,175,55,0.35)]
+                        hover:shadow-[0_20px_50px_rgba(212,175,55,0.5)]
+                         hover:scale-[1.02]
+                         transition-all
+                       duration-300
+                       disabled:opacity-70
+                      disabled:cursor-not-allowed
+                       "
+                    >
                       {status === "loading" ? (
                         <>
-                          <Loader2 className="mr-3 h-6 w-6 animate-spin" /> Sending...
+                          <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                          Sending...
                         </>
                       ) : (
                         <>
-                          Send Message <Send className="ml-3 h-5 w-5" />
+                          <Send className="mr-3 h-5 w-5" />
+                          Send Message
                         </>
                       )}
                     </ContactButton>
