@@ -23,6 +23,11 @@ function Notifications() {
 
   // FETCH NOTIFICATIONS
   async function fetchNotifications(pageNumber = 1, selectedCategory = "ALL") {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return; // Do not fetch if not authenticated
+    }
     try {
       setLoading(true);
       const categoryQuery = selectedCategory !== "ALL" ? `&category=${selectedCategory}` : "";
@@ -312,15 +317,30 @@ function Notifications() {
             
             /* EMPTY STATES */
             <div className="text-center py-5 px-3">
-              <span className="display-3 mb-3 d-block">🔕</span>
-              <h4 className="fw-bold text-warning mb-2">No Notifications Found</h4>
-              <p className="text-secondary mx-auto" style={{ maxWidth: "420px", fontSize: "14.5px" }}>
-                {statusTab === "UNREAD"
-                  ? "You are all caught up! No unread notifications in this category."
-                  : statusTab === "READ"
-                  ? "No read notifications found. New actions will show up in the unread tab."
-                  : "No notifications found under this filter. Complete profile details, follow users, or join trips to start seeing updates!"}
-              </p>
+              {!localStorage.getItem("token") ? (
+                <>
+                  <span className="display-3 mb-3 d-block">🔒</span>
+                  <h4 className="fw-bold text-warning mb-2">Sign in to view your notifications</h4>
+                  <p className="text-secondary mx-auto mb-4" style={{ maxWidth: "420px", fontSize: "14.5px" }}>
+                    Don't miss out on friend requests, trip invitations, and new memories.
+                  </p>
+                  <Link to="/login" className="btn btn-warning px-4 fw-bold rounded-pill">
+                    Sign In
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <span className="display-3 mb-3 d-block">🔕</span>
+                  <h4 className="fw-bold text-warning mb-2">No Notifications Found</h4>
+                  <p className="text-secondary mx-auto" style={{ maxWidth: "420px", fontSize: "14.5px" }}>
+                    {statusTab === "UNREAD"
+                      ? "You are all caught up! No unread notifications in this category."
+                      : statusTab === "READ"
+                      ? "No read notifications found. New actions will show up in the unread tab."
+                      : "No notifications found under this filter. Complete profile details, follow users, or join trips to start seeing updates!"}
+                  </p>
+                </>
+              )}
             </div>
 
           ) : (

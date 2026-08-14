@@ -5,6 +5,11 @@ import Avatar from "../components/shared/Avatar";
 
 export function Discover() {
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+  }, []);
 
   // Search, filter, and sort states
   const [query, setQuery] = useState("");
@@ -54,6 +59,11 @@ export function Discover() {
   // Fetch data
   const fetchTravelers = useCallback(
     async (currentPage, isNewSearch = false) => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return; // Don't fetch if logged out
+      }
       try {
         setLoading(true);
         const params = {
@@ -382,13 +392,27 @@ export function Discover() {
           <div className={showFilters ? "col-lg-9" : "col-12"}>
             {travelers.length === 0 && !loading ? (
               <div className="glass-card text-center py-5">
-                <h4 className="text-secondary">No travelers found matching your criteria</h4>
-                <p className="text-muted" style={{ fontSize: "14px" }}>
-                  Try adjusting filters or typing another query.
-                </p>
-                <button className="btn btn-sm btn-warning mt-2" onClick={resetFilters}>
-                  Reset All Settings
-                </button>
+                {!localStorage.getItem("token") ? (
+                  <>
+                    <h4 className="text-secondary">Sign in to discover travelers</h4>
+                    <p className="text-muted" style={{ fontSize: "14px" }}>
+                      Join the community to find like-minded wanderers and travel buddies.
+                    </p>
+                    <Link to="/login" className="btn btn-warning mt-3 px-4 fw-bold rounded-pill">
+                      Sign In
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <h4 className="text-secondary">No travelers found matching your criteria</h4>
+                    <p className="text-muted" style={{ fontSize: "14px" }}>
+                      Try adjusting filters or typing another query.
+                    </p>
+                    <button className="btn btn-sm btn-warning mt-2" onClick={resetFilters}>
+                      Reset All Settings
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <div className="row g-3">

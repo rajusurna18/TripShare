@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, Outlet } from "react-router-dom";
+import { Routes, Route, useLocation, Outlet, useOutlet } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "./components/shared/PageTransition";
@@ -67,10 +67,11 @@ const PageSkeleton = () => (
 
 const AnimatedLayout = () => {
   const location = useLocation();
+  const outlet = useOutlet();
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" initial={false}>
       <PageTransition key={location.pathname}>
-        <Outlet />
+        {outlet}
       </PageTransition>
     </AnimatePresence>
   );
@@ -167,13 +168,7 @@ function App() {
 
         <Route
           path="/notifications"
-          element={
-            <ProtectedRoute>
-
-              <Notifications />
-
-            </ProtectedRoute>
-          }
+          element={<Notifications />}
         />
 
         {/* MATCHES */}
@@ -398,20 +393,12 @@ function App() {
 
         <Route
           path="/discover"
-          element={
-            <ProtectedRoute>
-              <Discover />
-            </ProtectedRoute>
-          }
+          element={<Discover />}
         />
 
         <Route
           path="/saved-trips"
-          element={
-            <ProtectedRoute>
-              <SavedTrips />
-            </ProtectedRoute>
-          }
+          element={<SavedTrips />}
         />
 
         <Route

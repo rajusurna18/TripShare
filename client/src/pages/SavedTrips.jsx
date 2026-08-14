@@ -40,6 +40,11 @@ function SavedTrips() {
   }, [debouncedSearch, budgetMax, travelStyle, status]);
 
   async function fetchSaves(pageNum = 1) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const params = {
@@ -227,14 +232,26 @@ function SavedTrips() {
               borderRadius: "24px",
             }}
           >
-            <span style={{ fontSize: "64px" }}>🌍</span>
-            <h3 className="text-warning mt-4 fw-bold">No Saved Adventures</h3>
-            <p className="text-secondary mt-2 mb-4">
-              Explore upcoming public trips, co-plan budgets with matches, and click the star bookmark to curate your wishlist!
-            </p>
-            <Link to="/trips" className="btn btn-warning px-5 rounded-pill fw-bold text-dark text-decoration-none">
-              Explore Active Trips ✈️
-            </Link>
+            {!localStorage.getItem("token") ? (
+              <>
+                <span style={{ fontSize: "64px" }}>🔒</span>
+                <h3 className="text-warning mt-4 fw-bold">Sign in to save and access your favorite adventures.</h3>
+                <Link to="/login" className="btn btn-warning px-5 mt-4 rounded-pill fw-bold text-dark text-decoration-none">
+                  Sign In
+                </Link>
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize: "64px" }}>🌍</span>
+                <h3 className="text-warning mt-4 fw-bold">No Saved Adventures</h3>
+                <p className="text-secondary mt-2 mb-4">
+                  Explore upcoming public trips, co-plan budgets with matches, and click the star bookmark to curate your wishlist!
+                </p>
+                <Link to="/trips" className="btn btn-warning px-5 rounded-pill fw-bold text-dark text-decoration-none">
+                  Explore Active Trips ✈️
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           /* CARDS LIST */

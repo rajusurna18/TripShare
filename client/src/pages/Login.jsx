@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import API from "../services/api";
 
 function Login() {
-
   const navigate = useNavigate();
 
   const [loading, setLoading] =
@@ -26,6 +25,8 @@ function Login() {
 
     if (token && userStr) {
       try {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         localStorage.setItem("token", token);
         localStorage.setItem("user", userStr);
         toast.success("Login successful with Google 🚀");
@@ -34,33 +35,31 @@ function Login() {
         console.error(err);
         toast.error("Failed to parse social login credentials");
       }
+    } else {
+      // Intentionally empty to prevent clearing token during framer-motion page transitions
     }
   }, [navigate]);
 
   const handleChange = (e) => {
-
     setFormData({
-
       ...formData,
-
       [e.target.name]:
         e.target.value,
-
     });
-
   };
 
   const handleSubmit =
     async (e) => {
-
       e.preventDefault();
-
       try {
-
         setLoading(true);
+        // Clear any old state before starting a fresh login
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
 
         const res = await API.post("/auth/login", formData);
         const data = res.data;
+        
 
         localStorage.setItem(
           "token",

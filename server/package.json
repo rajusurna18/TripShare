@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/bootstrap.js"
+    "dev": "npx kill-port 5000 & nodemon src/bootstrap.js"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +29,7 @@
     "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
+    "kill-port": "^2.0.1",
     "nodemon": "^3.1.14"
   }
 }

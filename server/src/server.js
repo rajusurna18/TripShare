@@ -110,17 +110,30 @@ app.use(helmet({
 app.use(
 
   cors({
-
-    origin:
+    origin: [
       "http://localhost:5173",
-
+      "http://localhost:5174",
+      process.env.CLIENT_URL
+    ].filter(Boolean),
     credentials: true,
-
   })
 
 );
 
 app.use(express.json());
+
+// JSON Parse Error Handler
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    console.error('[JSON PARSE ERROR] Invalid JSON payload received');
+    console.error(`[JSON PARSE ERROR] Path: ${req.path}, Method: ${req.method}`);
+    console.error(`[JSON PARSE ERROR] Payload snippet: ${err.body.substring(0, 200)}`);
+    return res.status(400).send({ message: "Invalid JSON payload" });
+  }
+  next();
+});
+
+app.use(express.urlencoded({ extended: true }));
 
 // INPUT SANITIZATION
 app.use(nosqlSanitizer);
@@ -916,14 +929,32 @@ server.listen(
 );
 
 // Graceful shutdown handlers for nodemon restarts to prevent EADDRINUSE
-const shutdown = () => {
-  // Force exit to prevent socket.io from hanging EADDRINUSE
-  process.exit(0);
+const shutdown = (signal) => {
+  console.log(`\n[Server] Received ${signal}. Shutting down gracefully...`);
+  
+  if (server) {
+    server.close(async () => {
+      console.log('[Server] HTTP server closed.');
+      if (mongoose.connection.readyState === 1) {
+        await mongoose.connection.close();
+        console.log('[Server] MongoDB connection closed.');
+      }
+      process.exit(0);
+    });
+    
+    // Force close after 2 seconds if hanging
+    setTimeout(() => {
+      console.error('[Server] Forcing shutdown after timeout.');
+      process.exit(1);
+    }, 2000);
+  } else {
+    process.exit(0);
+  }
 };
 
-process.once('SIGUSR2', shutdown);
-process.once('SIGINT', shutdown);
-process.once('SIGTERM', shutdown);
+process.once('SIGUSR2', () => shutdown('SIGUSR2'));
+process.once('SIGINT', () => shutdown('SIGINT'));
+process.once('SIGTERM', () => shutdown('SIGTERM'));
 
 server.on('error', (e) => {
   if (e.code === 'EADDRINUSE') {

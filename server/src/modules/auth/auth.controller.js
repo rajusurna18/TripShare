@@ -166,6 +166,7 @@ export const googleAuthRedirect = async (req, res) => {
       `&response_type=code` +
       `&scope=${encodeURIComponent("profile email")}` +
       `&prompt=consent`;
+
     res.redirect(redirectUrl);
   } catch (err) {
     console.error("Google OAuth Redirect error:", err);

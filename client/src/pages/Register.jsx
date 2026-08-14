@@ -28,6 +28,8 @@ function Register() {
 
     if (token && userStr) {
       try {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         localStorage.setItem("token", token);
         localStorage.setItem("user", userStr);
         toast.success("Registration & Login successful with Google 🚀");
@@ -36,32 +38,30 @@ function Register() {
         console.error(err);
         toast.error("Failed to parse social login credentials");
       }
+    } else {
+      // Intentionally empty to prevent clearing token during framer-motion page transitions
     }
   }, [navigate]);
 
   const handleChange = (e) => {
-
     setFormData({
-
       ...formData,
-
       [e.target.name]:
         e.target.value,
-
     });
-
   };
 
   const handleSubmit =
     async (e) => {
-
       e.preventDefault();
-
       try {
-
         setLoading(true);
+        // Clear any old state before starting a fresh registration
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
 
         const res = await API.post("/auth/register", formData);
+        const data = res.data;
 
         toast.success(
           "Registration successful 🎉"

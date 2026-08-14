@@ -385,6 +385,10 @@ export const verifyGoogleOAuthCodeService = async (code) => {
   }
 
   const payload = await profileResponse.json();
+  return await processGooglePayload(payload);
+};
+
+const processGooglePayload = async (payload) => {
   if (!payload.email) {
     throw new Error("Google account profile lacks a valid email address");
   }
@@ -422,11 +426,20 @@ export const verifyGoogleOAuthCodeService = async (code) => {
     }
   );
 
-  const safeUser = user.toObject();
-  delete safeUser.password;
+  console.log("=== JWT SIGN (LOGIN) ===");
+  console.log("Issuer location: auth.service.js loginUser");
+  console.log(`JWT_SECRET length: ${process.env.JWT_SECRET ? process.env.JWT_SECRET.length : "UNDEFINED"}`);
+  console.log(`Token start: ${token.substring(0, 20)}`);
+  console.log(`Token end: ${token.substring(token.length - 20)}`);
+  console.log("========================");
 
   return {
-    user: safeUser,
     token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      profileImage: user.profileImage,
+    },
   };
-};
+};

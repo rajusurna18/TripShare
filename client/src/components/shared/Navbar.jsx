@@ -6,6 +6,7 @@ import Avatar from "./Avatar";
 import {
   useEffect,
   useState,
+  useRef
 } from "react";
 
 import API
@@ -20,6 +21,28 @@ function Navbar() {
   const [user,
     setUser] =
     useState(null);
+    
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   // FETCH PROFILE
 
@@ -131,14 +154,17 @@ function Navbar() {
 
     );
 
-    return () => {
-
-      socket.off(
-        "new_notification"
-      );
-
+    const handleAuthExpired = () => {
+      setUser(null);
+      setNotifications([]);
     };
 
+    window.addEventListener("auth-expired", handleAuthExpired);
+
+    return () => {
+      socket.off("new_notification");
+      window.removeEventListener("auth-expired", handleAuthExpired);
+    };
   }, []);
 
   // LOGOUT
@@ -326,100 +352,98 @@ function Navbar() {
             </li>
 
             {/* PROFILE */}
-
-            <li className="nav-item dropdown">
-
+            <li className="nav-item position-relative" ref={dropdownRef}>
               <button
-
                 className="nav-link bg-transparent border-0 d-flex align-items-center gap-2 text-light"
-
-                data-bs-toggle="dropdown"
-
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                aria-expanded={isDropdownOpen}
               >
-
                 <Avatar
                   src={user?.profileImage}
                   alt="profile"
                   className="navbar-profile"
                   size={40}
                 />
-
               </button>
 
-              <ul className="dropdown-menu dropdown-menu-end">
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-3 p-2 bg-[#0A0A0C] border border-[rgba(212,175,55,0.20)] rounded-[22px] w-[300px] backdrop-blur-[24px] shadow-[0_25px_70px_rgba(0,0,0,0.55)] z-50">
+                  
+                  {/* Profile Header */}
+                  <div className="d-flex align-items-center gap-3 p-[16px] mb-2 border-b border-[rgba(212,175,55,0.1)]">
+                    <Avatar src={user?.profileImage} alt="profile" size={48} />
+                    <div className="d-flex flex-column overflow-hidden">
+                      <span className="text-white fw-bold text-sm m-0 text-truncate">{user?.name || "Traveler"}</span>
+                      <span className="text-[#A1A1AA] text-xs m-0 text-truncate">{user?.email}</span>
+                      <span className="text-[#D4AF37] text-xs mt-1 fw-semibold">Traveler</span>
+                    </div>
+                  </div>
 
-                <li>
+                  <ul className="list-unstyled m-0 p-0">
+                    <li>
+                      <Link
+                        className="d-flex align-items-center gap-3 text-decoration-none w-100 h-[68px] p-[14px] rounded-[16px] transition-all duration-300 hover:bg-[rgba(212,175,55,0.07)] hover:translate-x-[4px] group"
+                        to="/profile"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <span className="text-xl text-[#A1A1AA] transition-colors duration-300 group-hover:text-[#D4AF37]">👤</span>
+                        <div className="d-flex flex-column">
+                          <span className="text-white fw-bold text-sm m-0 leading-tight">Edit Profile</span>
+                          <span className="text-[#A1A1AA] text-xs m-0 leading-tight group-hover:text-gray-300 transition-colors">Update your travel profile</span>
+                        </div>
+                      </Link>
+                    </li>
 
-                  <Link
+                    <li>
+                      <Link
+                        className="d-flex align-items-center gap-3 text-decoration-none w-100 h-[68px] p-[14px] rounded-[16px] transition-all duration-300 hover:bg-[rgba(212,175,55,0.07)] hover:translate-x-[4px] group"
+                        to="/saved-trips"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <span className="text-xl text-[#A1A1AA] transition-colors duration-300 group-hover:text-[#D4AF37]">⭐</span>
+                        <div className="d-flex flex-column">
+                          <span className="text-white fw-bold text-sm m-0 leading-tight">Saved Trips</span>
+                          <span className="text-[#A1A1AA] text-xs m-0 leading-tight group-hover:text-gray-300 transition-colors">Your saved journeys</span>
+                        </div>
+                      </Link>
+                    </li>
 
-                    className="dropdown-item"
+                    <li>
+                      <Link
+                        className="d-flex align-items-center gap-3 text-decoration-none w-100 h-[68px] p-[14px] rounded-[16px] transition-all duration-300 hover:bg-[rgba(212,175,55,0.07)] hover:translate-x-[4px] group"
+                        to="/settings"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <span className="text-xl text-[#A1A1AA] transition-colors duration-300 group-hover:text-[#D4AF37]">⚙️</span>
+                        <div className="d-flex flex-column">
+                          <span className="text-white fw-bold text-sm m-0 leading-tight">Settings</span>
+                          <span className="text-[#A1A1AA] text-xs m-0 leading-tight group-hover:text-gray-300 transition-colors">Preferences and privacy</span>
+                        </div>
+                      </Link>
+                    </li>
 
-                    to="/profile"
+                    <li>
+                      <hr className="border-[rgba(212,175,55,0.1)] my-1 mx-2" />
+                    </li>
 
-                  >
-
-                    👤 Edit Profile
-
-                  </Link>
-
-                </li>
-
-                <li>
-
-                  <Link
-
-                    className="dropdown-item"
-
-                    to="/saved-trips"
-
-                  >
-
-                    ⭐ Saved Trips
-
-                  </Link>
-
-                </li>
-
-                <li>
-
-                  <Link
-
-                    className="dropdown-item"
-
-                    to="/settings"
-
-                  >
-
-                    ⚙️ Settings
-
-                  </Link>
-
-                </li>
-
-                <li>
-
-                  <hr className="dropdown-divider" />
-
-                </li>
-
-                <li>
-
-                  <button
-
-                    className="dropdown-item text-danger"
-
-                    onClick={logout}
-
-                  >
-
-                    🚪 Logout
-
-                  </button>
-
-                </li>
-
-              </ul>
-
+                    <li>
+                      <button
+                        className="d-flex align-items-center gap-3 border-0 bg-transparent w-100 h-[68px] p-[14px] rounded-[16px] transition-all duration-300 hover:bg-[rgba(239,68,68,0.1)] hover:translate-x-[4px] group"
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          logout();
+                        }}
+                      >
+                        <span className="text-xl text-[#A1A1AA] transition-colors duration-300 group-hover:text-[#EF4444]">🚪</span>
+                        <div className="d-flex flex-column text-start">
+                          <span className="text-white group-hover:text-[#EF4444] fw-bold text-sm m-0 leading-tight transition-colors">Logout</span>
+                          <span className="text-[#A1A1AA] text-xs m-0 leading-tight group-hover:text-gray-300 transition-colors">Sign out of TripShare</span>
+                        </div>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </li>
 
           </ul>
