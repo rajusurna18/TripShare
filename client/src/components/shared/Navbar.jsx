@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import socket from "../../socket";
 import Avatar from "./Avatar";
 
@@ -24,6 +24,27 @@ function Navbar() {
     
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const location = useLocation();
+
+  // CLOSE MOBILE MENU ON ROUTE CHANGE
+  useEffect(() => {
+    const navbarCollapse = document.getElementById("navbarNav");
+    if (navbarCollapse && navbarCollapse.classList.contains("show")) {
+      if (window.bootstrap && window.bootstrap.Collapse) {
+        const bsCollapse = window.bootstrap.Collapse.getInstance(navbarCollapse);
+        if (bsCollapse) {
+          bsCollapse.hide();
+          return;
+        }
+      }
+      navbarCollapse.classList.remove("show");
+      const toggler = document.querySelector(".navbar-toggler");
+      if (toggler) {
+        toggler.classList.add("collapsed");
+        toggler.setAttribute("aria-expanded", "false");
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -202,12 +223,11 @@ function Navbar() {
         {/* LOGO */}
 
         <Link
-          className="navbar-brand"
+          className="navbar-brand d-flex align-items-center"
           to="/"
         >
-
+          <img src="/tripshare-logo.png" alt="TripShare Logo" className="d-inline-block" style={{ height: "36px", width: "auto", marginRight: "8px", borderRadius: "50%", objectFit: "cover" }} />
           TripShare
-
         </Link>
 
         {/* MOBILE BUTTON */}

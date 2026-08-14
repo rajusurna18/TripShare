@@ -92,10 +92,8 @@ function Register() {
         className="card p-4 bg-dark text-white shadow-lg auth-card"
       >
 
-        <h2 className="text-center mb-4 text-warning">
-
-          Join TripShare ✈️
-
+        <h2 className="text-center mb-4 text-warning d-flex justify-content-center align-items-center">
+          Join TripShare <img src="/tripshare-logo.png" alt="TripShare Logo" className="d-inline-block" style={{ height: "1.2em", width: "auto", marginLeft: "8px", borderRadius: "50%", objectFit: "cover" }} />
         </h2>
 
         <form onSubmit={handleSubmit}>

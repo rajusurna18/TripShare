@@ -182,6 +182,8 @@ function AI() {
               }
             } catch (e) {
               console.error("JSON parse error:", e);
+              // Re-throw so the outer catch block can handle the error properly
+              throw e;
             }
           }
         }

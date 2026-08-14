@@ -353,7 +353,7 @@ function Home() {
         <div className="container">
           <div className="row g-5 mb-5">
             <div className="col-lg-4">
-              <h3 className="fw-bold text-warning mb-3" style={{ letterSpacing: "1px" }}>TripShare AI</h3>
+              <img src="/tripshare-logo.png" alt="TripShare AI" style={{ width: "120px", height: "auto" }} className="mb-3" />
               <p className="text-secondary mb-4" style={{ fontSize: "0.95rem", maxWidth: "300px" }}>
                 The world's smartest AI-powered travel ecosystem. Plan, collaborate, and explore together.
               </p>
