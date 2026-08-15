@@ -14,8 +14,6 @@ const messageSchema =
 
         ref: "User",
 
-        required: true,
-
       },
 
       // TRIP

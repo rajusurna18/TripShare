@@ -140,6 +140,11 @@ export const loginUser =
 
     }
 
+    if (user.isActive === false) {
+      user.isActive = true;
+      await user.save();
+    }
+
     const token =
       jwt.sign(
 
@@ -397,8 +402,16 @@ const processGooglePayload = async (payload) => {
   let user = await User.findOne({ email });
 
   if (user) {
+    let needsSave = false;
     if (!user.isVerified) {
       user.isVerified = true;
+      needsSave = true;
+    }
+    if (user.isActive === false) {
+      user.isActive = true;
+      needsSave = true;
+    }
+    if (needsSave) {
       await user.save();
     }
   } else {

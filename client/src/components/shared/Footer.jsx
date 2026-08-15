@@ -33,8 +33,8 @@ export default function Footer() {
             <ul className="footer-links">
               <li><Link to="/contact">Contact Us</Link></li>
               <li><Link to="/contact">FAQ</Link></li>
-              <li><Link to="/">Privacy Policy</Link></li>
-              <li><Link to="/">Terms</Link></li>
+              <li><Link to="/privacy">Privacy Policy</Link></li>
+              <li><Link to="/terms">Terms</Link></li>
             </ul>
           </div>
 

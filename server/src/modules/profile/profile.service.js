@@ -161,8 +161,8 @@ export const updateProfileService = async (userId, data) => {
 };
 
 // PUBLIC PROFILE
-export const getPublicProfileService = async (userId, currentUserId = null) => {
-  const user = await User.findById(userId)
+export const getPublicProfileService = async (targetId, currentUserId) => {
+  const user = await User.findOne({ _id: targetId, isActive: { $ne: false } })
     .select("-password")
     .populate("friends", "name profileImage")
     .populate("followers", "name profileImage")
@@ -173,18 +173,18 @@ export const getPublicProfileService = async (userId, currentUserId = null) => {
   }
 
   const [stats, recentTrips, recentReviews] = await Promise.all([
-    computeStatsObj(user, userId),
+    computeStatsObj(user, targetId),
     Trip.find({
       $or: [
-        { createdBy: userId },
-        { members: userId }
+        { createdBy: targetId },
+        { members: targetId }
       ]
     })
       .select("title destination startDate endDate budget image status")
       .populate("createdBy", "name profileImage")
       .sort({ createdAt: -1 })
       .limit(3),
-    Review.find({ reviewFor: userId })
+    Review.find({ reviewFor: targetId })
       .populate("reviewer", "name profileImage")
       .sort({ createdAt: -1 })
       .limit(3)
@@ -195,14 +195,14 @@ export const getPublicProfileService = async (userId, currentUserId = null) => {
     const currentUser = await User.findById(currentUserId).select("following");
     if (currentUser && currentUser.following) {
       isFollowing = currentUser.following.some(
-        (id) => id.toString() === userId.toString()
+        (id) => id.toString() === targetId.toString()
       );
     }
   }
 
   // Determine visibility query for blogs in profile
-  const blogVisibilityQuery = { author: userId };
-  if (currentUserId && userId.toString() === currentUserId.toString()) {
+  const blogVisibilityQuery = { author: targetId };
+  if (currentUserId && targetId.toString() === currentUserId.toString()) {
     // Owner sees all their blogs
   } else if (isFollowing) {
     blogVisibilityQuery.visibility = { $in: ["public", "followers_only"] };
@@ -376,7 +376,9 @@ export const getDiscoverTravelersService = async (params, currentUserId) => {
   const skipNum = (pageNum - 1) * limitNum;
 
   // 1. MATCH FILTER
-  const matchStage = {};
+  const matchStage = {
+    isActive: { $ne: false } // Exclude deactivated users
+  };
 
   // Exclude current user from discovery list
   if (currentUserId) {

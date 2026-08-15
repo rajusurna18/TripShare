@@ -95,6 +95,9 @@ import aiPackingRoutes
 import contactRoutes
   from "./modules/contact/contact.routes.js";
 
+import settingsRoutes
+  from "./modules/settings/settings.routes.js";
+
 import Trip
   from "./modules/trip/trip.model.js";
 
@@ -303,6 +306,12 @@ app.use(
 app.use(
   "/api/contact",
   contactRoutes
+);
+
+app.use(
+  "/api/settings",
+  generalLimiter,
+  settingsRoutes
 );
 
 

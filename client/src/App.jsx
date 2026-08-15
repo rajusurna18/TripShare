@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation, Outlet, useOutlet } from "react-router-dom";
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "./components/shared/PageTransition";
 
@@ -46,6 +46,12 @@ const AIPackingList = lazy(() => import("./pages/AIPackingList"));
 const AIExpenses = lazy(() => import("./pages/AIExpenses"));
 const SavedTrips = lazy(() => import("./pages/SavedTrips"));
 const Timeline = lazy(() => import("./pages/Timeline"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Terms = lazy(() => import("./pages/legal/Terms"));
+const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const CommunityGuidelines = lazy(() => import("./pages/legal/CommunityGuidelines"));
+const TravelerSafety = lazy(() => import("./pages/legal/TravelerSafety"));
+const AIPolicy = lazy(() => import("./pages/legal/AIPolicy"));
 
 // Fallback Skeleton Loader
 const PageSkeleton = () => (
@@ -79,6 +85,18 @@ const AnimatedLayout = () => {
 
 function App() {
 
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      window.location.href = "/login";
+    };
+
+    window.addEventListener("auth-expired", handleAuthExpired);
+
+    return () => {
+      window.removeEventListener("auth-expired", handleAuthExpired);
+    };
+  }, []);
+
   return (
 
     <>
@@ -110,6 +128,21 @@ function App() {
           path="/contact"
           element={<Contact />}
         />
+
+        {/* SETTINGS & LEGAL */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/community-guidelines" element={<CommunityGuidelines />} />
+        <Route path="/traveler-safety" element={<TravelerSafety />} />
+        <Route path="/ai-policy" element={<AIPolicy />} />
 
         {/* AUTH */}
 

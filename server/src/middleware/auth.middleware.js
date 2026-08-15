@@ -20,6 +20,23 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ message: "User not found, session invalid" });
     }
 
+    if (user.isActive === false) {
+      return res.status(401).json({
+        success: false,
+        error: "Account deactivated. Please login to reactivate."
+      });
+    }
+
+    if (
+      user.sessionValidAfter &&
+      decoded.iat < user.sessionValidAfter
+    ) {
+      return res.status(401).json({
+        success: false,
+        error: "Session expired. Please login again."
+      });
+    }
+
     req.user = decoded;
     next();
   } catch (error) {

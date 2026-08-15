@@ -42,7 +42,7 @@ function Profile() {
   // FETCH PROFILE
   async function fetchProfile() {
     try {
-      const res = await API.get("/api/profile");
+      const res = await API.get("/profile");
       const profile = res.data.user || res.data;
 
       setUser(profile);
@@ -116,7 +116,7 @@ function Profile() {
         formData.append("profileImage", image);
       }
 
-      const res = await API.put("/api/profile", formData);
+      const res = await API.put("/profile", formData);
       const updatedUser = res.data.user || res.data;
 
       setUser(updatedUser);
@@ -148,7 +148,7 @@ function Profile() {
   // FOLLOWERS MODAL OPEN
   const openFollowers = async () => {
     try {
-      const res = await API.get(`/api/profile/followers/${user._id}`);
+      const res = await API.get(`/profile/followers/${user._id}`);
       setModalUsers(res.data);
       setModalTitle("Followers");
       setModalOpen(true);
@@ -160,7 +160,7 @@ function Profile() {
   // FOLLOWING MODAL OPEN
   const openFollowing = async () => {
     try {
-      const res = await API.get(`/api/profile/following/${user._id}`);
+      const res = await API.get(`/profile/following/${user._id}`);
       setModalUsers(res.data);
       setModalTitle("Following");
       setModalOpen(true);

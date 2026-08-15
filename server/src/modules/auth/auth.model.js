@@ -217,6 +217,58 @@ const userSchema =
         default: false,
       },
 
+      isActive: {
+        type: Boolean,
+        default: true,
+      },
+
+      sessionValidAfter: {
+        type: Number,
+      },
+
+      // SETTINGS & PREFERENCES
+
+      blockedUsers: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
+
+      notificationPreferences: {
+        friendRequests: { type: Boolean, default: true },
+        messages: { type: Boolean, default: true },
+        tripUpdates: { type: Boolean, default: true },
+        reviews: { type: Boolean, default: true },
+        importantAccountAlerts: { type: Boolean, default: true },
+        pushNotifications: { type: Boolean, default: false },
+        emailAlerts: { type: Boolean, default: true },
+      },
+
+      privacyPreferences: {
+        privateProfile: { type: Boolean, default: false },
+      },
+
+      aiPreferences: {
+        useTravelPreferences: { type: Boolean, default: true },
+      },
+
+      // CHANGE EMAIL OTP
+
+      newEmailOTP: {
+        type: String, // Stored as a hash
+        default: "",
+      },
+
+      newEmailPending: {
+        type: String,
+        default: "",
+      },
+
+      newEmailExpire: {
+        type: Date,
+      },
+
       // RESET PASSWORD
 
       resetOTP: {
