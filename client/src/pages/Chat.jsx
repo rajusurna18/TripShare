@@ -62,6 +62,7 @@ function Chat() {
 
   // CURRENT USER
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const currentUserId = currentUser?._id || currentUser?.id;
 
   // ======================
   // NO TRIP REDIRECT
@@ -183,11 +184,11 @@ function Chat() {
   // ======================
   const triggerSeenStatus = (msgsList) => {
     msgsList.forEach((msg) => {
-      const isUnread = !msg.seen && (!msg.readBy || !msg.readBy.some(id => id.toString() === currentUser._id.toString()));
-      if (isUnread && msg.sender?._id !== currentUser._id) {
+      const isUnread = !msg.seen && (!msg.readBy || !msg.readBy.some(id => id && currentUserId && id.toString() === currentUserId.toString()));
+      if (isUnread && currentUserId && msg.sender?._id !== currentUserId) {
         socket.emit("message_seen", {
           messageId: msg._id,
-          userId: currentUser._id,
+          userId: currentUserId,
           tripId,
         });
       }
@@ -416,7 +417,7 @@ function Chat() {
 
   const getTargetUserId = () => {
     if (!trip || !trip.members) return null;
-    return trip.members.find(m => m.toString() !== currentUser._id.toString());
+    return trip.members.find(m => m && currentUserId && m.toString() !== currentUserId.toString());
   };
 
   const startVideoCall = async () => {
@@ -451,7 +452,7 @@ function Chat() {
 
       socket.emit("start_video_call", {
         tripId,
-        callerId: currentUser._id,
+        callerId: currentUserId,
         caller: currentUser?.name,
         targetId,
         offer,
@@ -597,7 +598,9 @@ function Chat() {
     }
 
     socket.emit("join_trip", tripId);
-    socket.emit("register_user", currentUser?._id);
+    if (currentUserId) {
+      socket.emit("register_user", currentUserId);
+    }
 
     // Set connection status
     setConnected(socket.connected);
@@ -614,10 +617,10 @@ function Chat() {
         return [...prev, data];
       });
       // Mark as seen
-      if (data.sender?._id !== currentUser._id) {
+      if (currentUserId && data.sender?._id !== currentUserId) {
         socket.emit("message_seen", {
           messageId: data._id,
-          userId: currentUser._id,
+          userId: currentUserId,
           tripId,
         });
       }
@@ -691,7 +694,7 @@ function Chat() {
       setMessages((prev) =>
         prev.map((msg) =>
           msg._id === data.messageId
-            ? { ...msg, seen: true, readBy: [...(msg.readBy || []), data.userId] }
+            ? { ...msg, seen: true, readBy: data.userId ? [...(msg.readBy || []), data.userId] : (msg.readBy || []) }
             : msg
         )
       );
@@ -750,7 +753,7 @@ function Chat() {
     if (!trip || !trip.members) return false;
     // Check if any members (excluding self) is in the onlineUsers array
     return trip.members.some(
-      (mId) => mId.toString() !== currentUser._id.toString() && onlineUsers.includes(mId.toString())
+      (mId) => mId && currentUserId && mId.toString() !== currentUserId.toString() && onlineUsers.includes(mId.toString())
     );
   };
 
@@ -972,7 +975,7 @@ function Chat() {
         ) : (
           <div className="d-flex flex-column gap-3">
             {messages.map((msg) => {
-              const isMe = msg.sender?._id === currentUser._id;
+              const isMe = msg.sender?._id === currentUserId;
               const hasAttachment = !!msg.fileUrl;
               const isImage = hasAttachment && (
                 msg.fileType?.startsWith("image/") ||
@@ -980,7 +983,7 @@ function Chat() {
               );
 
               // Seen indicator calculation (seenBy architecture check)
-              const otherRead = msg.seen || (msg.readBy && msg.readBy.some(id => id.toString() !== currentUser._id.toString()));
+              const otherRead = msg.seen || (msg.readBy && msg.readBy.some(id => id && currentUserId && id.toString() !== currentUserId.toString()));
               const seenLabel = otherRead ? "Seen" : "Sent";
 
               return (
