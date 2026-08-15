@@ -19,6 +19,7 @@ function Register() {
       name: "",
       email: "",
       password: "",
+      termsAccepted: false,
     });
 
   useEffect(() => {
@@ -44,16 +45,22 @@ function Register() {
   }, [navigate]);
 
   const handleChange = (e) => {
+    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: value,
     });
   };
 
   const handleSubmit =
     async (e) => {
       e.preventDefault();
+
+      if (!formData.termsAccepted) {
+        toast.error("You must accept the Terms & Conditions to register.");
+        return;
+      }
+
       try {
         setLoading(true);
         // Clear any old state before starting a fresh registration
@@ -179,6 +186,22 @@ Password must contain:
 
             </small>
 
+          </div>
+
+          {/* TERMS & CONDITIONS */}
+          <div className="mb-4 form-check d-flex align-items-center">
+            <input
+              type="checkbox"
+              name="termsAccepted"
+              className="form-check-input mt-0 me-2"
+              id="termsCheck"
+              checked={formData.termsAccepted}
+              onChange={handleChange}
+              required
+            />
+            <label className="form-check-label text-secondary small" htmlFor="termsCheck">
+              I agree to the TripShare <Link to="/terms" className="text-info text-decoration-none">Terms & Conditions</Link>
+            </label>
           </div>
 
           {/* BUTTON */}

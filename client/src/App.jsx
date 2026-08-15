@@ -9,6 +9,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import GoogleConsent from "./pages/GoogleConsent";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyOTP from "./pages/VerifyOTP";
 import ResetPassword from "./pages/ResetPassword";
@@ -154,6 +155,11 @@ function App() {
         <Route
           path="/register"
           element={<Register />}
+        />
+
+        <Route
+          path="/google-consent"
+          element={<GoogleConsent />}
         />
 
         <Route

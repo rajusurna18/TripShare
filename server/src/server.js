@@ -752,120 +752,42 @@ io.on(
     // =========================
     // VIDEO CALL FEATURE
     // =========================
-
-    // START VIDEO CALL
-
-    socket.on(
-
-      "start_video_call",
-
-      (data) => {
-
-        socket.to(data.tripId)
-
-          .emit(
-
-            "incoming_video_call",
-
-            data
-
-          );
-
-        console.log(
-
-          `${data.caller} started video call`
-
-        );
-
+    
+    const emitToTargetUser = (targetId, event, data) => {
+      if (onlineUsers.has(targetId)) {
+        const socketIds = onlineUsers.get(targetId);
+        socketIds.forEach(id => {
+          io.to(id).emit(event, data);
+        });
       }
+    };
 
-    );
+    // START VIDEO CALL (Rings the other user)
 
-    // END VIDEO CALL
+    socket.on("start_video_call", (data) => {
+      emitToTargetUser(data.targetId, "incoming_video_call", data);
+      console.log(`${data.callerId} started video call with ${data.targetId}`);
+    });
 
-    socket.on(
+    socket.on("end_video_call", (data) => {
+      emitToTargetUser(data.targetId, "video_call_ended", data);
+    });
+    
+    socket.on("video_call_rejected", (data) => {
+      emitToTargetUser(data.targetId, "video_call_rejected", data);
+    });
 
-      "end_video_call",
+    socket.on("webrtc_offer", (data) => {
+      emitToTargetUser(data.targetId, "webrtc_offer", data);
+    });
 
-      (data) => {
+    socket.on("webrtc_answer", (data) => {
+      emitToTargetUser(data.targetId, "webrtc_answer", data);
+    });
 
-        socket.to(data.tripId)
-
-          .emit(
-
-            "video_call_ended"
-
-          );
-
-      }
-
-    );
-
-    // WEBRTC OFFER
-
-    socket.on(
-
-      "webrtc_offer",
-
-      (data) => {
-
-        socket.to(data.tripId)
-
-          .emit(
-
-            "webrtc_offer",
-
-            data
-
-          );
-
-      }
-
-    );
-
-    // WEBRTC ANSWER
-
-    socket.on(
-
-      "webrtc_answer",
-
-      (data) => {
-
-        socket.to(data.tripId)
-
-          .emit(
-
-            "webrtc_answer",
-
-            data
-
-          );
-
-      }
-
-    );
-
-    // ICE CANDIDATES
-
-    socket.on(
-
-      "ice_candidate",
-
-      (data) => {
-
-        socket.to(data.tripId)
-
-          .emit(
-
-            "ice_candidate",
-
-            data
-
-          );
-
-      }
-
-    );
+    socket.on("ice_candidate", (data) => {
+      emitToTargetUser(data.targetId, "ice_candidate", data);
+    });
 
     // DISCONNECT
 
@@ -901,20 +823,20 @@ io.on(
 
         }
 
+        // Notify room of disconnect to handle abandoned calls
+        if (socket.user && socket.user.id) {
+          socket.broadcast.emit("peer_disconnected", { userId: socket.user.id });
+        }
+
         io.emit(
-
           "online_users",
-
           Array.from(
             onlineUsers.keys()
           )
-
         );
-
         console.log(
           "User Disconnected"
         );
-
       }
 
     );

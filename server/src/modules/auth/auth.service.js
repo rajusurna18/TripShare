@@ -9,6 +9,8 @@ import {
   sendOTPEmail,
 } from "../../utils/auth.utils.js";
 
+export const CURRENT_TERMS_VERSION = "1.0";
+
 // REGISTER
 
 export const registerUser =
@@ -70,6 +72,14 @@ export const registerUser =
         10
       );
 
+    if (data.termsAccepted !== true) {
+      throw new Error("You must accept the Terms & Conditions to register.");
+    }
+
+    const termsAccepted = true;
+    const termsVersion = CURRENT_TERMS_VERSION;
+    const termsAcceptedAt = new Date();
+
     const user =
       await User.create({
 
@@ -80,6 +90,9 @@ export const registerUser =
         password:
           hashedPassword,
 
+        termsAccepted,
+        termsVersion,
+        termsAcceptedAt,
       });
 
     const safeUser =
@@ -414,19 +427,96 @@ const processGooglePayload = async (payload) => {
     if (needsSave) {
       await user.save();
     }
-  } else {
-    // Generate secure random password
-    const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).toUpperCase().slice(-4) + "1";
-    const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
-    user = await User.create({
-      name: payload.name || payload.given_name || "Google Traveler",
-      email,
-      password: hashedPassword,
-      profileImage: payload.picture || "",
-      isVerified: true
-    });
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    return {
+      isNewUser: false,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profileImage: user.profileImage,
+      },
+    };
+  } else {
+    // New user -> generate short-lived continuation token
+    const pendingToken = jwt.sign(
+      {
+        email,
+        name: payload.name || payload.given_name || "Google Traveler",
+        picture: payload.picture || "",
+        isPendingRegistration: true
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "15m",
+      }
+    );
+
+    return {
+      isNewUser: true,
+      pendingToken
+    };
   }
+};
+
+export const finalizeGoogleRegistrationService = async (pendingToken, termsAccepted) => {
+  if (termsAccepted !== true) {
+    throw new Error("You must accept the Terms & Conditions to register.");
+  }
+
+  if (!pendingToken) {
+    throw new Error("Missing Google continuation token");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(pendingToken, process.env.JWT_SECRET);
+  } catch (err) {
+    throw new Error("Invalid or expired Google continuation token");
+  }
+
+  if (decoded.isPendingRegistration !== true) {
+    throw new Error("Invalid token purpose");
+  }
+
+  if (!decoded.email) {
+    throw new Error("Token missing required identity claims");
+  }
+
+  const email = decoded.email.trim().toLowerCase();
+  
+  // Replay / Race condition protection
+  let existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new Error("User already exists");
+  }
+
+  // Generate secure random password
+  const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).toUpperCase().slice(-4) + "1";
+  const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+  const user = await User.create({
+    name: decoded.name,
+    email,
+    password: hashedPassword,
+    profileImage: decoded.picture,
+    isVerified: true,
+    termsAccepted: true,
+    termsVersion: CURRENT_TERMS_VERSION,
+    termsAcceptedAt: new Date()
+  });
 
   const token = jwt.sign(
     {
@@ -438,13 +528,6 @@ const processGooglePayload = async (payload) => {
       expiresIn: "7d",
     }
   );
-
-  console.log("=== JWT SIGN (LOGIN) ===");
-  console.log("Issuer location: auth.service.js loginUser");
-  console.log(`JWT_SECRET length: ${process.env.JWT_SECRET ? process.env.JWT_SECRET.length : "UNDEFINED"}`);
-  console.log(`Token start: ${token.substring(0, 20)}`);
-  console.log(`Token end: ${token.substring(token.length - 20)}`);
-  console.log("========================");
 
   return {
     token,

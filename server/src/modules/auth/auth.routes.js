@@ -8,6 +8,7 @@ import {
   resetPassword,
   googleAuthRedirect,
   googleAuthCallback,
+  finalizeGoogleRegistration,
 } from "./auth.controller.js";
 
 const router = express.Router();
@@ -22,6 +23,12 @@ router.get(
 router.get(
   "/google/callback",
   googleAuthCallback
+);
+
+// GOOGLE FINALIZE (CONSENT)
+router.post(
+  "/google/finalize",
+  finalizeGoogleRegistration
 );
 
 // REGISTER

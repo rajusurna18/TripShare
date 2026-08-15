@@ -5,6 +5,7 @@ import {
   verifyOTPService,
   resetPasswordService,
   verifyGoogleOAuthCodeService,
+  finalizeGoogleRegistrationService,
 } from "./auth.service.js";
 
 // REGISTER
@@ -183,10 +184,34 @@ export const googleAuthCallback = async (req, res) => {
     }
     const data = await verifyGoogleOAuthCodeService(code);
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-    const redirectTarget = `${clientUrl}/login?token=${data.token}&user=${encodeURIComponent(JSON.stringify(data.user))}`;
-    res.redirect(redirectTarget);
+    
+    if (data.isNewUser) {
+      const redirectTarget = `${clientUrl}/google-consent?pendingToken=${data.pendingToken}`;
+      res.redirect(redirectTarget);
+    } else {
+      const redirectTarget = `${clientUrl}/login?token=${data.token}&user=${encodeURIComponent(JSON.stringify(data.user))}`;
+      res.redirect(redirectTarget);
+    }
   } catch (err) {
     console.error("Google OAuth Callback exchange error:", err);
     res.status(400).send("Google authentication callback exchange failed: " + err.message);
   }
-};
+};
+
+export const finalizeGoogleRegistration = async (req, res) => {
+  try {
+    const { pendingToken, termsAccepted } = req.body;
+    const data = await finalizeGoogleRegistrationService(pendingToken, termsAccepted);
+    
+    res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+      ...data
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    });
+  }
+};

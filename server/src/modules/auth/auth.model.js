@@ -228,6 +228,20 @@ const userSchema =
 
       // SETTINGS & PREFERENCES
 
+      termsAccepted: {
+        type: Boolean,
+        default: false,
+      },
+
+      termsVersion: {
+        type: String,
+        default: "",
+      },
+
+      termsAcceptedAt: {
+        type: Date,
+      },
+
       blockedUsers: [
         {
           type: mongoose.Schema.Types.ObjectId,

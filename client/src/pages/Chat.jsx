@@ -43,9 +43,15 @@ function Chat() {
 
   // VIDEO CALL (WebRTC)
   const [callActive, setCallActive] = useState(false);
+  const [callStatus, setCallStatus] = useState("");
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+  
   const [localStream, setLocalStream] = useState(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const peerConnectionRef = useRef(null);
+  const pendingCandidatesRef = useRef([]); // ICE candidate buffer
 
   // REFS FOR SCROLL & INPUT
   const messagesEndRef = useRef(null);
@@ -404,36 +410,178 @@ function Chat() {
   // ======================
   // VIDEO CALL (WebRTC)
   // ======================
+  const stunConfig = {
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  };
+
+  const getTargetUserId = () => {
+    if (!trip || !trip.members) return null;
+    return trip.members.find(m => m.toString() !== currentUser._id.toString());
+  };
+
   const startVideoCall = async () => {
+    const targetId = getTargetUserId();
+    if (!targetId) {
+      toast.error("No trip members to call.");
+      return;
+    }
+    if (callActive) return;
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       setLocalStream(stream);
       setCallActive(true);
+      setCallStatus("Calling...");
+      setIsMuted(false);
+      setIsVideoEnabled(true);
+
       setTimeout(() => {
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
       }, 100);
+
+      const pc = new RTCPeerConnection(stunConfig);
+      peerConnectionRef.current = pc;
+
+      setupPeerConnectionListeners(pc, targetId);
+
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
 
       socket.emit("start_video_call", {
         tripId,
+        callerId: currentUser._id,
         caller: currentUser?.name,
+        targetId,
+        offer,
       });
     } catch (err) {
       console.error("Video call error:", err);
-      toast.error("Mic or Camera permissions denied.");
+      toast.error("Camera or microphone permission was denied.");
+      endVideoCall();
     }
   };
 
-  const endVideoCall = () => {
+  const acceptVideoCall = async (data) => {
+    if (callActive) {
+      rejectVideoCall(data.callerId);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setLocalStream(stream);
+      setCallActive(true);
+      setCallStatus("Connected");
+      setIsMuted(false);
+      setIsVideoEnabled(true);
+
+      setTimeout(() => {
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+      }, 100);
+
+      const pc = new RTCPeerConnection(stunConfig);
+      peerConnectionRef.current = pc;
+
+      setupPeerConnectionListeners(pc, data.callerId);
+
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+      // Flush queued candidates
+      while (pendingCandidatesRef.current.length > 0) {
+        const candidate = pendingCandidatesRef.current.shift();
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      socket.emit("webrtc_answer", {
+        tripId,
+        targetId: data.callerId,
+        answer,
+      });
+    } catch (err) {
+      console.error("Accept video call error:", err);
+      toast.error("Camera or microphone permission was denied.");
+      endVideoCall();
+    }
+  };
+
+  const rejectVideoCall = (callerId) => {
+    socket.emit("video_call_rejected", { tripId, targetId: callerId });
+  };
+
+  const setupPeerConnectionListeners = (pc, remoteUserId) => {
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit("ice_candidate", {
+          tripId,
+          targetId: remoteUserId,
+          candidate: event.candidate,
+        });
+      }
+    };
+
+    pc.ontrack = (event) => {
+      if (remoteVideoRef.current && event.streams[0]) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+        setCallStatus("Connected");
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      if (["failed", "disconnected", "closed"].includes(pc.connectionState)) {
+        toast.error("Connection lost");
+        endVideoCall();
+      }
+    };
+  };
+
+  const endVideoCall = (isLocal = true) => {
+    const targetId = getTargetUserId();
+    
     if (localStream) {
       localStream.getTracks().forEach((track) => track.stop());
     }
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+    
+    setLocalStream(null);
     setCallActive(false);
-    socket.emit("end_video_call", { tripId });
+    setCallStatus("");
+    pendingCandidatesRef.current = [];
+
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+
+    if (isLocal && targetId) {
+      socket.emit("end_video_call", { tripId, targetId });
+    }
+  };
+
+  const toggleMute = () => {
+    if (localStream) {
+      const audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsMuted(!audioTrack.enabled);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStream) {
+      const videoTrack = localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoEnabled(videoTrack.enabled);
+      }
+    }
   };
 
   // ======================
@@ -478,6 +626,7 @@ function Chat() {
     const onUserTyping = (data) => setTypingUser(`${data.name} is typing...`);
     const onUserStopTyping = () => setTypingUser("");
     const onIncomingVideoCall = (data) => {
+      if (peerConnectionRef.current) return;
       toast((t) => (
         <span className="d-flex align-items-center gap-2">
           📞 <b>{data.caller}</b> calls video
@@ -485,20 +634,58 @@ function Chat() {
             className="btn btn-xs btn-success text-dark fw-bold ms-2"
             onClick={() => {
               toast.dismiss(t.id);
-              startVideoCall();
+              acceptVideoCall(data);
             }}
           >
             Accept
           </button>
+          <button
+            className="btn btn-xs btn-danger text-light fw-bold ms-1"
+            onClick={() => {
+              toast.dismiss(t.id);
+              rejectVideoCall(data.callerId);
+            }}
+          >
+            Reject
+          </button>
         </span>
-      ), { duration: 8000 });
+      ), { duration: 15000 });
     };
+    
     const onVideoCallEnded = () => {
-      setCallActive(false);
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-      }
       toast("Call ended");
+      endVideoCall(false);
+    };
+
+    const onVideoCallRejected = () => {
+      toast("Call declined by user");
+      endVideoCall(false);
+    };
+
+    const onWebRtcAnswer = async (data) => {
+      if (peerConnectionRef.current) {
+        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+        
+        while (pendingCandidatesRef.current.length > 0) {
+          const candidate = pendingCandidatesRef.current.shift();
+          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+      }
+    };
+
+    const onIceCandidate = async (data) => {
+      if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
+        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+      } else {
+        pendingCandidatesRef.current.push(data.candidate);
+      }
+    };
+
+    const onPeerDisconnected = () => {
+      if (peerConnectionRef.current) {
+        toast("Peer disconnected");
+        endVideoCall(false);
+      }
     };
     const onMessageSeenUpdate = (data) => {
       setMessages((prev) =>
@@ -528,6 +715,10 @@ function Chat() {
     socket.on("user_stop_typing", onUserStopTyping);
     socket.on("incoming_video_call", onIncomingVideoCall);
     socket.on("video_call_ended", onVideoCallEnded);
+    socket.on("video_call_rejected", onVideoCallRejected);
+    socket.on("webrtc_answer", onWebRtcAnswer);
+    socket.on("ice_candidate", onIceCandidate);
+    socket.on("peer_disconnected", onPeerDisconnected);
     socket.on("message_seen_update", onMessageSeenUpdate);
     socket.on("message_reaction_update", onMessageReactionUpdate);
     socket.on("message_deleted", onMessageDeleted);
@@ -541,11 +732,16 @@ function Chat() {
       socket.off("user_stop_typing", onUserStopTyping);
       socket.off("incoming_video_call", onIncomingVideoCall);
       socket.off("video_call_ended", onVideoCallEnded);
+      socket.off("video_call_rejected", onVideoCallRejected);
+      socket.off("webrtc_answer", onWebRtcAnswer);
+      socket.off("ice_candidate", onIceCandidate);
+      socket.off("peer_disconnected", onPeerDisconnected);
       socket.off("message_seen_update", onMessageSeenUpdate);
       socket.off("message_reaction_update", onMessageReactionUpdate);
       socket.off("message_deleted", onMessageDeleted);
       clearTimeout(typingTimeoutRef.current);
       clearInterval(recordTimerRef.current);
+      endVideoCall(false); // Cleanup on unmount
     };
   }, [tripId]);
 
@@ -706,33 +902,52 @@ function Chat() {
       {/* VIDEO STREAMS OVERLAY PANEL */}
       {callActive && (
         <div
-          className="p-3 border-bottom border-secondary d-flex flex-wrap gap-3 justify-content-center bg-black"
+          className="p-3 border-bottom border-secondary d-flex flex-column align-items-center bg-black"
           style={{ background: "#050505", zIndex: 900 }}
         >
-          <div className="position-relative" style={{ width: "240px", height: "160px" }}>
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              playsInline
-              className="w-100 h-100 rounded border border-warning"
-              style={{ objectFit: "cover" }}
-            />
-            <span className="position-absolute bottom-0 start-0 bg-dark text-warning px-2 py-1 rounded-end" style={{ fontSize: "11px" }}>
-              You
-            </span>
-          </div>
+          <div className="d-flex flex-wrap gap-3 justify-content-center mb-3">
+            <div className="position-relative" style={{ width: "240px", height: "160px" }}>
+              <video
+                ref={localVideoRef}
+                autoPlay
+                muted
+                playsInline
+                className="w-100 h-100 rounded border border-warning"
+                style={{ objectFit: "cover" }}
+              />
+              <span className="position-absolute bottom-0 start-0 bg-dark text-warning px-2 py-1 rounded-end" style={{ fontSize: "11px" }}>
+                You {isMuted && "(Muted)"} {!isVideoEnabled && "(No Video)"}
+              </span>
+            </div>
 
-          {/* Fallback mock remote stream since single agent testing */}
-          <div className="position-relative bg-dark rounded border border-secondary" style={{ width: "240px", height: "160px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              playsInline
-              className="w-100 h-100 rounded"
-              style={{ objectFit: "cover" }}
-            />
-            <span className="text-secondary" style={{ fontSize: "12px" }}>Connecting peer stream...</span>
+            <div className="position-relative bg-dark rounded border border-secondary" style={{ width: "240px", height: "160px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <video
+                ref={remoteVideoRef}
+                autoPlay
+                playsInline
+                className="w-100 h-100 rounded"
+                style={{ objectFit: "cover", zIndex: 1 }}
+              />
+              <span className="text-secondary position-absolute" style={{ fontSize: "12px", zIndex: 0 }}>
+                {callStatus || "Connecting..."}
+              </span>
+            </div>
+          </div>
+          
+          {/* WebRTC Controls */}
+          <div className="d-flex gap-2">
+            <button 
+              className={`btn btn-sm ${isMuted ? "btn-danger" : "btn-secondary"}`}
+              onClick={toggleMute}
+            >
+              {isMuted ? "Unmute" : "Mute"}
+            </button>
+            <button 
+              className={`btn btn-sm ${!isVideoEnabled ? "btn-danger" : "btn-secondary"}`}
+              onClick={toggleVideo}
+            >
+              {!isVideoEnabled ? "Turn Video On" : "Turn Video Off"}
+            </button>
           </div>
         </div>
       )}
