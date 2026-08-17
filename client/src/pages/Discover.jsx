@@ -195,7 +195,7 @@ export function Discover() {
 
   return (
     <div className="dashboard-page min-vh-100 text-light py-5" style={{ background: "#111" }}>
-      <div className="container">
+      <div className="container container-responsive">
         
         {/* HEADER BAR */}
         <div className="glass-card p-4 mb-4">
@@ -208,12 +208,12 @@ export function Discover() {
             </div>
             <div className="d-flex gap-2">
               <button
-                className={`btn ${showFilters ? "btn-warning" : "btn-outline-warning"} d-flex align-items-center gap-2`}
+                className={`btn ${showFilters ? "btn-warning" : "btn-outline-warning"} d-flex align-items-center gap-2 btn-responsive`}
                 onClick={() => setShowFilters(!showFilters)}
               >
                 ⚙️ Filters {showFilters ? "Open" : "Closed"}
               </button>
-              <button className="btn btn-outline-secondary" onClick={resetFilters}>
+              <button className="btn btn-outline-secondary btn-responsive" onClick={resetFilters}>
                 Reset
               </button>
             </div>

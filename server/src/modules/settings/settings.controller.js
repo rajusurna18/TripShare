@@ -1,6 +1,7 @@
 import User from "../auth/auth.model.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import transporter from "../../config/mail.js";
 import AIConversation from "../ai/ai.model.js";
 import mongoose from "mongoose";
@@ -80,8 +81,8 @@ export const changePassword = async (req, res) => {
       return res.status(404).json({ success: false, error: "User not found" });
     }
 
-    // Check if user is registered via Google OAuth (no password)
-    if (!user.password || user.password.startsWith("oauth-")) {
+    // Check if user is registered via Google OAuth (no local password expected)
+    if (user.profileImage && user.profileImage.includes("googleusercontent")) {
       return res.status(400).json({ success: false, error: "OAuth users cannot change passwords here" });
     }
 
@@ -90,11 +91,36 @@ export const changePassword = async (req, res) => {
       return res.status(400).json({ success: false, error: "Incorrect current password" });
     }
 
+    // Validate new password complexity
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, error: "Password must be at least 6 characters" });
+    }
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{6,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ success: false, error: "Password must contain at least one uppercase letter and one number" });
+    }
+
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
+    
+    // Invalidate all other sessions
+    user.sessionValidAfter = Math.floor(Date.now() / 1000) + 1;
+    
     await user.save();
 
-    res.status(200).json({ success: true, message: "Password updated successfully" });
+    // Generate a new JWT so the current session remains active seamlessly
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    res.status(200).json({ success: true, message: "Password updated successfully", token });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

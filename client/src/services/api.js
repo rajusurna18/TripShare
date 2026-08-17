@@ -3,7 +3,7 @@ import axios from "axios";
 const API = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000/api",
+    "https://tripshare-mewl.onrender.com/api",
 });
 
 // AUTO TOKEN
@@ -41,7 +41,7 @@ API.interceptors.response.use(
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("activeTripId");
-      
+
       // We dispatch a custom event so the UI can update if it wants to, 
       // but we DO NOT force a hard redirect here anymore.
       window.dispatchEvent(new Event("auth-expired"));

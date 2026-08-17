@@ -150,8 +150,12 @@ function Matches() {
   return (
 
     <div className="dashboard-page min-vh-100 text-light">
-
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
 
         {/* HEADER */}
 
@@ -554,7 +558,7 @@ function Matches() {
                   <div className="d-grid gap-2 mt-4">
                        <button
 
-                           className="btn btn-custom flex-fill"
+                           className="btn btn-custom btn-responsive flex-fill"
 
                             onClick={() =>
 
@@ -572,7 +576,7 @@ function Matches() {
 
                     <button
 
-                      className="btn btn-outline-warning flex-fill"
+                      className="btn btn-outline-warning btn-responsive flex-fill"
 
                       onClick={() =>
 
@@ -593,7 +597,7 @@ function Matches() {
 
                    <button
 
-                className="btn btn-outline-light flex-fill"
+                 className="btn btn-outline-light btn-responsive flex-fill"
 
                onClick={() =>
 

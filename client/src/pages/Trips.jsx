@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { getTrips } from "../services/trip.api";
 
@@ -6,6 +7,7 @@ import TripCard from "../components/shared/TripCard";
 import { useDebounce } from "../hooks/useDebounce";
 
 function Trips() {
+  const navigate = useNavigate();
 
   const [trips, setTrips] =
     useState([]);
@@ -82,8 +84,12 @@ function Trips() {
   return (
 
     <div className="dashboard-page min-vh-100 text-light">
-
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
 
         {/* HEADER */}
 

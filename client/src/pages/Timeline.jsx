@@ -227,7 +227,7 @@ function Timeline() {
 
   return (
     <div className="dashboard-page min-vh-100 text-light py-5" style={{ background: "#0c0c0e" }}>
-      <div className="container" style={{ maxWidth: "1200px" }}>
+      <div className="container container-responsive" style={{ maxWidth: "1200px" }}>
         
         {/* HEADER */}
         <div className="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
@@ -235,14 +235,14 @@ function Timeline() {
             <h1 className="fw-bold m-0 display-5 text-warning">📅 Travel Timeline</h1>
             <p className="text-secondary m-0 mt-1">Chronological summary logs of your trip checkpoints</p>
           </div>
-          <div className="d-flex gap-2">
+          <div className="d-flex gap-2 flex-wrap">
             <button 
-              className="btn btn-outline-warning"
+              className="btn btn-outline-warning btn-responsive"
               onClick={() => setShowLocationForm(!showLocationForm)}
             >
               📍 Log Checkpoint
             </button>
-            <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
+            <button className="btn btn-outline-secondary btn-responsive" onClick={() => navigate(-1)}>
               ◀ Back
             </button>
           </div>

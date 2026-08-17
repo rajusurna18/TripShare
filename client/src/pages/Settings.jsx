@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaUser,
   FaShieldAlt,
@@ -9,7 +9,9 @@ import {
   FaQuestionCircle,
   FaExclamationTriangle,
   FaCheckCircle,
-  FaChevronDown
+  FaChevronDown,
+  FaEye,
+  FaEyeSlash
 } from "react-icons/fa";
 import API from "../services/api";
 import toast from "react-hot-toast";
@@ -61,10 +63,14 @@ const CustomSelect = ({ value, onChange, options, label }) => (
 );
 
 const Settings = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("account");
   const [loading, setLoading] = useState(false);
 
-  const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
+  const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [emailData, setEmailData] = useState({ currentPassword: "", newEmail: "", otp: "" });
   const [emailStage, setEmailStage] = useState(0); // 0: input, 1: verify
   const [blockData, setBlockData] = useState({ targetId: "" });
@@ -133,12 +139,27 @@ const Settings = () => {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{6,}$/;
+    if (!passwordRegex.test(passwordData.newPassword)) {
+      toast.error("Password must be at least 6 characters and contain at least one uppercase letter and one number");
+      return;
+    }
     setLoading(true);
     try {
-      const res = await API.post("/settings/change-password", passwordData);
+      const res = await API.post("/settings/change-password", {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
       if (res.data.success) {
         toast.success("Password updated successfully");
-        setPasswordData({ currentPassword: "", newPassword: "" });
+        setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+        }
       }
     } catch (err) {
       toast.error(err.response?.data?.error || "Failed to update password");
@@ -347,8 +368,13 @@ const Settings = () => {
 
   return (
     <div style={{ background: "#0c0c0e", minHeight: "100vh", color: "white", paddingTop: "80px", paddingBottom: "40px" }}>
-      <div className="container" style={{ maxWidth: "1200px" }}>
-        <h2 className="fw-bold text-warning mb-4">Settings</h2>
+      <div className="container container-responsive" style={{ maxWidth: "1200px" }}>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="fw-bold text-warning mb-0">Settings</h2>
+          <button className="btn btn-outline-secondary btn-sm btn-responsive rounded-3 px-3 d-lg-none" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
         
         <div className="row g-4">
           <div className="col-12 col-lg-3">
@@ -379,23 +405,8 @@ const Settings = () => {
                   <div className="mb-5">
                     <h6 className="fw-bold mb-3">Profile Information</h6>
                     <p className="text-secondary small mb-4">To update your bio, interests, and profile image, visit your profile page.</p>
-                    <Link to="/profile" className="btn btn-outline-warning rounded-pill px-4 py-2 fw-semibold transition-all hover-scale">Go to Profile</Link>
+                    <Link to="/profile" className="btn btn-outline-warning rounded-pill px-4 py-2 fw-semibold transition-all hover-scale btn-responsive">Go to Profile</Link>
                   </div>
-
-                  {!isOAuthUser && (
-                    <div className="mb-5">
-                      <h6 className="fw-bold mb-3">Change Password</h6>
-                      <form onSubmit={handleChangePassword}>
-                        <div className="mb-3 max-w-sm">
-                          <input type="password" placeholder="Current Password" required className="form-control bg-dark text-light border-secondary border-opacity-25 rounded-3 py-2 px-3 focus-ring-warning" name="currentPassword" id="currentPassword" autoComplete="current-password" value={passwordData.currentPassword} onChange={e => setPasswordData(prev => ({...prev, currentPassword: e.target.value}))} />
-                        </div>
-                        <div className="mb-4 max-w-sm">
-                          <input type="password" placeholder="New Password" required className="form-control bg-dark text-light border-secondary border-opacity-25 rounded-3 py-2 px-3 focus-ring-warning" name="newPassword" id="newPassword" autoComplete="new-password" value={passwordData.newPassword} onChange={e => setPasswordData(prev => ({...prev, newPassword: e.target.value}))} />
-                        </div>
-                        <button type="submit" className="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm transition-all hover-scale" disabled={loading}>Update Password</button>
-                      </form>
-                    </div>
-                  )}
 
                   <div className="mb-4">
                     <h6 className="fw-bold mb-3">Change Email</h6>
@@ -407,7 +418,7 @@ const Settings = () => {
                         <div className="mb-4 max-w-sm">
                           <input type="email" placeholder="New Email Address" required className="form-control bg-dark text-light border-secondary border-opacity-25 rounded-3 py-2 px-3 focus-ring-warning" value={emailData.newEmail} onChange={e => setEmailData(prev => ({...prev, newEmail: e.target.value}))} />
                         </div>
-                        <button type="submit" className="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm transition-all hover-scale" disabled={loading}>Request Change</button>
+                        <button type="submit" className="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm transition-all hover-scale btn-responsive" disabled={loading}>Request Change</button>
                       </form>
                     ) : (
                       <form onSubmit={handleVerifyEmail} className="animation-fade-in">
@@ -417,8 +428,8 @@ const Settings = () => {
                             <input type="text" placeholder="Enter 6-digit OTP" required className="form-control bg-dark text-light border-warning border-opacity-50 rounded-3 py-2 px-3 focus-ring-warning text-center fw-bold letter-spacing-2" value={emailData.otp} onChange={e => setEmailData({...emailData, otp: e.target.value})} maxLength="6" />
                           </div>
                           <div className="d-flex gap-2">
-                            <button type="submit" className="btn btn-warning rounded-pill px-4 flex-grow-1 fw-semibold shadow-sm" disabled={loading}>Verify</button>
-                            <button type="button" className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setEmailStage(0)}>Cancel</button>
+                            <button type="submit" className="btn btn-warning rounded-pill px-4 flex-grow-1 fw-semibold shadow-sm btn-responsive" disabled={loading}>Verify</button>
+                            <button type="button" className="btn btn-outline-secondary rounded-pill px-4 btn-responsive" onClick={() => setEmailStage(0)}>Cancel</button>
                           </div>
                         </div>
                       </form>
@@ -432,6 +443,38 @@ const Settings = () => {
                   <h4 className="fw-bold text-warning mb-4 border-bottom border-secondary border-opacity-20 pb-3">Privacy & Security</h4>
                   <p className="text-secondary small mb-4">Manage who can see your profile and activities.</p>
                   
+                  {isOAuthUser ? (
+                    <div className="p-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10 rounded-4 mb-4 max-w-md">
+                      <h6 className="fw-bold mb-3 d-flex align-items-center gap-2"><FaShieldAlt className="text-warning"/>Password & Security</h6>
+                      <p className="text-secondary small mb-0">Your account uses Google Sign-In. Manage your authentication through Google.</p>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10 rounded-4 mb-4 max-w-md">
+                      <h6 className="fw-bold mb-3 d-flex align-items-center gap-2"><FaShieldAlt className="text-warning"/>Password & Security</h6>
+                      <form onSubmit={handleChangePassword}>
+                        <div className="mb-3 position-relative">
+                          <input type={showCurrentPassword ? "text" : "password"} placeholder="Current Password" required className="form-control bg-dark text-light border-secondary border-opacity-25 rounded-3 py-2 px-3 focus-ring-warning" name="currentPassword" id="currentPassword" autoComplete="current-password" value={passwordData.currentPassword} onChange={e => setPasswordData(prev => ({...prev, currentPassword: e.target.value}))} style={{ paddingRight: "40px" }} />
+                          <button type="button" className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-secondary text-decoration-none border-0 px-3" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                            {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+                          </button>
+                        </div>
+                        <div className="mb-3 position-relative">
+                          <input type={showNewPassword ? "text" : "password"} placeholder="New Password" required className="form-control bg-dark text-light border-secondary border-opacity-25 rounded-3 py-2 px-3 focus-ring-warning" name="newPassword" id="newPassword" autoComplete="new-password" value={passwordData.newPassword} onChange={e => setPasswordData(prev => ({...prev, newPassword: e.target.value}))} style={{ paddingRight: "40px" }} />
+                          <button type="button" className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-secondary text-decoration-none border-0 px-3" onClick={() => setShowNewPassword(!showNewPassword)}>
+                            {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                          </button>
+                        </div>
+                        <div className="mb-4 position-relative">
+                          <input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm New Password" required className="form-control bg-dark text-light border-secondary border-opacity-25 rounded-3 py-2 px-3 focus-ring-warning" name="confirmNewPassword" id="confirmNewPassword" autoComplete="new-password" value={passwordData.confirmNewPassword} onChange={e => setPasswordData(prev => ({...prev, confirmNewPassword: e.target.value}))} style={{ paddingRight: "40px" }} />
+                          <button type="button" className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-secondary text-decoration-none border-0 px-3" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                          </button>
+                        </div>
+                        <button type="submit" className="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm transition-all hover-scale btn-responsive" disabled={loading}>Update Password</button>
+                      </form>
+                    </div>
+                  )}
+
                   <div className="p-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10 rounded-4 mb-4 max-w-md">
                     <ToggleSwitch 
                       id="privateProfile"
@@ -447,7 +490,7 @@ const Settings = () => {
                   
                   <div className="p-4 bg-dark bg-opacity-50 border border-secondary border-opacity-10 rounded-4 mt-4 max-w-md">
                     <h6 className="fw-bold mb-3">Session Management</h6>
-                    <button onClick={handleLogoutAllDevices} disabled={loading} className="btn btn-outline-danger rounded-pill px-4 d-flex align-items-center gap-2">
+                    <button onClick={handleLogoutAllDevices} disabled={loading} className="btn btn-outline-danger rounded-pill px-4 d-flex align-items-center gap-2 btn-responsive">
                       Logout from all devices
                     </button>
                     <p className="text-secondary small mt-3 mb-0">This will instantly sign you out of all active sessions, including this one.</p>
@@ -464,7 +507,7 @@ const Settings = () => {
                     <p className="text-secondary small mb-3">Blocked users cannot view your profile or message you.</p>
                     <form onSubmit={handleBlockUser} className="d-flex flex-column flex-sm-row gap-2 max-w-sm">
                       <input type="text" placeholder="Paste User ID here" required className="form-control bg-dark text-light border-secondary border-opacity-25 rounded-3 py-2 px-3 focus-ring-danger" value={blockData.targetId} onChange={e => setBlockData({ targetId: e.target.value})} />
-                      <button type="submit" className="btn btn-danger rounded-3 px-4 fw-semibold transition-all hover-scale" disabled={loading}>Block</button>
+                      <button type="submit" className="btn btn-danger rounded-3 px-4 fw-semibold transition-all hover-scale btn-responsive" disabled={loading}>Block</button>
                     </form>
                   </div>
 
@@ -486,7 +529,7 @@ const Settings = () => {
                               )}
                               <span className="fw-semibold">{user.name}</span>
                             </div>
-                            <button className="btn btn-sm btn-outline-warning rounded-pill px-3 transition-all hover-scale" onClick={() => handleUnblockUser(user._id)}>Unblock</button>
+                            <button className="btn btn-sm btn-outline-warning rounded-pill px-3 transition-all hover-scale btn-responsive" onClick={() => handleUnblockUser(user._id)}>Unblock</button>
                           </div>
                         ))}
                       </div>
@@ -548,7 +591,7 @@ const Settings = () => {
                   <div className="p-4 bg-danger bg-opacity-10 border border-danger border-opacity-25 rounded-4 max-w-md">
                     <h6 className="fw-bold text-danger mb-3">Clear AI History</h6>
                     <p className="text-danger text-opacity-75 small mb-4">Permanently deletes all your AI chat history. This action cannot be undone.</p>
-                    <button className="btn btn-outline-danger rounded-pill px-4 fw-semibold transition-all hover-scale" onClick={handleClearAIHistory} disabled={loading}>
+                    <button className="btn btn-outline-danger rounded-pill px-4 fw-semibold transition-all hover-scale btn-responsive" onClick={handleClearAIHistory} disabled={loading}>
                       Delete Conversation History
                     </button>
                   </div>
@@ -636,7 +679,7 @@ const Settings = () => {
                     <div className="d-flex flex-column gap-2">
                       <h6 className="fw-bold text-light mb-1">Deactivate Account</h6>
                       <p className="text-secondary small mb-3">Temporarily hide your profile and pause notifications. You can reactivate at any time by logging back in.</p>
-                      <button onClick={handleDeactivateAccount} disabled={loading} className="btn btn-outline-warning rounded-pill px-4 align-self-start">
+                      <button onClick={handleDeactivateAccount} disabled={loading} className="btn btn-outline-warning rounded-pill px-4 align-self-start btn-responsive">
                         Deactivate
                       </button>
                     </div>
@@ -646,7 +689,7 @@ const Settings = () => {
                     <div className="d-flex flex-column gap-2">
                       <h6 className="fw-bold text-danger mb-1">Delete Account</h6>
                       <p className="text-danger text-opacity-75 small mb-3">Permanently delete your account and all associated data including trips, reviews, and messages. This cannot be undone.</p>
-                      <button onClick={handleDeleteAccount} disabled={loading} className="btn btn-danger rounded-pill px-4 align-self-start opacity-75">
+                      <button onClick={handleDeleteAccount} disabled={loading} className="btn btn-danger rounded-pill px-4 align-self-start opacity-75 btn-responsive">
                         Delete Account
                       </button>
                     </div>

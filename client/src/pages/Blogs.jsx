@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
 import BlogCard from "../components/blog/BlogCard";
 import BlogSkeleton from "../components/blog/BlogSkeleton";
@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useDebounce } from "../hooks/useDebounce";
 
 function Blogs() {
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [trending, setTrending] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -112,7 +113,12 @@ function Blogs() {
   const currentUserId = currentUser?._id || currentUser?.id;
 
   return (
-    <div className="container py-5 mt-4">
+    <div className="container container-responsive py-5 mt-4">
+      <div className="mb-4">
+        <button className="btn btn-outline-secondary btn-sm btn-responsive rounded-3 px-3 d-lg-none" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+      </div>
       {/* Header Banner */}
       <div 
         className="glass-card p-5 mb-5 text-center text-md-start d-flex flex-column flex-md-row justify-content-between align-items-center gap-4 position-relative overflow-hidden"
@@ -126,7 +132,7 @@ function Blogs() {
           </p>
         </div>
         {currentUserId && (
-          <Link to="/create-blog" className="btn btn-warning px-4 py-2.5 fw-bold shadow-sm" style={{ borderRadius: "10px" }}>
+          <Link to="/create-blog" className="btn btn-warning px-4 py-2.5 fw-bold shadow-sm btn-responsive" style={{ borderRadius: "10px" }}>
             ✍️ Write a Story
           </Link>
         )}
@@ -159,10 +165,10 @@ function Blogs() {
                 />
               </div>
               <div className="col-12 col-md-3 d-flex gap-2">
-                <button type="submit" className="btn btn-warning flex-grow-1 fw-bold">
+                <button type="submit" className="btn btn-warning flex-grow-1 fw-bold btn-responsive">
                   Search
                 </button>
-                <button type="button" className="btn btn-outline-secondary" onClick={handleResetFilters}>
+                <button type="button" className="btn btn-outline-secondary btn-responsive" onClick={handleResetFilters}>
                   Clear
                 </button>
               </div>
@@ -215,7 +221,7 @@ function Blogs() {
               {totalPages > 1 && (
                 <div className="d-flex justify-content-center gap-2 mt-5">
                   <button
-                    className="btn btn-outline-secondary"
+                    className="btn btn-outline-secondary btn-responsive"
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
                   >
@@ -231,7 +237,7 @@ function Blogs() {
                     </button>
                   ))}
                   <button
-                    className="btn btn-outline-secondary"
+                    className="btn btn-outline-secondary btn-responsive"
                     onClick={() => setPage(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
                   >

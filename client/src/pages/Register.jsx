@@ -33,6 +33,7 @@ function Register() {
         localStorage.removeItem("user");
         localStorage.setItem("token", token);
         localStorage.setItem("user", userStr);
+        window.dispatchEvent(new Event("auth-success"));
         toast.success("Registration & Login successful with Google 🚀");
         navigate("/dashboard");
       } catch (err) {

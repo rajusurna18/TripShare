@@ -171,7 +171,7 @@ function AIPackingList() {
 
   return (
     <div className="dashboard-page min-vh-100 text-light py-5">
-      <div className="container" style={{ maxWidth: "1200px" }}>
+      <div className="container container-responsive" style={{ maxWidth: "1200px" }}>
         
         {/* HEADER SECTION */}
         <div className="d-flex justify-content-between align-items-center mb-5 no-print">
@@ -179,7 +179,7 @@ function AIPackingList() {
             <h1 className="fw-bold display-6">🎒 AI Packing Planner</h1>
             <p className="text-secondary mb-0">Customized packing checkers fueled by Gemini AI</p>
           </div>
-          <button className="btn btn-outline-secondary btn-sm rounded-3 px-3" onClick={() => navigate(-1)}>
+          <button className="btn btn-outline-secondary btn-sm btn-responsive rounded-3 px-3" onClick={() => navigate(-1)}>
             ◀ Back to Trip
           </button>
         </div>

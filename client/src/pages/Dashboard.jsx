@@ -242,8 +242,7 @@ function Dashboard() {
   return (
 
     <div className="dashboard-page min-vh-100 text-light">
-
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
 
         {/* HERO */}
 
@@ -308,7 +307,7 @@ function Dashboard() {
 
               <Link
                 to="/create-trip"
-                className="btn btn-custom"
+                className="btn btn-custom btn-responsive"
               >
 
                 Create Your First Trip
@@ -391,7 +390,7 @@ function Dashboard() {
 
                       <Link
                         to="/trips"
-                        className="btn btn-custom"
+                        className="btn btn-custom btn-responsive mt-3 mt-sm-0"
                       >
 
                         Open Trips →

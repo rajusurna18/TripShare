@@ -186,7 +186,7 @@ function BlogDetails() {
   const blogOwnerId = blog.author?._id || blog.author;
 
   return (
-    <div className="container py-5 mt-4 position-relative" style={{ maxWidth: "860px" }}>
+    <div className="container container-responsive py-5 mt-4 position-relative" style={{ maxWidth: "860px" }}>
       {/* Sticky Progress Bar */}
       <ReadingProgress />
 

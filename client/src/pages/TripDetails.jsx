@@ -511,7 +511,13 @@ function TripDetails() {
   const isMember = trip.members && trip.members.some(m => (m._id === currentUser._id || m === currentUser._id));
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="container-responsive mx-auto">
+      
+      <div style={{ marginBottom: "20px" }}>
+        <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+      </div>
       
       {trip.archived && (
         <div className="alert alert-warning mb-4 rounded-3 d-flex align-items-center gap-2 border-0 bg-warning bg-opacity-10 text-warning px-4 py-3">
@@ -593,19 +599,19 @@ function TripDetails() {
 
                 {isOwner && (
                   <>
-                    <button className="btn btn-outline-info btn-sm px-3" onClick={handleArchiveToggle}>
+                    <button className="btn btn-outline-info btn-sm px-3 btn-responsive mb-2 mb-md-0" onClick={handleArchiveToggle}>
                       {trip.archived ? "📂 Unarchive" : "📦 Archive"}
                     </button>
-                    <button className="btn btn-warning btn-sm px-3" onClick={openEditModal}>
+                    <button className="btn btn-warning btn-sm px-3 btn-responsive mb-2 mb-md-0" onClick={openEditModal}>
                       ✏️ Edit
                     </button>
-                    <button className="btn btn-danger btn-sm px-3" onClick={() => setShowDeleteModal(true)}>
+                    <button className="btn btn-danger btn-sm px-3 btn-responsive mb-2 mb-md-0" onClick={() => setShowDeleteModal(true)}>
                       🗑️ Delete
                     </button>
                   </>
                 )}
                 {isMember && !isOwner && (
-                  <button className="btn btn-outline-danger btn-sm px-3" onClick={() => setShowLeaveModal(true)}>
+                  <button className="btn btn-outline-danger btn-sm px-3 btn-responsive mb-2 mb-md-0" onClick={() => setShowLeaveModal(true)}>
                     🚪 Leave Trip
                   </button>
                 )}

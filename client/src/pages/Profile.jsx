@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 // COMPONENTS
@@ -9,6 +10,7 @@ import ProfileForm from "../components/profile/ProfileForm";
 import FollowModal from "../components/profile/FollowModal";
 
 function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [bio, setBio] = useState("");
   const [interests, setInterests] = useState("");
@@ -183,7 +185,12 @@ function Profile() {
 
   return (
     <div className="dashboard-page min-vh-100 text-light">
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
         {/* HERO */}
         <ProfileHero
           user={user}

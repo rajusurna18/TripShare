@@ -39,6 +39,7 @@ function GoogleConsent() {
 
       if (res.data.success && res.data.token) {
         localStorage.setItem("token", res.data.token);
+        window.dispatchEvent(new Event("auth-success"));
         toast.success("Account created successfully!");
         navigate("/dashboard");
       }

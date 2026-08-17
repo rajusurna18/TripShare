@@ -115,7 +115,7 @@ function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, o
         <div className="d-flex flex-column gap-3 mb-4">
           {/* WHATSAPP */}
           <button
-            className="btn btn-success d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill text-white"
+            className="btn btn-success d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill text-white btn-responsive"
             onClick={handleWhatsAppShare}
             style={{
               background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
@@ -129,7 +129,7 @@ function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, o
 
           {/* INSTAGRAM */}
           <button
-            className="btn d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill text-white"
+            className="btn d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill text-white btn-responsive"
             onClick={handleInstagramShare}
             style={{
               background: "linear-gradient(135deg, #F09433 0%, #E6683C 25%, #DC2743 50%, #CC2366 75%, #BC1888 100%)",
@@ -143,7 +143,7 @@ function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, o
 
           {/* COPY LINK */}
           <button
-            className="btn btn-outline-light d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill"
+            className="btn btn-outline-light d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill btn-responsive"
             onClick={handleCopyLink}
             style={{
               background: "rgba(255, 255, 255, 0.03)",

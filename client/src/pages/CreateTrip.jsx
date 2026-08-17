@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import API from "../services/api";
 
 import toast from "react-hot-toast";
 
 function CreateTrip() {
+  const navigate = useNavigate();
 
   const [loading, setLoading] =
     useState(false);
@@ -149,8 +151,12 @@ function CreateTrip() {
   return (
 
     <div className="dashboard-page">
-
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
 
         <div className="create-trip-box">
 
@@ -611,7 +617,7 @@ function CreateTrip() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn btn-custom w-100"
+                  className="btn btn-custom btn-responsive w-100"
                 >
 
                   {

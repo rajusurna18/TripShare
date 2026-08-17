@@ -6,6 +6,7 @@ import {
 import {
   useParams,
   Link,
+  useNavigate,
 } from "react-router-dom";
 
 import {
@@ -39,6 +40,7 @@ L.Icon.Default.mergeOptions({
 function LiveTracking() {
 
   const { tripId } = useParams();
+  const navigate = useNavigate();
 
   const [users, setUsers] =
     useState([]);
@@ -149,6 +151,7 @@ function LiveTracking() {
   return (
 
     <div
+      className="container-responsive mx-auto"
       style={{
         background: "#111",
         minHeight: "100vh",
@@ -156,6 +159,11 @@ function LiveTracking() {
         padding: "20px",
       }}
     >
+      <div style={{ marginBottom: "20px" }}>
+        <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+      </div>
 
       <h1 className="mb-4">
         🌍 Trip Live Tracking
@@ -256,14 +264,14 @@ function LiveTracking() {
 
         <Link
           to={`/chat/${tripId}`}
-          className="btn btn-warning"
+          className="btn btn-warning btn-responsive"
         >
           Open Chat
         </Link>
 
         <Link
           to={`/expenses/${tripId}`}
-          className="btn btn-outline-warning"
+          className="btn btn-outline-warning btn-responsive"
         >
           Expenses
         </Link>

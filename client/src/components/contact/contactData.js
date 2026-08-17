@@ -6,7 +6,7 @@ export const PANELS = [
     icon: LifeBuoy,
     title: "General Support",
     desc: "For account help, technical support, and general questions. We're here to help.",
-    email: "support@tripshare.com",
+    email: "tripshareatoz@gmail.com",
     response: "Within 24 hours",
   },
   {
@@ -75,7 +75,7 @@ export const FAQS = [
   },
   {
     question: "How do I contact TripShare support?",
-    answer: "You can use the luxury support form above, or directly email us at support@tripshare.com. Our support agents operate globally and typically respond within 24 hours.",
+    answer: "You can use the luxury support form above, or directly email us at tripshareatoz@gmail.com. Our support agents operate globally and typically respond within 24 hours.",
   },
 ];
 

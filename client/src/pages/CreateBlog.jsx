@@ -194,8 +194,13 @@ function CreateBlog() {
   };
 
   return (
-    <div className="container py-5 mt-4" style={{ maxWidth: "800px" }}>
-      <h2 className="text-warning fw-bold mb-4">Create Travel Story 📝</h2>
+    <div className="container container-responsive py-5 mt-4" style={{ maxWidth: "800px" }}>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="text-warning fw-bold mb-0">Create Travel Story 📝</h2>
+        <button className="btn btn-outline-secondary btn-sm btn-responsive rounded-3 px-3 d-lg-none" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="d-flex flex-column gap-4">
         
@@ -577,7 +582,7 @@ function CreateBlog() {
         <div className="d-flex gap-3 justify-content-end mb-5">
           <button
             type="button"
-            className="btn btn-outline-secondary px-4 py-2"
+            className="btn btn-outline-secondary px-4 py-2 btn-responsive"
             disabled={loading}
             onClick={() => navigate("/blogs")}
           >
@@ -585,7 +590,7 @@ function CreateBlog() {
           </button>
           <button
             type="submit"
-            className="btn btn-warning px-5 py-2 fw-bold d-flex align-items-center gap-2"
+            className="btn btn-warning px-5 py-2 fw-bold d-flex align-items-center gap-2 btn-responsive"
             disabled={loading}
           >
             {loading && <span className="spinner-border spinner-border-sm" role="status"></span>}

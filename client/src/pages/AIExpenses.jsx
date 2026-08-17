@@ -44,7 +44,7 @@ function AIExpenses() {
 
   return (
     <div className="dashboard-page min-vh-100 text-light py-5">
-      <div className="container" style={{ maxWidth: "1200px" }}>
+      <div className="container container-responsive" style={{ maxWidth: "1200px" }}>
         
         {/* HEADER */}
         <div className="d-flex justify-content-between align-items-center mb-5">
@@ -52,7 +52,7 @@ function AIExpenses() {
             <h1 className="fw-bold display-6">🤖 AI Expense Advisor</h1>
             <p className="text-secondary mb-0">Smart settlements, anomaly scanning, and budget tips</p>
           </div>
-          <button className="btn btn-outline-secondary btn-sm rounded-3 px-3" onClick={() => navigate(-1)}>
+          <button className="btn btn-outline-secondary btn-sm btn-responsive rounded-3 px-3" onClick={() => navigate(-1)}>
             <FaArrowLeft className="me-2" /> Back
           </button>
         </div>

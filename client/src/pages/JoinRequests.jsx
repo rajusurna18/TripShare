@@ -7,9 +7,8 @@ import {
 } from "react";
 
 import {
-
   useParams,
-
+  useNavigate,
 } from "react-router-dom";
 
 import API
@@ -20,8 +19,8 @@ from "../components/trip/JoinRequestCard";
 
 function JoinRequests() {
 
-  const { tripId } =
-    useParams();
+  const { tripId } = useParams();
+  const navigate = useNavigate();
 
   const [requests, setRequests] =
     useState([]);
@@ -133,8 +132,12 @@ function JoinRequests() {
   return (
 
     <div className="dashboard-page min-vh-100 text-light">
-
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
 
         <div className="glass-card p-4 p-md-5 mb-5">
 

@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Avatar from "../components/shared/Avatar";
 import SaveButton from "../components/shared/SaveButton";
 import ShareButton from "../components/shared/ShareButton";
 import { getSavedTrips } from "../services/tripSave.api";
 
 function SavedTrips() {
+  const navigate = useNavigate();
   const [saves, setSaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -85,7 +86,12 @@ function SavedTrips() {
 
   return (
     <div className="dashboard-page min-vh-100 text-light py-5">
-      <div className="container">
+      <div className="container container-responsive">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
         {/* HEADER */}
         <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-5">
           <div>
@@ -135,7 +141,7 @@ function SavedTrips() {
             </div>
             <div className="col-12 col-md-6 col-lg-4 d-flex gap-2">
               <button
-                className="btn btn-outline-secondary w-100 rounded-pill"
+                className="btn btn-outline-secondary w-100 btn-responsive rounded-pill"
                 onClick={() => {
                   setSearch("");
                   setBudgetMax("");

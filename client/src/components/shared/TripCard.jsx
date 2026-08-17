@@ -183,7 +183,7 @@ const sendJoinRequest =
           {/* CHAT */}
            <Link
              to={`/chat/${trip?._id}`}
-             className="btn btn-custom"
+             className="btn btn-custom btn-responsive"
              onClick={() =>
              localStorage.setItem(
             "activeTripId",
@@ -198,7 +198,7 @@ const sendJoinRequest =
 
           <Link
             to={`/expenses/${trip?._id}`}
-            className="btn btn-warning"
+            className="btn btn-warning btn-responsive"
           >
 
             💸 Expenses
@@ -207,7 +207,7 @@ const sendJoinRequest =
 
           <Link
           to={`/live/${trip._id}`}
-          className="btn btn-success"
+          className="btn btn-success btn-responsive"
            >
 
            Live Tracking
@@ -221,7 +221,7 @@ const sendJoinRequest =
 
            <button
 
-             className="btn btn-outline-light"
+             className="btn btn-outline-light btn-responsive"
 
              onClick={
             sendJoinRequest
@@ -241,7 +241,7 @@ const sendJoinRequest =
 
          <Link
          to="/matches"
-         className="btn btn-outline-warning"
+         className="btn btn-outline-warning btn-responsive"
          onClick={() =>
           localStorage.setItem(
          "activeTripId",

@@ -137,7 +137,12 @@ function PublicProfile() {
 
   return (
     <div className="dashboard-page min-vh-100 text-light py-5" style={{ background: "#111" }}>
-      <div className="container">
+      <div className="container container-responsive">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
         {/* PROFILE HEADER HERO CARD */}
         <div className="glass-card p-4 p-md-5 mb-4 text-center position-relative overflow-hidden">
           {/* COVER DECORATION */}
@@ -171,19 +176,19 @@ function PublicProfile() {
           {/* SOCIAL ACTIONS BUTTONS */}
           <div className="d-flex justify-content-center gap-3 mt-4 flex-wrap">
             {isSelf ? (
-              <Link to="/profile" className="btn btn-warning px-4 py-2 fw-semibold">
+              <Link to="/profile" className="btn btn-warning px-4 py-2 fw-semibold btn-responsive">
                 👤 Edit Profile
               </Link>
             ) : (
               <>
                 <button
-                  className={`btn ${isFollowing ? "btn-outline-warning" : "btn-warning"} px-4 py-2 fw-semibold`}
+                  className={`btn ${isFollowing ? "btn-outline-warning" : "btn-warning"} px-4 py-2 fw-semibold btn-responsive`}
                   onClick={toggleFollow}
                 >
                   {isFollowing ? "👤 Unfollow" : "👤 Follow"}
                 </button>
                 <button
-                  className="btn px-4 py-2 fw-semibold text-white border"
+                  className="btn px-4 py-2 fw-semibold text-white border btn-responsive"
                   style={{ background: "rgba(255, 183, 3, 0.15)", borderColor: "rgba(255,183,3,0.3)" }}
                   onClick={sendFriendRequest}
                 >
@@ -192,7 +197,7 @@ function PublicProfile() {
               </>
             )}
             <button
-              className="btn btn-outline-light px-4 py-2"
+              className="btn btn-outline-light px-4 py-2 btn-responsive"
               onClick={() => navigate(`/reviews/${userId}`)}
             >
               ⭐ View All Reviews

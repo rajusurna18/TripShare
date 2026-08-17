@@ -300,8 +300,12 @@ function Expenses() {
     <div
       className="dashboard-page min-vh-100 text-light"
     >
-
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
 
         {/* PAGE TITLE */}
 
@@ -326,7 +330,7 @@ function Expenses() {
           </div>
 
           <button
-            className="btn btn-outline-warning rounded-4 px-4 py-2 fw-bold shadow-sm"
+            className="btn btn-outline-warning rounded-4 px-4 py-2 fw-bold shadow-sm btn-responsive mt-3 mt-md-0"
             onClick={() => navigate(`/expense-ai/${tripId}`)}
           >
             🤖 Run AI Settlement Insights

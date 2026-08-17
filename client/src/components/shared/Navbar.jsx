@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import socket from "../../socket";
 import Avatar from "./Avatar";
 
@@ -11,7 +11,8 @@ import {
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { 
   Menu, X, Home, Compass, FileText, Info, Sparkles, Phone, 
-  Bell, User, LogIn, LogOut, Bookmark, Settings as SettingsIcon 
+  Bell, User, LogIn, LogOut, Bookmark, Settings as SettingsIcon,
+  ChevronRight, ArrowLeft
 } from "lucide-react";
 
 import API from "../../services/api";
@@ -22,15 +23,18 @@ function Navbar() {
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   
   const dropdownRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
 
   // CLOSE MOBILE MENU ON ROUTE CHANGE
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsDropdownOpen(false);
+    setIsAccountMenuOpen(false);
     document.body.style.overflow = '';
   }, [location]);
 
@@ -40,6 +44,7 @@ function Navbar() {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      setIsAccountMenuOpen(false); // Reset account submenu when mobile menu closes
     }
     return () => {
       document.body.style.overflow = '';
@@ -107,10 +112,17 @@ function Navbar() {
       setNotifications([]);
     };
 
+    const handleAuthSuccess = () => {
+      fetchProfile();
+      fetchNotifications();
+    };
+
     window.addEventListener("auth-expired", handleAuthExpired);
+    window.addEventListener("auth-success", handleAuthSuccess);
     return () => {
       socket.off("new_notification");
       window.removeEventListener("auth-expired", handleAuthExpired);
+      window.removeEventListener("auth-success", handleAuthSuccess);
     };
   }, []);
 
@@ -118,7 +130,9 @@ function Navbar() {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("activeTripId");
-    window.location.href = "/login";
+    setUser(null);
+    setNotifications([]);
+    navigate("/login");
   };
 
   // UNREAD COUNT
@@ -391,110 +405,219 @@ function Navbar() {
             animate="visible"
             exit="exit"
           >
-            <div className="container-fluid px-4 py-3 d-flex flex-column h-100">
-              <ul className="list-unstyled m-0 d-flex flex-column gap-1 flex-grow-1">
-                
-                {/* PRIMARY NAV */}
-                {navLinks.map((link) => (
-                  <motion.li key={link.name} variants={itemVariants}>
-                    <Link
-                      className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none transition-all duration-200 active:scale-95"
-                      style={{
-                        backgroundColor: location.pathname === link.path ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
-                        color: location.pathname === link.path ? '#ffc107' : 'rgba(255,255,255,0.85)',
-                        fontWeight: location.pathname === link.path ? '600' : '400'
-                      }}
-                      to={link.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
-                        <link.Icon size={20} strokeWidth={location.pathname === link.path ? 2.5 : 2} />
-                      </div>
-                      <span className="fs-5">{link.name}</span>
-                    </Link>
-                  </motion.li>
-                ))}
-
-                {/* DIVIDER 1 */}
-                <motion.li variants={itemVariants}>
-                  <hr className="border-secondary opacity-25 my-2 mx-2" />
-                </motion.li>
-
-                {/* NOTIFICATIONS */}
-                <motion.li variants={itemVariants}>
-                  <Link
-                    className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
-                    style={{
-                      backgroundColor: location.pathname === "/notifications" ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
-                      color: location.pathname === "/notifications" ? '#ffc107' : 'rgba(255,255,255,0.85)',
-                      fontWeight: location.pathname === "/notifications" ? '600' : '400'
-                    }}
-                    to="/notifications"
-                    onClick={() => setIsMobileMenuOpen(false)}
+            <div className="container-fluid px-4 py-3 d-flex flex-column h-100 overflow-hidden position-relative">
+              <AnimatePresence mode="wait">
+                {!isAccountMenuOpen ? (
+                  <motion.ul 
+                    key="main-menu"
+                    initial={{ x: shouldReduceMotion ? 0 : -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: shouldReduceMotion ? 0 : -20, opacity: 0 }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                    className="list-unstyled m-0 d-flex flex-column gap-1 flex-grow-1"
                   >
-                     <div className="position-relative d-flex align-items-center justify-content-center" style={{ width: '24px' }}>
-                        <Bell size={20} strokeWidth={location.pathname === "/notifications" ? 2.5 : 2} />
-                        {unreadCount > 0 && (
-                          <span className="position-absolute bg-danger text-white rounded-pill d-flex align-items-center justify-content-center fw-bold" style={{ top: '-4px', right: '-8px', minWidth: '16px', height: '16px', fontSize: '10px', border: '2px solid rgba(10, 10, 15, 0.98)', padding: '0 4px' }}>
-                            {unreadCount > 99 ? '99+' : unreadCount}
-                          </span>
-                        )}
-                     </div>
-                     <span className="fs-5">Notifications</span>
-                  </Link>
-                </motion.li>
+                    {/* PRIMARY NAV */}
+                    {navLinks.map((link) => (
+                      <motion.li key={link.name} variants={itemVariants}>
+                        <Link
+                          className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
+                          style={{
+                            backgroundColor: location.pathname === link.path ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
+                            color: location.pathname === link.path ? '#ffc107' : 'rgba(255,255,255,0.85)',
+                            fontWeight: location.pathname === link.path ? '600' : '400'
+                          }}
+                          to={link.path}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                            <link.Icon size={20} strokeWidth={location.pathname === link.path ? 2.5 : 2} />
+                          </div>
+                          <span className="fs-5">{link.name}</span>
+                        </Link>
+                      </motion.li>
+                    ))}
 
-                {/* DIVIDER 2 */}
-                <motion.li variants={itemVariants}>
-                  <hr className="border-secondary opacity-25 my-2 mx-2" />
-                </motion.li>
+                    {/* DIVIDER 1 */}
+                    <motion.li variants={itemVariants}>
+                      <hr className="border-secondary opacity-25 my-2 mx-2" />
+                    </motion.li>
 
-                {/* PROFILE / LOGIN */}
-                {user ? (
-                  <motion.li variants={itemVariants} className="mt-auto pt-2 pb-4">
-                    <Link
-                      className="d-flex align-items-center justify-content-between p-3 rounded-3 text-decoration-none transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
-                      style={{
-                        backgroundColor: location.pathname === "/profile" ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
-                        color: location.pathname === "/profile" ? '#ffc107' : 'rgba(255,255,255,0.85)',
-                        fontWeight: location.pathname === "/profile" ? '600' : '400'
-                      }}
-                      to="/profile"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <div className="d-flex align-items-center gap-3">
-                        <div className="d-flex align-items-center justify-content-center" style={{ width: '32px' }}>
-                          <Avatar
-                            src={user?.profileImage}
-                            alt="profile"
-                            size={32}
-                            style={{ border: location.pathname === "/profile" ? '2px solid #ffc107' : '1px solid rgba(255,255,255,0.2)' }}
-                          />
-                        </div>
-                        <span className="fs-5">{user?.name || "Profile"}</span>
-                      </div>
-                    </Link>
-                  </motion.li>
+                    {/* NOTIFICATIONS */}
+                    <motion.li variants={itemVariants}>
+                      <Link
+                        className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
+                        style={{
+                          backgroundColor: location.pathname === "/notifications" ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
+                          color: location.pathname === "/notifications" ? '#ffc107' : 'rgba(255,255,255,0.85)',
+                          fontWeight: location.pathname === "/notifications" ? '600' : '400'
+                        }}
+                        to="/notifications"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                         <div className="position-relative d-flex align-items-center justify-content-center" style={{ width: '24px' }}>
+                            <Bell size={20} strokeWidth={location.pathname === "/notifications" ? 2.5 : 2} />
+                            {unreadCount > 0 && (
+                              <span className="position-absolute bg-danger text-white rounded-pill d-flex align-items-center justify-content-center fw-bold" style={{ top: '-4px', right: '-8px', minWidth: '16px', height: '16px', fontSize: '10px', border: '2px solid rgba(10, 10, 15, 0.98)', padding: '0 4px' }}>
+                                {unreadCount > 99 ? '99+' : unreadCount}
+                              </span>
+                            )}
+                         </div>
+                         <span className="fs-5">Notifications</span>
+                      </Link>
+                    </motion.li>
+
+                    {/* DIVIDER 2 */}
+                    <motion.li variants={itemVariants}>
+                      <hr className="border-secondary opacity-25 my-2 mx-2" />
+                    </motion.li>
+
+                    {/* PROFILE / LOGIN */}
+                    {user ? (
+                      <motion.li variants={itemVariants} className="mt-auto pt-2 pb-4">
+                        <button
+                          className="d-flex w-100 border-0 bg-transparent align-items-center justify-content-between p-3 rounded-3 transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
+                          style={{
+                            color: 'rgba(255,255,255,0.85)',
+                            fontWeight: '400'
+                          }}
+                          onClick={() => setIsAccountMenuOpen(true)}
+                        >
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="d-flex align-items-center justify-content-center" style={{ width: '32px' }}>
+                              <Avatar
+                                src={user?.profileImage}
+                                alt="profile"
+                                size={32}
+                                style={{ border: '1px solid rgba(255,255,255,0.2)' }}
+                              />
+                            </div>
+                            <span className="fs-5">{user?.name || "Profile"}</span>
+                          </div>
+                          <ChevronRight size={20} className="opacity-50" />
+                        </button>
+                      </motion.li>
+                    ) : (
+                      <motion.li variants={itemVariants} className="mt-auto pt-2 pb-4">
+                        <Link
+                          className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none fw-semibold transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
+                          style={{
+                            backgroundColor: location.pathname === "/login" ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
+                            color: location.pathname === "/login" ? '#ffc107' : 'rgba(255,255,255,0.85)',
+                            fontWeight: location.pathname === "/login" ? '600' : '400'
+                          }}
+                          to="/login"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <div className="d-flex align-items-center justify-content-center" style={{ width: '24px' }}>
+                            <LogIn size={20} />
+                          </div>
+                          <span className="fs-5">Login</span>
+                        </Link>
+                      </motion.li>
+                    )}
+                  </motion.ul>
                 ) : (
-                  <motion.li variants={itemVariants} className="mt-auto pt-2 pb-4">
-                    <Link
-                      className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none fw-semibold transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
-                      style={{
-                        backgroundColor: location.pathname === "/login" ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
-                        color: location.pathname === "/login" ? '#ffc107' : 'rgba(255,255,255,0.85)',
-                        fontWeight: location.pathname === "/login" ? '600' : '400'
-                      }}
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <div className="d-flex align-items-center justify-content-center" style={{ width: '24px' }}>
-                        <LogIn size={20} />
-                      </div>
-                      <span className="fs-5">Login</span>
-                    </Link>
-                  </motion.li>
+                  <motion.div 
+                    key="account-menu"
+                    initial={{ x: shouldReduceMotion ? 0 : 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: shouldReduceMotion ? 0 : 20, opacity: 0 }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                    className="d-flex flex-column h-100"
+                  >
+                    {/* BACK BUTTON ROW */}
+                    <div className="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+                      <button 
+                        className="d-flex align-items-center gap-3 p-2 border-0 bg-transparent text-white rounded-3 transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5 flex-grow-1 text-start"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                      >
+                        <ArrowLeft size={24} className="opacity-75" />
+                        <span className="fs-5 fw-semibold">{user?.name || "Profile"}</span>
+                      </button>
+                      <button
+                        className="bg-transparent border-0 text-white p-2 d-flex align-items-center justify-content-center hover:bg-white hover:bg-opacity-10 rounded-circle"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        aria-label="Close menu"
+                      >
+                         <X size={24} className="opacity-75" />
+                      </button>
+                    </div>
+
+                    <ul className="list-unstyled m-0 d-flex flex-column gap-1 flex-grow-1">
+                      <li>
+                        <Link
+                          className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
+                          style={{
+                            backgroundColor: location.pathname === "/profile" ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
+                            color: location.pathname === "/profile" ? '#ffc107' : 'rgba(255,255,255,0.85)',
+                            fontWeight: location.pathname === "/profile" ? '600' : '400'
+                          }}
+                          to="/profile"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                            <User size={20} strokeWidth={location.pathname === "/profile" ? 2.5 : 2} />
+                          </div>
+                          <span className="fs-5">Profile</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
+                          style={{
+                            backgroundColor: location.pathname === "/saved-trips" ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
+                            color: location.pathname === "/saved-trips" ? '#ffc107' : 'rgba(255,255,255,0.85)',
+                            fontWeight: location.pathname === "/saved-trips" ? '600' : '400'
+                          }}
+                          to="/saved-trips"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                            <Bookmark size={20} strokeWidth={location.pathname === "/saved-trips" ? 2.5 : 2} />
+                          </div>
+                          <span className="fs-5">Saved Trips</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          className="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5"
+                          style={{
+                            backgroundColor: location.pathname === "/settings" ? 'rgba(255, 193, 7, 0.1)' : 'transparent',
+                            color: location.pathname === "/settings" ? '#ffc107' : 'rgba(255,255,255,0.85)',
+                            fontWeight: location.pathname === "/settings" ? '600' : '400'
+                          }}
+                          to="/settings"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                            <SettingsIcon size={20} strokeWidth={location.pathname === "/settings" ? 2.5 : 2} />
+                          </div>
+                          <span className="fs-5">Settings</span>
+                        </Link>
+                      </li>
+                      
+                      <li>
+                        <hr className="border-secondary opacity-25 my-2 mx-2" />
+                      </li>
+                      
+                      <li className="mt-auto pt-2 pb-4">
+                        <button
+                          className="d-flex align-items-center gap-3 border-0 bg-transparent w-100 p-3 rounded-3 transition-all duration-200 text-start active:scale-95 hover:bg-white hover:bg-opacity-5 text-danger opacity-85 hover:opacity-100"
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            logout();
+                          }}
+                        >
+                          <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                            <LogOut size={20} />
+                          </div>
+                          <span className="fs-5 fw-medium">Logout</span>
+                        </button>
+                      </li>
+                    </ul>
+                  </motion.div>
                 )}
-              </ul>
+              </AnimatePresence>
             </div>
           </motion.div>
         )}

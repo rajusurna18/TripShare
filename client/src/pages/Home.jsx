@@ -80,16 +80,16 @@ function Home() {
       {/* 1. HERO SECTION */}
       <section className="hero">
         <div className="overlay"></div>
-        <div className="container hero-content">
+        <div className="container container-responsive hero-content">
           <h1>Travel Together. Explore Smarter.</h1>
           <p>The AI-powered travel platform that helps travelers discover companions, plan unforgettable trips, collaborate in real time, split expenses, preserve memories, and create lasting travel stories.</p>
-          <button className="btn btn-custom mt-3" onClick={() => navigate("/register")}>Start Your Journey</button>
+          <button className="btn btn-custom btn-responsive mt-3" onClick={() => navigate("/register")}>Start Your Journey</button>
         </div>
       </section>
 
       {/* 2. MISSION & VISION */}
       <section className="landing-section" style={{ background: "#0a0a0a" }}>
-        <div className="container">
+        <div className="container container-responsive">
           <div className="row g-5">
             <div className="col-lg-6">
               <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="h-100 pe-lg-4">
@@ -147,7 +147,7 @@ function Home() {
 
       {/* 3. CORE FEATURES */}
       <section className="landing-section" style={{ background: "#050505" }}>
-        <div className="container text-center">
+        <div className="container container-responsive text-center">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
             <h2 className="landing-title mb-5">Core Features</h2>
           </motion.div>
@@ -174,14 +174,14 @@ function Home() {
           </motion.div>
 
           <div className="mt-5 text-center">
-            <Link to="/features" className="btn btn-outline-warning rounded-pill px-4 py-2">Explore All Features</Link>
+            <Link to="/features" className="btn btn-outline-warning btn-responsive rounded-pill px-4 py-2">Explore All Features</Link>
           </div>
         </div>
       </section>
 
       {/* 4. WHY TRIPSHARE (COMPARISON) */}
       <section className="landing-section" style={{ background: "#0a0a0a" }}>
-        <div className="container">
+        <div className="container container-responsive">
           <motion.div className="text-center mb-5" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
             <h2 className="landing-title mb-2">Why TripShare?</h2>
             <p className="landing-subtitle">Instead of traditional travel apps.</p>
@@ -298,7 +298,7 @@ function Home() {
       {/* 6. LIVE TRAVEL FEED (Rendered only if logged in) */}
       {token && (
         <section className="live-feed-section py-5" style={{ background: "#0a0a0a", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
-          <div className="container" style={{ maxWidth: "800px" }}>
+          <div className="container container-responsive" style={{ maxWidth: "800px" }}>
             <h2 className="section-title text-center text-warning fw-bold mb-4">🌍 Live Travel Feed</h2>
             <p className="text-secondary text-center mb-5" style={{ fontSize: "15px" }}>See what travelers are planning and sharing in real-time.</p>
 
@@ -331,15 +331,15 @@ function Home() {
 
       {/* 7. CALL TO ACTION BANNER */}
       <section className="landing-section pb-5" style={{ background: "#050505" }}>
-        <div className="container">
+        <div className="container container-responsive">
           <motion.div className="cta-banner" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
             <div className="cta-content">
               <h2 className="fw-bold text-white mb-5" style={{ fontSize: "2.5rem" }}>Ready for Your Next Adventure?</h2>
               <div className="d-flex justify-content-center gap-4 flex-wrap">
-                <button className="btn btn-outline-light btn-lg fw-bold px-5 rounded-pill" onClick={() => navigate("/login")}>
+                <button className="btn btn-outline-light btn-lg btn-responsive fw-bold px-5 rounded-pill" onClick={() => navigate("/login")}>
                   Start Exploring
                 </button>
-                <button className="btn btn-warning btn-lg fw-bold px-5 rounded-pill" onClick={() => navigate("/register")}>
+                <button className="btn btn-warning btn-lg btn-responsive fw-bold px-5 rounded-pill" onClick={() => navigate("/register")}>
                   Create Trip
                 </button>
               </div>
@@ -350,7 +350,7 @@ function Home() {
 
       {/* 8. ENHANCED FOOTER */}
       <footer className="enhanced-footer">
-        <div className="container">
+        <div className="container container-responsive">
           <div className="row g-5 mb-5">
             <div className="col-lg-4">
               <img src="/tripshare-logo.png" alt="TripShare AI" style={{ width: "120px", height: "auto" }} className="mb-3" />

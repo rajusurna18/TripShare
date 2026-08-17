@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import API from "../services/api";
 import socket from "../socket";
 import NotificationCard from "../components/notification/NotificationCard";
 
 function Notifications() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("ALL");
@@ -224,7 +225,12 @@ function Notifications() {
         }
       `}</style>
 
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
         
         {/* HEADER SECTION */}
         <div className="glass-card p-4 p-md-5 mb-4" style={{ borderRadius: "16px", background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>

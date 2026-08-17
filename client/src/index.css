@@ -108,3 +108,97 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* ==========================================================================
+   GLOBAL RESPONSIVE DESIGN SYSTEM (GROUP 1)
+   ========================================================================== */
+
+/* 1. Touch Targets (Min 44px for usability on mobile) */
+button, 
+.btn, 
+input.form-control, 
+textarea.form-control, 
+select.form-select,
+.touch-target {
+  min-height: 44px;
+}
+
+/* Fix icon-only buttons to be square and touch-friendly */
+.btn-icon-only {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+}
+
+/* 2. Form Inputs */
+/* Make all inputs take full width natively, relying on grid/flex parents to constrain */
+input, textarea, select {
+  max-width: 100%;
+}
+.form-control:focus, .form-select:focus {
+  box-shadow: 0 0 0 0.25rem rgba(170, 59, 255, 0.25);
+  border-color: var(--accent);
+}
+
+/* 3. Responsive Buttons */
+/* Auto full-width on mobile (320px - 768px), inline on tablet+ */
+@media (max-width: 767.98px) {
+  .btn-responsive {
+    width: 100%;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+}
+@media (min-width: 768px) {
+  .btn-responsive {
+    width: auto;
+    display: inline-block;
+  }
+}
+
+/* 4. Responsive Containers */
+/* Max-widths to prevent ultra-wide stretching on 1440px+ */
+.container-responsive {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 768px) {
+  .container-responsive {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* 5. Drawers / Modals constraint */
+/* Prevent modals from bleeding out of viewport */
+.modal-content-responsive {
+  max-height: 90dvh;
+  overflow-y: auto;
+  border-radius: 1rem;
+}
+
+/* 6. Typography Utilities */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}
+
+/* 7. Hide scrollbar cleanly for horizontal lists */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+

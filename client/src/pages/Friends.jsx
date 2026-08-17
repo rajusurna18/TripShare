@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import FriendCard from "../components/shared/FriendCard";
 import toast, { Toaster } from "react-hot-toast";
 
 function Friends() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("friends"); // friends, sent, received, suggestions
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -323,7 +325,12 @@ function Friends() {
     >
       <Toaster position="top-right" reverseOrder={false} />
 
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
         {/* Header Title Section */}
         <div className="glass-card p-4 mb-4" style={{ background: "rgba(25, 25, 25, 0.7)", borderRadius: "20px" }}>
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">

@@ -1,10 +1,11 @@
-import { useState }
-from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import API
 from "../services/api";
 
 function Itinerary() {
+  const navigate = useNavigate();
 
   const [destination, setDestination] =
     useState("");
@@ -99,7 +100,12 @@ function Itinerary() {
       }}
     >
 
-      <div className="container py-5">
+      <div className="container container-responsive py-5">
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
 
         {/* HERO */}
 
@@ -362,7 +368,7 @@ function Itinerary() {
 
               disabled={loading}
 
-              className="btn btn-warning px-5 py-3"
+              className="btn btn-warning btn-responsive px-5 py-3"
 
               style={{
                 borderRadius: "15px",

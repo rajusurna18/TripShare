@@ -29,6 +29,7 @@ function Login() {
         localStorage.removeItem("user");
         localStorage.setItem("token", token);
         localStorage.setItem("user", userStr);
+        window.dispatchEvent(new Event("auth-success"));
         toast.success("Login successful with Google 🚀");
         navigate("/dashboard");
       } catch (err) {
@@ -70,6 +71,8 @@ function Login() {
           "user",
           JSON.stringify(data.user)
         );
+
+        window.dispatchEvent(new Event("auth-success"));
 
         toast.success(
           "Login successful 🚀"

@@ -883,7 +883,7 @@ function Chat() {
         <div className="d-flex align-items-center gap-2">
           {/* RTC Video Call toggle trigger */}
           <button
-            className={`btn btn-sm ${callActive ? "btn-danger text-light animate-pulse" : "btn-outline-warning text-warning"} fw-semibold`}
+            className={`btn btn-sm btn-responsive ${callActive ? "btn-danger text-light animate-pulse" : "btn-outline-warning text-warning"} fw-semibold`}
             onClick={callActive ? endVideoCall : startVideoCall}
             style={{ borderRadius: "8px" }}
           >
@@ -893,7 +893,7 @@ function Chat() {
           {trip?.createdBy && (
             <Link
               to={`/profile/${trip.createdBy._id || trip.createdBy}`}
-              className="btn btn-sm btn-outline-light"
+              className="btn btn-sm btn-outline-light btn-responsive"
               style={{ borderRadius: "8px" }}
             >
               Owner
@@ -1339,14 +1339,14 @@ function Chat() {
               ⏹ Stop ({recordTime}s)
             </button>
           ) : !message.trim() && !file && !audioBlob ? (
-            <button className="btn btn-outline-warning p-2" onClick={startRecording} style={{ borderRadius: "20px" }} title="Record Voice">
+            <button className="btn btn-outline-warning p-2 btn-responsive" onClick={startRecording} style={{ borderRadius: "20px" }} title="Record Voice">
               🎤 Voice
             </button>
           ) : (
             <button
               onClick={sendMessage}
               disabled={sending}
-              className="btn btn-warning p-2 px-4 text-dark fw-bold"
+              className="btn btn-warning p-2 px-4 text-dark fw-bold btn-responsive"
               style={{ borderRadius: "20px" }}
             >
               {sending ? "Sending" : "Send"}

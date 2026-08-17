@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import { FaTrash, FaPlus, FaComment, FaPaperPlane } from "react-icons/fa";
 
 function AI() {
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -337,7 +339,12 @@ function AI() {
         paddingTop: "20px",
       }}
     >
-      <div className="container-fluid py-4" style={{ maxWidth: "1400px" }}>
+      <div className="container-fluid container-responsive py-4" style={{ maxWidth: "1400px" }}>
+        <div style={{ marginBottom: "20px" }}>
+          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
         <div className="row g-4">
           
           {/* SIDEBAR: CHAT SESSIONS */}
