@@ -83,7 +83,7 @@ function Home() {
         <div className="container container-responsive hero-content">
           <h1>Travel Together. Explore Smarter.</h1>
           <p>The AI-powered travel platform that helps travelers discover companions, plan unforgettable trips, collaborate in real time, split expenses, preserve memories, and create lasting travel stories.</p>
-          <button className="btn btn-custom btn-responsive mt-3" onClick={() => navigate("/register")}>Start Your Journey</button>
+          <button className="btn btn-custom mt-3 px-4 py-3 flex-shrink-0 w-auto" onClick={() => navigate("/register")}>Start Your Journey</button>
         </div>
       </section>
 

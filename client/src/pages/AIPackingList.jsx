@@ -268,7 +268,7 @@ function AIPackingList() {
                   </div>
 
                   {/* PRINT ACTIONS BUTTONS */}
-                  <div className="d-flex gap-3 justify-content-end mt-3 no-print">
+                  <div className="d-flex flex-wrap gap-3 justify-content-end mt-3 no-print">
                     <button className="btn btn-sm btn-outline-warning d-flex align-items-center gap-2" onClick={handleCopyList}>
                       <FaCopy /> Copy List
                     </button>

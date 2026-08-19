@@ -56,10 +56,11 @@ function SaveButton({ tripId, initialSaved = false, initialCount = 0, onToggle }
     <button
       onClick={handleSaveToggle}
       disabled={loading}
-      className={`btn ${saved ? "btn-warning text-dark" : "btn-outline-light"}`}
+      className={`btn ${saved ? "btn-warning text-dark" : "btn-outline-light"} flex-grow-1 flex-shrink-0 text-nowrap`}
       style={{
         display: "inline-flex",
         alignItems: "center",
+        justifyContent: "center",
         gap: "6px",
         borderRadius: "20px",
         padding: "6px 14px",

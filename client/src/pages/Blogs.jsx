@@ -164,7 +164,7 @@ function Blogs() {
                   onChange={(e) => setDestination(e.target.value)}
                 />
               </div>
-              <div className="col-12 col-md-3 d-flex gap-2">
+              <div className="col-12 col-md-3 d-flex flex-wrap gap-2">
                 <button type="submit" className="btn btn-warning flex-grow-1 fw-bold btn-responsive">
                   Search
                 </button>

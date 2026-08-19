@@ -344,29 +344,36 @@ function SavedTrips() {
                         </div>
 
                         {/* BUTTONS */}
-                        <div className="mt-auto d-flex justify-content-between align-items-center gap-2 pt-2 border-top border-secondary border-opacity-10">
+                        <div className="mt-auto d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2 border-top border-secondary border-opacity-10">
+                          <SaveButton
+                            tripId={trip._id}
+                            initialSaved={true}
+                            initialCount={trip.savesCount}
+                            onToggle={() => handleUnsaveCallback(trip._id)}
+                          />
+                          <ShareButton
+                            tripId={trip._id}
+                            tripTitle={trip.title}
+                            tripDestination={trip.destination}
+                            initialCount={trip.sharesCount}
+                          />
                           <Link
                             to={`/trip/${trip._id}`}
-                            className="btn btn-outline-warning btn-sm px-3 py-2 fw-semibold text-decoration-none"
-                            style={{ borderRadius: "20px" }}
+                            className="btn btn-outline-warning flex-grow-1 flex-shrink-0 text-nowrap"
+                            style={{ 
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px",
+                              borderRadius: "20px",
+                              padding: "6px 14px",
+                              fontSize: "13.5px",
+                              fontWeight: "600",
+                              transition: "all 0.25s ease"
+                            }}
                           >
                             👁️ View Details
                           </Link>
-                          
-                          <div className="d-flex gap-2">
-                            <SaveButton
-                              tripId={trip._id}
-                              initialSaved={true}
-                              initialCount={trip.savesCount}
-                              onToggle={() => handleUnsaveCallback(trip._id)}
-                            />
-                            <ShareButton
-                              tripId={trip._id}
-                              tripTitle={trip.title}
-                              tripDestination={trip.destination}
-                              initialCount={trip.sharesCount}
-                            />
-                          </div>
                         </div>
                       </div>
                     </div>

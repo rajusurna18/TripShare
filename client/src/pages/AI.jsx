@@ -14,6 +14,7 @@ function AI() {
 
   const messagesEndRef = useRef(null);
   const abortRef = useRef(null);
+  const textareaRef = useRef(null);
 
   // CLEANUP ACTIVE STREAMS ON UNMOUNT
   useEffect(() => {
@@ -112,6 +113,9 @@ function AI() {
     const userMessage = { role: "user", content: question };
     setMessages(prev => [...prev, userMessage]);
     setQuestion("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
     setLoading(true);
     setError("");
 
@@ -511,13 +515,18 @@ function AI() {
               </div>
 
               {/* INPUT BOX */}
-              <div className="d-flex gap-2 align-items-center">
+              <div className="d-flex gap-2 align-items-end w-100 mt-3">
                 <textarea
-                  rows="2"
+                  ref={textareaRef}
+                  rows="1"
                   placeholder="Ask AI Travel Buddy anything..."
                   className="form-control bg-dark text-light border-secondary border-opacity-35 p-3 rounded-4"
                   value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
+                  onChange={(e) => {
+                    setQuestion(e.target.value);
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -528,34 +537,30 @@ function AI() {
                   style={{
                     resize: "none",
                     boxShadow: "none",
+                    maxHeight: "150px",
+                    overflowY: "auto",
+                    flexGrow: 1,
+                    minWidth: 0
                   }}
                 />
                 {loading ? (
                   <button
-                    className="btn btn-danger h-100 px-4 rounded-4 shadow-sm fw-bold d-flex align-items-center gap-2"
+                    className="btn btn-danger rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center"
                     onClick={stopGeneration}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minHeight: "58px",
-                    }}
+                    style={{ width: "52px", height: "52px" }}
+                    title="Stop"
                   >
-                    <span>Stop ⏹️</span>
+                    ⏹️
                   </button>
                 ) : (
                   <button
-                    className="btn btn-warning h-100 px-4 rounded-4 shadow-sm"
+                    className="btn btn-warning rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center text-dark"
                     onClick={askAI}
                     disabled={!question.trim()}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minHeight: "58px",
-                    }}
+                    style={{ width: "52px", height: "52px", fontSize: "20px" }}
+                    title="Send"
                   >
-                    <FaPaperPlane />
+                    ➤
                   </button>
                 )}
               </div>

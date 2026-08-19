@@ -343,10 +343,15 @@ function EditBlog() {
                 <div className="flex-grow-1">
                   {block.type === "paragraph" && (
                     <textarea
-                      rows="3"
-                      className="form-control bg-dark border-secondary border-opacity-40 text-light"
+                      rows="1"
+                      className="form-control bg-dark border-secondary border-opacity-40 text-light flex-1-min-0"
                       value={block.data.text}
-                      onChange={(e) => handleUpdateBlock(block.id, { text: e.target.value })}
+                      onChange={(e) => {
+                        handleUpdateBlock(block.id, { text: e.target.value });
+                        e.target.style.height = 'auto';
+                        e.target.style.height = `${Math.min(e.target.scrollHeight, 250)}px`;
+                      }}
+                      style={{ resize: "none", maxHeight: "250px", overflowY: "auto" }}
                     />
                   )}
 
@@ -373,10 +378,15 @@ function EditBlog() {
                   {block.type === "quote" && (
                     <div className="d-flex flex-column gap-2 border-start border-warning ps-3">
                       <textarea
-                        rows="2"
-                        className="form-control bg-dark border-secondary border-opacity-40 text-light italic"
+                        rows="1"
+                        className="form-control bg-dark border-secondary border-opacity-40 text-light italic flex-1-min-0"
                         value={block.data.text}
-                        onChange={(e) => handleUpdateBlock(block.id, { text: e.target.value })}
+                        onChange={(e) => {
+                          handleUpdateBlock(block.id, { text: e.target.value });
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+                        }}
+                        style={{ resize: "none", maxHeight: "150px", overflowY: "auto" }}
                       />
                       <input
                         type="text"
@@ -400,10 +410,15 @@ function EditBlog() {
                         />
                       </div>
                       <textarea
-                        rows="4"
-                        className="form-control bg-dark border-secondary border-opacity-40 text-warning font-monospace"
+                        rows="1"
+                        className="form-control bg-dark border-secondary border-opacity-40 text-warning font-monospace flex-1-min-0"
                         value={block.data.text}
-                        onChange={(e) => handleUpdateBlock(block.id, { text: e.target.value })}
+                        onChange={(e) => {
+                          handleUpdateBlock(block.id, { text: e.target.value });
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
+                        }}
+                        style={{ resize: "none", maxHeight: "300px", overflowY: "auto" }}
                       />
                     </div>
                   )}
@@ -597,7 +612,7 @@ function EditBlog() {
         </div>
 
         {/* Action Buttons */}
-        <div className="d-flex gap-3 justify-content-end mb-5">
+        <div className="d-flex flex-wrap gap-3 justify-content-end mb-5">
           <button
             type="button"
             className="btn btn-outline-secondary px-4 py-2 btn-responsive"

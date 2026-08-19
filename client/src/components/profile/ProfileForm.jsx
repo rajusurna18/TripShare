@@ -62,7 +62,7 @@ function ProfileForm({
 
       <div className="row">
         {/* TRAVEL STYLE */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Travel Style</label>
           <select
             className="form-select profile-input"
@@ -78,7 +78,7 @@ function ProfileForm({
         </div>
 
         {/* PERSONALITY */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Personality</label>
           <select
             className="form-select profile-input"
@@ -94,7 +94,7 @@ function ProfileForm({
 
       <div className="row">
         {/* MBTI PERSONALITY TYPE */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Personality Type (MBTI)</label>
           <select
             className="form-select profile-input"
@@ -122,7 +122,7 @@ function ProfileForm({
         </div>
 
         {/* TRAVEL FREQUENCY */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Travel Frequency</label>
           <select
             className="form-select profile-input"
@@ -138,7 +138,7 @@ function ProfileForm({
 
       <div className="row">
         {/* BUDGET RANGE MIN */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Min Budget Preference (₹)</label>
           <input
             type="number"
@@ -151,7 +151,7 @@ function ProfileForm({
         </div>
 
         {/* BUDGET RANGE MAX */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Max Budget Preference (₹)</label>
           <input
             type="number"
@@ -166,7 +166,7 @@ function ProfileForm({
 
       <div className="row">
         {/* LOCATION */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Location</label>
           <input
             type="text"
@@ -178,7 +178,7 @@ function ProfileForm({
         </div>
 
         {/* DESTINATION PREFERENCE */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Destination Preference</label>
           <input
             type="text"
@@ -192,7 +192,7 @@ function ProfileForm({
 
       <div className="row">
         {/* LANGUAGES */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Languages (comma-separated)</label>
           <input
             type="text"
@@ -204,7 +204,7 @@ function ProfileForm({
         </div>
 
         {/* VISITED PLACES */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Visited Places (comma-separated)</label>
           <input
             type="text"
@@ -219,7 +219,7 @@ function ProfileForm({
       <h5 className="mt-4 mb-3 text-warning fw-bold">Social Media Handles & Links</h5>
       <div className="row">
         {/* INSTAGRAM */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Instagram Username</label>
           <input
             type="text"
@@ -231,7 +231,7 @@ function ProfileForm({
         </div>
 
         {/* WEBSITE */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">Website URL</label>
           <input
             type="url"
@@ -245,7 +245,7 @@ function ProfileForm({
 
       <div className="row">
         {/* GITHUB */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">GitHub Username</label>
           <input
             type="text"
@@ -257,7 +257,7 @@ function ProfileForm({
         </div>
 
         {/* LINKEDIN */}
-        <div className="col-md-6 mb-4">
+        <div className="col-12 col-md-6 mb-4">
           <label className="form-label fw-bold">LinkedIn Username</label>
           <input
             type="text"
@@ -282,7 +282,7 @@ function ProfileForm({
       {/* BUTTON */}
       <button
         onClick={updateProfile}
-        className="btn btn-warning px-5 py-3 mt-3 w-100"
+        className="btn btn-warning px-5 py-3 mt-3 btn-responsive"
         style={{ fontWeight: "700" }}
         disabled={saving}
       >

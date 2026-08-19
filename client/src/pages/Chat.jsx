@@ -360,6 +360,9 @@ function Chat() {
 
       // Clear input fields
       setMessage("");
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
       setFile(null);
       setFilePreviewUrl("");
       setAudioBlob(null);
@@ -838,7 +841,7 @@ function Chat() {
 
       {/* 1. STICKY CHAT HEADER (Step 8) */}
       <div
-        className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom border-secondary sticky-top"
+        className="d-flex align-items-center px-2 px-sm-3 py-2 border-bottom border-secondary sticky-top w-100"
         style={{
           background: "rgba(20, 20, 20, 0.85)",
           backdropFilter: "blur(12px)",
@@ -846,55 +849,60 @@ function Chat() {
           zIndex: 1000,
         }}
       >
-        <div className="d-flex align-items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="btn btn-link text-light p-0 text-decoration-none"
-            title="Go Back"
-          >
-            <h4 className="m-0">⬅</h4>
-          </button>
+        {/* BACK BUTTON */}
+        <button
+          onClick={() => navigate(-1)}
+          className="btn btn-link text-light p-2 text-decoration-none flex-shrink-0 d-flex align-items-center justify-content-center"
+          style={{ width: "40px", height: "40px", marginRight: "4px" }}
+          title="Go Back"
+        >
+          <span style={{ fontSize: "20px", lineHeight: 1 }}>⬅</span>
+        </button>
 
-          <div className="position-relative">
-            <Avatar src={trip?.image || ""} size={44} className="border border-secondary shadow-sm" />
+        {/* AVATAR + TRIP INFO */}
+        <div className="d-flex align-items-center flex-grow-1" style={{ minWidth: 0, paddingRight: "8px" }}>
+          <div className="position-relative flex-shrink-0 me-2">
+            <Avatar src={trip?.image || ""} size={40} className="border border-secondary shadow-sm" />
             <span
               className={`position-absolute bottom-0 end-0 rounded-circle border border-2 border-dark ${
                 isTripMemberOnline() ? "bg-success" : "bg-secondary"
               }`}
-              style={{ width: "12px", height: "12px" }}
+              style={{ width: "12px", height: "12px", right: "-2px", bottom: "-2px" }}
               title={isTripMemberOnline() ? "Online" : "Offline"}
             />
           </div>
 
-          <div>
-            <h6 className="m-0 fw-bold text-white text-truncate" style={{ maxWidth: "200px" }}>
+          <div className="d-flex flex-column flex-grow-1 justify-content-center" style={{ minWidth: 0 }}>
+            <h6 className="m-0 fw-bold text-white text-truncate" style={{ fontSize: "15px", lineHeight: "1.2" }}>
               {trip?.title || "Trip Chat"}
             </h6>
-            <small className="text-secondary d-flex align-items-center gap-1" style={{ fontSize: "11px" }}>
-              <span>📍 {trip?.destination || "Unknown"}</span>
-              <span className="mx-1">•</span>
-              <span className={isTripMemberOnline() ? "text-success" : "text-secondary"}>
+            <div className="text-secondary text-truncate mt-1 d-flex align-items-center gap-1" style={{ fontSize: "11px", lineHeight: "1.2" }}>
+              <span className="text-truncate">📍 {trip?.destination || "Unknown"}</span>
+              <span className="flex-shrink-0">•</span>
+              <span className={`flex-shrink-0 ${isTripMemberOnline() ? "text-success" : "text-secondary"}`}>
                 {isTripMemberOnline() ? "Online" : "Offline"}
               </span>
-            </small>
+            </div>
           </div>
         </div>
 
-        <div className="d-flex align-items-center gap-2">
+        {/* ACTIONS */}
+        <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
           {/* RTC Video Call toggle trigger */}
           <button
-            className={`btn btn-sm btn-responsive ${callActive ? "btn-danger text-light animate-pulse" : "btn-outline-warning text-warning"} fw-semibold`}
+            className={`btn btn-sm flex-shrink-0 d-flex align-items-center justify-content-center ${callActive ? "btn-danger text-light animate-pulse" : "btn-outline-warning text-warning"} fw-semibold`}
             onClick={callActive ? endVideoCall : startVideoCall}
-            style={{ borderRadius: "8px" }}
+            style={{ borderRadius: "50%", width: "40px", height: "40px" }}
+            title={callActive ? "End Call" : "Call"}
           >
-            {callActive ? "❌ End Call" : "📞 Call"}
+            {callActive ? "❌" : "📞"}
           </button>
 
           {trip?.createdBy && (
             <Link
               to={`/profile/${trip.createdBy._id || trip.createdBy}`}
-              className="btn btn-sm btn-outline-light btn-responsive"
-              style={{ borderRadius: "8px" }}
+              className="btn btn-sm btn-outline-light flex-shrink-0 d-none d-md-flex align-items-center justify-content-center"
+              style={{ borderRadius: "20px", height: "40px", padding: "0 16px" }}
             >
               Owner
             </Link>
@@ -1003,7 +1011,7 @@ function Chat() {
                       </Link>
                     )}
 
-                    <div className="d-flex flex-column align-items-start">
+                    <div className={`d-flex flex-column ${isMe ? "align-items-end" : "align-items-start"}`} style={{ minWidth: 0 }}>
                       {/* Name header for receiver */}
                       {!isMe && (
                         <span className="text-secondary mb-1 ps-1" style={{ fontSize: "11px" }}>
@@ -1026,11 +1034,14 @@ function Chat() {
                           lineHeight: "1.4",
                           cursor: "pointer",
                           wordBreak: "break-word",
+                          overflowWrap: "break-word",
                           whiteSpace: "pre-wrap",
+                          minWidth: 0,
+                          maxWidth: "100%"
                         }}
                       >
                         {/* 1. TEXT */}
-                        {msg.message && <div className="mb-2">{msg.message}</div>}
+                        {msg.message && <div className="mb-2" style={{ minWidth: 0 }}>{msg.message}</div>}
 
                         {/* 2. IMAGE ATTACHMENT */}
                         {isImage && (
@@ -1256,9 +1267,9 @@ function Chat() {
           zIndex: 1000,
         }}
       >
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-end gap-2 w-100">
           {/* Emoji button popover trigger */}
-          <div className="position-relative">
+          <div className="position-relative flex-shrink-0">
             <button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               className="btn btn-outline-secondary p-2 text-warning border-0"
@@ -1296,7 +1307,7 @@ function Chat() {
           </div>
 
           {/* Attachment button picker */}
-          <div>
+          <div className="flex-shrink-0">
             <label
               htmlFor="chat-attachment-input"
               className="btn btn-outline-secondary p-2 border-0"
@@ -1323,33 +1334,57 @@ function Chat() {
             onChange={(e) => {
               setMessage(e.target.value);
               handleTypingEvent();
+              e.target.style.height = 'auto';
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
+                if (textareaRef.current) {
+                  textareaRef.current.style.height = 'auto';
+                }
               }
             }}
-            style={{ resize: "none", borderRadius: "20px", padding: "8px 16px" }}
+            style={{ 
+              resize: "none", 
+              borderRadius: "20px", 
+              padding: "10px 16px", 
+              maxHeight: "150px", 
+              overflowY: "auto",
+              flexGrow: 1,
+              minWidth: 0 
+            }}
           />
 
           {/* Recording / Send actions toggle button */}
           {isRecording ? (
-            <button className="btn btn-danger p-2 px-3 fw-bold" onClick={stopRecording} style={{ borderRadius: "20px" }}>
-              ⏹ Stop ({recordTime}s)
+            <button 
+              className="btn btn-danger flex-shrink-0 d-flex align-items-center justify-content-center p-0" 
+              onClick={stopRecording} 
+              style={{ borderRadius: "50%", width: "44px", height: "44px" }}
+              title="Stop Recording"
+            >
+              ⏹
             </button>
           ) : !message.trim() && !file && !audioBlob ? (
-            <button className="btn btn-outline-warning p-2 btn-responsive" onClick={startRecording} style={{ borderRadius: "20px" }} title="Record Voice">
-              🎤 Voice
+            <button 
+              className="btn btn-outline-warning flex-shrink-0 d-flex align-items-center justify-content-center p-0" 
+              onClick={startRecording} 
+              style={{ borderRadius: "50%", width: "44px", height: "44px" }} 
+              title="Record Voice"
+            >
+              🎤
             </button>
           ) : (
             <button
               onClick={sendMessage}
               disabled={sending}
-              className="btn btn-warning p-2 px-4 text-dark fw-bold btn-responsive"
-              style={{ borderRadius: "20px" }}
+              className="btn btn-warning text-dark fw-bold flex-shrink-0 d-flex align-items-center justify-content-center p-0"
+              style={{ borderRadius: "50%", width: "44px", height: "44px" }}
+              title="Send Message"
             >
-              {sending ? "Sending" : "Send"}
+              {sending ? "..." : "➤"}
             </button>
           )}
         </div>

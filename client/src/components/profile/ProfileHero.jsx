@@ -34,7 +34,7 @@ function ProfileHero({
       <p className="text-secondary mb-2">{user?.email}</p>
 
       {/* STATS COUNT */}
-      <div className="d-flex justify-content-center gap-4 mt-2 mb-4 text-center">
+      <div className="d-flex flex-wrap justify-content-center gap-4 mt-2 mb-4 text-center">
         <div style={{ cursor: "pointer" }} onClick={onFollowersClick}>
           <span className="text-warning fw-bold d-block" style={{ fontSize: "20px" }}>
             {user?.stats?.followersCount || 0}

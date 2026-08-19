@@ -82,7 +82,10 @@ function ActivityCard({ activity }) {
                   📅 {new Date(metadata.startDate).toLocaleDateString()} - {metadata.endDate ? new Date(metadata.endDate).toLocaleDateString() : ""}
                 </span>
               )}
-              <div className="d-flex gap-2 align-items-center mt-2 mt-sm-0">
+              <div 
+                className="d-flex flex-wrap gap-2 align-items-center mt-2 mt-sm-0 w-100"
+                style={{ boxSizing: "border-box", minWidth: 0 }}
+              >
                 {actualTripId && (
                   <>
                     <SaveButton
@@ -106,8 +109,22 @@ function ActivityCard({ activity }) {
                       tripDestination={metadata?.destination}
                       initialCount={tripId?.sharesCount || 0}
                     />
-                    <Link to={`/trip/${actualTripId}`} className="btn btn-outline-warning btn-sm fw-bold px-3 py-2" style={{ borderRadius: "20px" }}>
-                      View Details
+                    <Link 
+                      to={`/trip/${actualTripId}`} 
+                      className="btn btn-outline-warning flex-grow-1 flex-shrink-0 text-nowrap"
+                      style={{ 
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        borderRadius: "20px",
+                        padding: "6px 14px",
+                        fontSize: "13.5px",
+                        fontWeight: "600",
+                        transition: "all 0.25s ease"
+                      }}
+                    >
+                      👁️ View Details
                     </Link>
                   </>
                 )}

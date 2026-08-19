@@ -60,6 +60,10 @@ body {
   box-sizing: border-box;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 h1,
 h2 {
   font-family: var(--heading);
@@ -138,6 +142,7 @@ select.form-select,
 /* Make all inputs take full width natively, relying on grid/flex parents to constrain */
 input, textarea, select {
   max-width: 100%;
+  min-width: 0;
 }
 .form-control:focus, .form-select:focus {
   box-shadow: 0 0 0 0.25rem rgba(170, 59, 255, 0.25);
@@ -145,19 +150,36 @@ input, textarea, select {
 }
 
 /* 3. Responsive Buttons */
-/* Auto full-width on mobile (320px - 768px), inline on tablet+ */
-@media (max-width: 767.98px) {
-  .btn-responsive {
-    width: 100%;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
+/* REMOVED: blind width: 100% on mobile. Buttons should be sized by their flex/grid parents. */
+.btn-responsive {
+  display: inline-block;
+  width: auto;
 }
-@media (min-width: 768px) {
-  .btn-responsive {
-    width: auto;
-    display: inline-block;
-  }
+
+/* New Utilities for structural flex layouts */
+.flex-1-min-0 {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.flex-shrink-0-btn {
+  flex: 0 0 auto !important;
+  width: auto !important;
+}
+
+/* 3.5 Responsive Grid Auto-Fit (For Stats, Badges, etc) */
+.responsive-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.stats-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  width: 100%;
 }
 
 /* 4. Responsive Containers */

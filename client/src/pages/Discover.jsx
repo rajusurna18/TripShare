@@ -199,55 +199,66 @@ export function Discover() {
         
         {/* HEADER BAR */}
         <div className="glass-card p-4 mb-4">
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div>
-              <h2 className="fw-bold m-0 text-warning">🔍 Discover Travelers</h2>
-              <p className="text-secondary m-0" style={{ fontSize: "14px" }}>
-                Find like-minded wanderers, check trust scores, and follow their adventures.
-              </p>
-            </div>
-            <div className="d-flex gap-2">
-              <button
-                className={`btn ${showFilters ? "btn-warning" : "btn-outline-warning"} d-flex align-items-center gap-2 btn-responsive`}
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                ⚙️ Filters {showFilters ? "Open" : "Closed"}
-              </button>
-              <button className="btn btn-outline-secondary btn-responsive" onClick={resetFilters}>
-                Reset
-              </button>
-            </div>
+          <div className="mb-3">
+            <h2 className="fw-bold m-0 text-warning">🔍 Discover Travelers</h2>
+            <p className="text-secondary m-0" style={{ fontSize: "14px", marginTop: "6px" }}>
+              Find like-minded wanderers, check trust scores, and follow their adventures.
+            </p>
           </div>
 
           {/* MAIN SEARCH & SORT INPUTS */}
-          <div className="row g-3 mt-3">
-            <div className="col-md-8">
-              <div className="input-group">
-                <span className="input-group-text bg-dark border-secondary text-secondary">🔍</span>
-                <input
-                  type="text"
-                  className="form-control bg-black text-light border-secondary shadow-none"
-                  placeholder="Search by name, interest (e.g. hiking), travel style, destination..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
+          <div className="d-flex flex-column gap-3 w-100 mb-4">
+            {/* 1. Search Input */}
+            <div className="w-100" style={{ minWidth: 0 }}>
+              <input
+                type="text"
+                className="form-control bg-black text-light border-secondary shadow-none w-100"
+                placeholder="Search by name, interests, destination..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                style={{ padding: "0 16px", borderRadius: "12px", height: "48px" }}
+              />
+            </div>
+            
+            {/* 2. Filters & Reset (Equal 50/50 split) */}
+            <div className="row g-2">
+              <div className="col-6">
+                <button
+                  className={`btn ${showFilters ? "btn-warning text-dark" : "btn-outline-warning"} w-100 d-flex align-items-center justify-content-center gap-2 fw-semibold text-nowrap`}
+                  onClick={() => setShowFilters(!showFilters)}
+                  style={{ borderRadius: "12px", height: "48px", padding: "0 16px" }}
+                >
+                  ⚙️ Filters
+                </button>
+              </div>
+              <div className="col-6">
+                <button 
+                  className="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center fw-semibold text-nowrap" 
+                  onClick={resetFilters}
+                  style={{ borderRadius: "12px", height: "48px", padding: "0 16px" }}
+                >
+                  Reset
+                </button>
               </div>
             </div>
-            <div className="col-md-4">
-              <div className="input-group">
-                <span className="input-group-text bg-dark border-secondary text-secondary">Sort:</span>
-                <select
-                  className="form-select bg-black text-light border-secondary shadow-none"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="relevance">Most Relevant</option>
-                  <option value="trust">Highest Trust Score</option>
-                  <option value="completion">Profile Strength</option>
-                  <option value="followed">Most Followed</option>
-                  <option value="newest">Newest Travelers</option>
-                </select>
-              </div>
+
+            {/* 3. Sort Group */}
+            <div className="d-flex align-items-center gap-2 w-100" style={{ minWidth: 0 }}>
+              <label className="text-secondary fw-semibold mb-0 flex-shrink-0" style={{ fontSize: "14px", whiteSpace: "nowrap" }}>
+                Sort:
+              </label>
+              <select
+                className="form-select bg-black text-light border-secondary shadow-none flex-grow-1 fw-semibold"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                style={{ borderRadius: "12px", height: "48px", cursor: "pointer" }}
+              >
+                <option value="relevance">Most Relevant</option>
+                <option value="trust">Highest Trust</option>
+                <option value="completion">Profile Strength</option>
+                <option value="followed">Most Followed</option>
+                <option value="newest">Newest</option>
+              </select>
             </div>
           </div>
         </div>
@@ -256,7 +267,7 @@ export function Discover() {
         <div className="row g-4">
           {/* FILTERS DRAWER / SIDE PANEL */}
           {showFilters && (
-            <div className="col-lg-3">
+            <div className="col-12 col-lg-3">
               <div
                 className="glass-card p-4 sticky-top"
                 style={{ top: "90px", zIndex: 10, background: "#181818" }}
@@ -423,7 +434,7 @@ export function Discover() {
 
                   return (
                     <div
-                      className={showFilters ? "col-md-6 col-xl-4" : "col-md-6 col-lg-4 col-xl-3"}
+                      className={showFilters ? "col-12 col-md-6 col-xl-4" : "col-12 col-md-6 col-lg-4 col-xl-3"}
                       key={item._id}
                     >
                       <div

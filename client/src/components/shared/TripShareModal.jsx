@@ -112,10 +112,10 @@ function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, o
         </p>
 
         {/* SOCIAL LIST */}
-        <div className="d-flex flex-column gap-3 mb-4">
+        <div className="d-flex flex-column gap-3 mb-4 w-100">
           {/* WHATSAPP */}
           <button
-            className="btn btn-success d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill text-white btn-responsive"
+            className="btn btn-success d-flex align-items-center justify-content-center gap-2 py-3 fw-bold rounded-pill text-white w-100 text-wrap lh-sm"
             onClick={handleWhatsAppShare}
             style={{
               background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
@@ -129,7 +129,7 @@ function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, o
 
           {/* INSTAGRAM */}
           <button
-            className="btn d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill text-white btn-responsive"
+            className="btn d-flex align-items-center justify-content-center gap-2 py-3 fw-bold rounded-pill text-white w-100 text-wrap lh-sm"
             onClick={handleInstagramShare}
             style={{
               background: "linear-gradient(135deg, #F09433 0%, #E6683C 25%, #DC2743 50%, #CC2366 75%, #BC1888 100%)",
@@ -138,12 +138,12 @@ function TripShareModal({ tripId, tripTitle, tripDestination, isOpen, onClose, o
             }}
           >
             <i className="fab fa-instagram style-icon" style={{ fontSize: "20px" }}></i>
-            Copy Link for Instagram Story
+            <span>Copy Link for Instagram Story</span>
           </button>
 
           {/* COPY LINK */}
           <button
-            className="btn btn-outline-light d-flex align-items-center justify-content-center gap-3 py-3 fw-bold rounded-pill btn-responsive"
+            className="btn btn-outline-light d-flex align-items-center justify-content-center gap-2 py-3 fw-bold rounded-pill w-100 text-wrap lh-sm"
             onClick={handleCopyLink}
             style={{
               background: "rgba(255, 255, 255, 0.03)",

@@ -211,57 +211,57 @@ function PublicProfile() {
           <div className="col-lg-8">
             <div className="glass-card p-4 h-100">
               <h4 className="fw-bold mb-4 text-warning">📊 Traveler Statistics</h4>
-              <div className="row g-3 text-center">
-                <div className="col-4 col-md-3">
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+              <div className="stats-grid-auto text-center">
+                <div>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-white fw-bold">{stats.friendsCount || 0}</h3>
                     <small className="text-secondary">Friends</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3" style={{ cursor: "pointer" }} onClick={openFollowers}>
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                <div style={{ cursor: "pointer" }} onClick={openFollowers}>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-white fw-bold">{stats.followersCount || 0}</h3>
                     <small className="text-secondary text-decoration-underline">Followers</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3" style={{ cursor: "pointer" }} onClick={openFollowing}>
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                <div style={{ cursor: "pointer" }} onClick={openFollowing}>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-white fw-bold">{stats.followingCount || 0}</h3>
                     <small className="text-secondary text-decoration-underline">Following</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3">
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                <div>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-white fw-bold">{stats.tripsCreated || 0}</h3>
                     <small className="text-secondary">Trips Created</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3">
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                <div>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-white fw-bold">{stats.tripsJoined || 0}</h3>
                     <small className="text-secondary">Trips Joined</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3">
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                <div>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-white fw-bold">{stats.reviewsCount || 0}</h3>
                     <small className="text-secondary">Reviews</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3">
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                <div>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-warning fw-bold">{stats.blogsCount || 0}</h3>
                     <small className="text-secondary">Blogs</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3">
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                <div>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-warning fw-bold">{user.travelStyle || "Explorer"}</h3>
                     <small className="text-secondary">Travel Style</small>
                   </div>
                 </div>
-                <div className="col-4 col-md-3">
-                  <div className="p-3 bg-dark rounded border border-secondary" style={{ background: "#1a1a1a" }}>
+                <div>
+                  <div className="p-3 bg-dark rounded border border-secondary h-100 d-flex flex-column justify-content-center" style={{ background: "#1a1a1a" }}>
                     <h3 className="m-0 text-info fw-bold">{user.personality || "Flexible"}</h3>
                     <small className="text-secondary">Personality</small>
                   </div>

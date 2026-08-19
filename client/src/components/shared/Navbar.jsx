@@ -391,14 +391,15 @@ function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="d-lg-none position-absolute start-0 w-100 overflow-y-auto"
+            className="d-lg-none position-absolute start-0 w-100 overflow-y-auto overflow-x-hidden"
             style={{ 
               top: "100%", 
               height: "calc(100dvh - 68px)",
               background: "rgba(10, 10, 15, 0.98)",
               backdropFilter: "blur(24px)",
               borderTop: "1px solid rgba(255,255,255,0.05)",
-              zIndex: 999 
+              zIndex: 999,
+              overflowX: 'hidden'
             }}
             variants={menuVariants}
             initial="hidden"
@@ -454,15 +455,15 @@ function Navbar() {
                         to="/notifications"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                         <div className="position-relative d-flex align-items-center justify-content-center" style={{ width: '24px' }}>
+                         <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
                             <Bell size={20} strokeWidth={location.pathname === "/notifications" ? 2.5 : 2} />
-                            {unreadCount > 0 && (
-                              <span className="position-absolute bg-danger text-white rounded-pill d-flex align-items-center justify-content-center fw-bold" style={{ top: '-4px', right: '-8px', minWidth: '16px', height: '16px', fontSize: '10px', border: '2px solid rgba(10, 10, 15, 0.98)', padding: '0 4px' }}>
-                                {unreadCount > 99 ? '99+' : unreadCount}
-                              </span>
-                            )}
                          </div>
-                         <span className="fs-5">Notifications</span>
+                         <span className="fs-5 flex-grow-1">Notifications</span>
+                         {unreadCount > 0 && (
+                           <span className="bg-danger text-white rounded-pill fw-bold px-2 py-1 d-flex align-items-center justify-content-center" style={{ fontSize: '12px', minWidth: '24px' }}>
+                             {unreadCount > 99 ? '99+' : unreadCount}
+                           </span>
+                         )}
                       </Link>
                     </motion.li>
 

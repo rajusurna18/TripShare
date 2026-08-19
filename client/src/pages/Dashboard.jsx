@@ -332,7 +332,7 @@ function Dashboard() {
 
                 {/* LEFT */}
 
-                <div className="col-lg-8 d-flex flex-column gap-4">
+                <div className="col-12 col-lg-8 d-flex flex-column gap-4">
 
                   {/* ACTIVE TRIPS */}
 
@@ -456,7 +456,7 @@ function Dashboard() {
 
                 {/* STATS */}
 
-                <div className="col-lg-4">
+                <div className="col-12 col-lg-4">
 
                   <div className="special-card glass-card h-100 p-4">
 
@@ -530,7 +530,7 @@ function Dashboard() {
 
                 {/* SMART MATCHES */}
 
-                <div className="col-lg-6">
+                <div className="col-12 col-lg-6">
 
                   <Link
                     to="/matches"
@@ -574,7 +574,7 @@ function Dashboard() {
 
                 {/* GROUP CHAT */}
 
-                <div className="col-lg-6">
+                <div className="col-12 col-lg-6">
 
                   <Link
 
@@ -789,7 +789,7 @@ function Dashboard() {
                           )}
                         </div>
                         {dashboardStats.widgets.latestTrip && (
-                          <Link to={`/trip/${dashboardStats.widgets.latestTrip._id}`} className="btn btn-sm btn-outline-warning w-100 py-2 rounded-3 fw-bold mt-2">
+                          <Link to={`/trip/${dashboardStats.widgets.latestTrip._id}`} className="btn btn-sm btn-outline-warning flex-shrink-0 w-auto align-self-center py-2 px-4 rounded-3 fw-bold mt-2">
                             Quick Open →
                           </Link>
                         )}
@@ -812,7 +812,7 @@ function Dashboard() {
                           )}
                         </div>
                         {dashboardStats.widgets.latestFriend && (
-                          <Link to={`/profile/${dashboardStats.widgets.latestFriend._id}`} className="btn btn-sm btn-outline-warning w-100 py-2 rounded-3 fw-bold mt-2">
+                          <Link to={`/profile/${dashboardStats.widgets.latestFriend._id}`} className="btn btn-sm btn-outline-warning flex-shrink-0 w-auto align-self-center py-2 px-4 rounded-3 fw-bold mt-2">
                             View Profile
                           </Link>
                         )}

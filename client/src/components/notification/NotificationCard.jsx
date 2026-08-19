@@ -105,10 +105,10 @@ function NotificationCard({
         </div>
 
         {/* Right Side Actions */}
-        <div className="d-flex align-items-center gap-2 ms-auto ms-md-0 mt-2 mt-md-0">
+        <div className="d-flex flex-wrap align-items-center gap-2 ms-auto ms-md-0 mt-2 mt-md-0">
           {!notification.read && (
             <button
-              className="btn btn-warning btn-sm fw-bold px-3"
+              className="btn btn-warning btn-sm fw-bold px-3 btn-responsive"
               onClick={() => onRead(notification._id)}
               style={{ borderRadius: "8px", fontSize: "12px" }}
             >
@@ -117,7 +117,7 @@ function NotificationCard({
           )}
 
           <button
-            className="btn btn-outline-danger btn-sm px-2"
+            className="btn btn-outline-danger btn-sm px-2 btn-responsive"
             onClick={() => onDelete(notification._id)}
             title="Delete Notification"
             style={{ borderRadius: "8px", fontSize: "12px", border: "1px solid rgba(220, 53, 69, 0.3)" }}

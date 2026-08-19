@@ -183,7 +183,7 @@ const sendJoinRequest =
           {/* CHAT */}
            <Link
              to={`/chat/${trip?._id}`}
-             className="btn btn-custom btn-responsive"
+             className="btn btn-custom flex-shrink-0 w-auto"
              onClick={() =>
              localStorage.setItem(
             "activeTripId",
@@ -198,7 +198,7 @@ const sendJoinRequest =
 
           <Link
             to={`/expenses/${trip?._id}`}
-            className="btn btn-warning btn-responsive"
+            className="btn btn-warning flex-shrink-0 w-auto"
           >
 
             💸 Expenses
@@ -207,7 +207,7 @@ const sendJoinRequest =
 
           <Link
           to={`/live/${trip._id}`}
-          className="btn btn-success btn-responsive"
+          className="btn btn-success flex-shrink-0 w-auto"
            >
 
            Live Tracking
@@ -221,7 +221,7 @@ const sendJoinRequest =
 
            <button
 
-             className="btn btn-outline-light btn-responsive"
+             className="btn btn-outline-light flex-shrink-0 w-auto"
 
              onClick={
             sendJoinRequest
@@ -241,7 +241,7 @@ const sendJoinRequest =
 
          <Link
          to="/matches"
-         className="btn btn-outline-warning btn-responsive"
+         className="btn btn-outline-warning flex-shrink-0 w-auto"
          onClick={() =>
           localStorage.setItem(
          "activeTripId",
@@ -252,7 +252,7 @@ const sendJoinRequest =
         🤝 Matches
       </Link>
 
-      <div className="d-flex gap-2 w-100 mt-2 border-top border-secondary border-opacity-10 pt-2 justify-content-end">
+      <div className="d-flex gap-2 flex-wrap w-100 mt-2 border-top border-secondary border-opacity-10 pt-2 justify-content-end">
         <SaveButton
           tripId={trip._id}
           initialSaved={isSaved}

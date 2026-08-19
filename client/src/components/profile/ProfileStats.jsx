@@ -2,9 +2,9 @@ function ProfileStats({ user }) {
 
   return (
 
-    <div className="row g-4 mb-5">
+    <div className="stats-grid-auto mb-5">
 
-      <div className="col-md-3">
+      <div>
 
         <div className="glass-card p-4 text-center h-100">
 
@@ -24,7 +24,7 @@ function ProfileStats({ user }) {
 
       </div>
 
-      <div className="col-md-3">
+      <div>
 
         <div className="glass-card p-4 text-center h-100">
 
@@ -44,7 +44,7 @@ function ProfileStats({ user }) {
 
       </div>
 
-      <div className="col-md-3">
+      <div>
 
         <div className="glass-card p-4 text-center h-100">
 
@@ -64,7 +64,7 @@ function ProfileStats({ user }) {
 
       </div>
 
-      <div className="col-md-3">
+      <div>
 
         <div className="glass-card p-4 text-center h-100">
 

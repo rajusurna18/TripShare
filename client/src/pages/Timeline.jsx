@@ -253,7 +253,7 @@ function Timeline() {
           <div className="glass-card p-4 mb-4 border border-warning border-opacity-25" style={{ background: "rgba(30, 25, 15, 0.45)" }}>
             <h5 className="fw-bold text-warning mb-3">📍 Log Location Checkpoint</h5>
             <form onSubmit={handleLogLocation} className="row g-3">
-              <div className="col-md-6 col-lg-3">
+              <div className="col-12 col-md-6 col-lg-3">
                 <input 
                   type="text" 
                   className="form-control" 
@@ -263,7 +263,7 @@ function Timeline() {
                   required
                 />
               </div>
-              <div className="col-md-6 col-lg-3">
+              <div className="col-12 col-md-6 col-lg-3">
                 <input 
                   type="text" 
                   className="form-control" 
@@ -293,7 +293,7 @@ function Timeline() {
                   onChange={e => setLocationForm({...locationForm, lng: e.target.value})} 
                 />
               </div>
-              <div className="col-md-6 col-lg-2">
+              <div className="col-12 col-md-6 col-lg-2">
                 <input 
                   type="datetime-local" 
                   className="form-control text-secondary" 
@@ -301,7 +301,7 @@ function Timeline() {
                   onChange={e => setLocationForm({...locationForm, visitTime: e.target.value})} 
                 />
               </div>
-              <div className="col-12 d-flex justify-content-end gap-2 mt-3">
+              <div className="col-12 d-flex flex-wrap justify-content-end gap-2 mt-3">
                 <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setShowLocationForm(false)}>
                   Cancel
                 </button>
@@ -453,16 +453,21 @@ function Timeline() {
                 <div className="mb-4 bg-black bg-opacity-25 p-4 rounded-4 border border-secondary border-opacity-10">
                   <label className="form-label text-warning small fw-bold mb-2">Day Summary & Thoughts 📝</label>
                   <textarea 
-                    className="form-control bg-dark border-secondary border-opacity-20 text-light mb-2"
-                    rows="2"
+                    className="form-control bg-dark border-secondary border-opacity-20 text-light mb-2 flex-1-min-0"
+                    rows="1"
                     placeholder="Describe your highlight moments or restaurant notes..."
                     value={noteInputs[day.dayNumber] || ""}
-                    onChange={e => setNoteInputs({
-                      ...noteInputs,
-                      [day.dayNumber]: e.target.value
-                    })}
+                    onChange={e => {
+                      setNoteInputs({
+                        ...noteInputs,
+                        [day.dayNumber]: e.target.value
+                      });
+                      e.target.style.height = 'auto';
+                      e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
+                    style={{ resize: "none", overflowY: "auto", maxHeight: "150px" }}
                   />
-                  <div className="d-flex justify-content-end">
+                  <div className="d-flex flex-wrap justify-content-end gap-2">
                     <button 
                       className="btn btn-sm btn-outline-warning"
                       onClick={() => handleSaveNote(day.dayNumber, day.date)}
@@ -698,7 +703,7 @@ function Timeline() {
               </>
             )}
             
-            <div className="d-flex justify-content-end gap-2">
+            <div className="d-flex flex-wrap justify-content-end gap-2 mt-3">
               <button className="btn btn-secondary" onClick={() => setEditingEventId(null)}>Cancel</button>
               <button className="btn btn-warning text-dark fw-bold" onClick={handleSaveEditEvent}>Save Changes</button>
             </div>

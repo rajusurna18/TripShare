@@ -664,7 +664,7 @@ function Expenses() {
               </div>
             )}
             
-            <div className="d-flex justify-content-end gap-2">
+            <div className="d-flex flex-wrap justify-content-end gap-2 mt-3">
               <button className="btn btn-secondary" onClick={() => setEditingExpense(null)}>Cancel</button>
               <button className="btn btn-warning text-dark fw-bold" onClick={submitEditExpense}>Save Changes</button>
             </div>

@@ -137,6 +137,8 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: "10px",
     padding: "12px 16px",
     background: "rgba(255, 255, 255, 0.03)",
     border: "1px solid rgba(255, 255, 255, 0.05)",
@@ -514,7 +516,7 @@ function TripDetails() {
     <div style={styles.container} className="container-responsive mx-auto">
       
       <div style={{ marginBottom: "20px" }}>
-        <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
+        <button className="btn btn-outline-light btn-sm px-3 flex-shrink-0 w-auto" onClick={() => navigate(-1)}>
           ← Back
         </button>
       </div>
@@ -573,7 +575,7 @@ function TripDetails() {
                 <span className="fw-semibold">{trip.createdBy?.name || "Unknown"}</span>
               </div>
               
-              <div className="d-flex gap-2 flex-wrap align-items-center">
+              <div className="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto align-items-stretch mt-2 mt-md-0">
                 <SaveButton
                   tripId={tripId}
                   initialSaved={isSaved}
@@ -599,29 +601,53 @@ function TripDetails() {
 
                 {isOwner && (
                   <>
-                    <button className="btn btn-outline-info btn-sm px-3 btn-responsive mb-2 mb-md-0" onClick={handleArchiveToggle}>
+                    <button 
+                      className="btn btn-outline-info flex-grow-1 flex-shrink-0 text-nowrap" 
+                      onClick={handleArchiveToggle}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", borderRadius: "20px", padding: "6px 14px", fontSize: "13.5px", fontWeight: "600", transition: "all 0.25s ease" }}
+                    >
                       {trip.archived ? "📂 Unarchive" : "📦 Archive"}
                     </button>
-                    <button className="btn btn-warning btn-sm px-3 btn-responsive mb-2 mb-md-0" onClick={openEditModal}>
+                    <button 
+                      className="btn btn-warning flex-grow-1 flex-shrink-0 text-nowrap text-dark" 
+                      onClick={openEditModal}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", borderRadius: "20px", padding: "6px 14px", fontSize: "13.5px", fontWeight: "600", transition: "all 0.25s ease" }}
+                    >
                       ✏️ Edit
                     </button>
-                    <button className="btn btn-danger btn-sm px-3 btn-responsive mb-2 mb-md-0" onClick={() => setShowDeleteModal(true)}>
+                    <button 
+                      className="btn btn-danger flex-grow-1 flex-shrink-0 text-nowrap" 
+                      onClick={() => setShowDeleteModal(true)}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", borderRadius: "20px", padding: "6px 14px", fontSize: "13.5px", fontWeight: "600", transition: "all 0.25s ease" }}
+                    >
                       🗑️ Delete
                     </button>
                   </>
                 )}
                 {isMember && !isOwner && (
-                  <button className="btn btn-outline-danger btn-sm px-3 btn-responsive mb-2 mb-md-0" onClick={() => setShowLeaveModal(true)}>
+                  <button 
+                    className="btn btn-outline-danger flex-grow-1 flex-shrink-0 text-nowrap" 
+                    onClick={() => setShowLeaveModal(true)}
+                    style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", borderRadius: "20px", padding: "6px 14px", fontSize: "13.5px", fontWeight: "600", transition: "all 0.25s ease" }}
+                  >
                     🚪 Leave Trip
                   </button>
                 )}
                 {!isOwner && !isMember && (
                   trip.hasPendingRequest ? (
-                    <button className="btn btn-outline-warning btn-sm px-3" onClick={handleCancelJoinRequest}>
+                    <button 
+                      className="btn btn-outline-warning flex-grow-1 flex-shrink-0 text-nowrap" 
+                      onClick={handleCancelJoinRequest}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", borderRadius: "20px", padding: "6px 14px", fontSize: "13.5px", fontWeight: "600", transition: "all 0.25s ease" }}
+                    >
                       ❌ Cancel Request
                     </button>
                   ) : (
-                    <button className="btn btn-warning btn-sm px-3" onClick={handleSendJoinRequest}>
+                    <button 
+                      className="btn btn-warning flex-grow-1 flex-shrink-0 text-nowrap text-dark" 
+                      onClick={handleSendJoinRequest}
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px", borderRadius: "20px", padding: "6px 14px", fontSize: "13.5px", fontWeight: "600", transition: "all 0.25s ease" }}
+                    >
                       ✈️ Request Join
                     </button>
                   )
@@ -645,12 +671,12 @@ function TripDetails() {
         <div style={styles.ownerCard}>
           <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <h3 className="m-0" style={{ fontWeight: "700", color: "#ffc107" }}>🛠️ Owner Administration</h3>
-            <div className="d-flex gap-2">
-              <button className="btn btn-outline-warning px-4" onClick={() => setShowInviteModal(true)}>
-                Invite Friend 👥
+            <div className="d-flex flex-wrap gap-2">
+              <button className="btn btn-outline-warning px-4 flex-shrink-0 w-auto" onClick={() => setShowInviteModal(true)}>
+                👥 Invite Friend
               </button>
-              <Link to={`/join-requests/${tripId}`} className="btn btn-warning px-4">
-                Manage Join Requests 👥
+              <Link to={`/join-requests/${tripId}`} className="btn btn-warning px-4 flex-shrink-0 w-auto">
+                👥 Manage Join Requests
               </Link>
             </div>
           </div>
@@ -787,6 +813,7 @@ function TripDetails() {
           zoom={13}
           style={{
             height: "450px",
+            maxHeight: "50vh",
             width: "100%",
             borderRadius: "20px",
             border: "1px solid rgba(255,255,255,0.1)"
@@ -812,37 +839,38 @@ function TripDetails() {
       )}
 
       {/* TRIP LINKS/ACTIONS */}
-      <div className="mt-4 d-flex gap-3 flex-wrap">
+      <div className="mt-4 d-flex flex-column gap-3">
+        {/* Primary Action */}
         <Link
           to={`/chat/${tripId}`}
-          className="btn btn-warning"
+          className="btn btn-warning fw-bold py-2 shadow-sm d-flex justify-content-center align-items-center gap-2"
         >
-          Open Chat 💬
+          💬 Open Chat
         </Link>
-        <Link
-          to={`/timeline/${tripId}`}
-          className="btn btn-outline-warning text-warning"
-        >
-          📅 Travel Timeline
-        </Link>
-        <Link
-          to={`/expenses/${tripId}`}
-          className="btn btn-outline-warning"
-        >
-          Expenses 💳
-        </Link>
-        <Link
-          to={`/packing-list/${tripId}`}
-          className="btn btn-outline-warning"
-        >
-          🎒 Packing List
-        </Link>
-        <Link
-          to={`/memories/${tripId}`}
-          className="btn btn-outline-light"
-        >   
-          📸 Memories
-        </Link>
+        
+        {/* Secondary Actions */}
+        <div className="row g-2">
+          <div className="col-6">
+            <Link to={`/timeline/${tripId}`} className="btn btn-outline-warning w-100 h-100 d-flex align-items-center justify-content-center gap-2">
+              <span>📅</span> <span>Timeline</span>
+            </Link>
+          </div>
+          <div className="col-6">
+            <Link to={`/expenses/${tripId}`} className="btn btn-outline-warning w-100 h-100 d-flex align-items-center justify-content-center gap-2">
+              <span>💳</span> <span>Expenses</span>
+            </Link>
+          </div>
+          <div className="col-6">
+            <Link to={`/packing-list/${tripId}`} className="btn btn-outline-warning w-100 h-100 d-flex align-items-center justify-content-center gap-2">
+              <span>🎒</span> <span>Packing List</span>
+            </Link>
+          </div>
+          <div className="col-6">
+            <Link to={`/memories/${tripId}`} className="btn btn-outline-light w-100 h-100 d-flex align-items-center justify-content-center gap-2">   
+              <span>📸</span> <span>Memories</span>
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* ============================================================== */}
@@ -890,7 +918,7 @@ function TripDetails() {
               />
 
               <div className="row">
-                <div className="col-md-6">
+                <div className="col-12 col-md-6">
                   <label style={styles.label}>Start Date</label>
                   <input 
                     type="date" 
@@ -900,7 +928,7 @@ function TripDetails() {
                     style={styles.input} 
                   />
                 </div>
-                <div className="col-md-6">
+                <div className="col-12 col-md-6">
                   <label style={styles.label}>End Date</label>
                   <input 
                     type="date" 
@@ -913,7 +941,7 @@ function TripDetails() {
               </div>
 
               <div className="row">
-                <div className="col-md-6">
+                <div className="col-12 col-md-6">
                   <label style={styles.label}>Budget ($)</label>
                   <input 
                     type="number" 
@@ -925,7 +953,7 @@ function TripDetails() {
                     required 
                   />
                 </div>
-                <div className="col-md-6">
+                <div className="col-12 col-md-6">
                   <label style={styles.label}>Max Members</label>
                   <input 
                     type="number" 
@@ -940,7 +968,7 @@ function TripDetails() {
               </div>
 
               <div className="row">
-                <div className="col-md-6">
+                <div className="col-12 col-md-6">
                   <label style={styles.label}>Travel Style</label>
                   <input 
                     type="text" 
@@ -951,7 +979,7 @@ function TripDetails() {
                     placeholder="e.g. Budget, Luxury"
                   />
                 </div>
-                <div className="col-md-6">
+                <div className="col-12 col-md-6">
                   <label style={styles.label}>Status</label>
                   <select 
                     name="status"
@@ -985,17 +1013,17 @@ function TripDetails() {
                 style={styles.input} 
               />
 
-              <div className="d-flex justify-content-end gap-2 mt-3">
+              <div className="d-flex flex-wrap justify-content-end gap-2 mt-3">
                 <button 
                   type="button" 
-                  className="btn btn-secondary" 
+                  className="btn btn-secondary btn-responsive" 
                   onClick={() => setShowEditModal(false)}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="btn btn-warning"
+                  className="btn btn-warning btn-responsive"
                   disabled={updating}
                 >
                   {updating ? "Saving..." : "Save Changes"}
@@ -1015,11 +1043,11 @@ function TripDetails() {
               Are you sure you want to delete <strong>{trip.title}</strong>? 
               This will permanently delete the trip and all associated chats, expenses, settlements, memories, reviews, and notifications. This action cannot be undone.
             </p>
-            <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>
+            <div className="d-flex flex-wrap justify-content-end gap-2 mt-3">
+              <button className="btn btn-secondary btn-responsive" onClick={() => setShowDeleteModal(false)}>
                 Cancel
               </button>
-              <button className="btn btn-danger" onClick={handleDeleteConfirm}>
+              <button className="btn btn-danger btn-responsive" onClick={handleDeleteConfirm}>
                 Yes, Delete Trip
               </button>
             </div>
@@ -1036,11 +1064,11 @@ function TripDetails() {
               Are you sure you want to leave the trip <strong>{trip.title}</strong>?
               You will lose access to this trip's chats, expenses, and maps.
             </p>
-            <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-secondary" onClick={() => setShowLeaveModal(false)}>
+            <div className="d-flex flex-wrap justify-content-end gap-2 mt-3">
+              <button className="btn btn-secondary btn-responsive" onClick={() => setShowLeaveModal(false)}>
                 Cancel
               </button>
-              <button className="btn btn-danger" onClick={handleLeaveConfirm}>
+              <button className="btn btn-danger btn-responsive" onClick={handleLeaveConfirm}>
                 Yes, Leave Trip
               </button>
             </div>
@@ -1057,9 +1085,9 @@ function TripDetails() {
               Are you sure you want to remove <strong>{selectedMember?.name}</strong> from the trip?
               They will no longer have access to this trip.
             </p>
-            <div className="d-flex justify-content-end gap-2">
+            <div className="d-flex flex-wrap justify-content-end gap-2 mt-3">
               <button 
-                className="btn btn-secondary" 
+                className="btn btn-secondary btn-responsive" 
                 onClick={() => {
                   setShowRemoveMemberModal(false);
                   setSelectedMember(null);
@@ -1067,7 +1095,7 @@ function TripDetails() {
               >
                 Cancel
               </button>
-              <button className="btn btn-danger" onClick={handleRemoveMemberConfirm}>
+              <button className="btn btn-danger btn-responsive" onClick={handleRemoveMemberConfirm}>
                 Remove Member
               </button>
             </div>
@@ -1084,9 +1112,9 @@ function TripDetails() {
               Are you sure you want to transfer ownership of this trip to <strong>{selectedMember?.name}</strong>?
               You will lose administrator controls and become a regular member of the trip.
             </p>
-            <div className="d-flex justify-content-end gap-2">
+            <div className="d-flex flex-wrap justify-content-end gap-2 mt-3">
               <button 
-                className="btn btn-secondary" 
+                className="btn btn-secondary btn-responsive" 
                 onClick={() => {
                   setShowTransferModal(false);
                   setSelectedMember(null);
@@ -1094,7 +1122,7 @@ function TripDetails() {
               >
                 Cancel
               </button>
-              <button className="btn btn-warning" onClick={handleTransferConfirm}>
+              <button className="btn btn-warning btn-responsive" onClick={handleTransferConfirm}>
                 Transfer Ownership
               </button>
             </div>

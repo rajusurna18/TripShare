@@ -23,10 +23,11 @@ function ShareButton({ tripId, tripTitle, tripDestination, initialCount = 0 }) {
     <>
       <button
         onClick={handleShareClick}
-        className="btn btn-outline-info"
+        className="btn btn-outline-info flex-grow-1 flex-shrink-0 text-nowrap"
         style={{
           display: "inline-flex",
           alignItems: "center",
+          justifyContent: "center",
           gap: "6px",
           borderRadius: "20px",
           padding: "6px 14px",
