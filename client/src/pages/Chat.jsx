@@ -807,7 +807,7 @@ function Chat() {
       className="d-flex flex-column"
       style={{
         background: "#0c0c0c",
-        height: "100vh",
+        height: "calc(100dvh - 68px)",
         color: "white",
         overflow: "hidden",
       }}
@@ -839,41 +839,42 @@ function Chat() {
         }
       `}</style>
 
-      {/* 1. STICKY CHAT HEADER (Step 8) */}
+      {/* 1. CHAT HEADER */}
       <div
-        className="d-flex align-items-center px-2 px-sm-3 py-2 border-bottom border-secondary sticky-top w-100"
+        className="d-flex align-items-center px-2 px-sm-3 py-2 border-bottom border-secondary w-100 flex-shrink-0"
         style={{
-          background: "rgba(20, 20, 20, 0.85)",
+          background: "rgba(20, 20, 20, 0.95)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid rgba(255,255,255,0.06) !important",
           zIndex: 1000,
+          minHeight: "56px"
         }}
       >
         {/* BACK BUTTON */}
         <button
           onClick={() => navigate(-1)}
-          className="btn btn-link text-light p-2 text-decoration-none flex-shrink-0 d-flex align-items-center justify-content-center"
-          style={{ width: "40px", height: "40px", marginRight: "4px" }}
+          className="btn btn-link text-light p-0 text-decoration-none flex-shrink-0 d-flex align-items-center justify-content-center me-2"
+          style={{ width: "36px", height: "36px" }}
           title="Go Back"
         >
-          <span style={{ fontSize: "20px", lineHeight: 1 }}>⬅</span>
+          <span style={{ fontSize: "18px", lineHeight: 1 }}>⬅</span>
         </button>
 
         {/* AVATAR + TRIP INFO */}
         <div className="d-flex align-items-center flex-grow-1" style={{ minWidth: 0, paddingRight: "8px" }}>
           <div className="position-relative flex-shrink-0 me-2">
-            <Avatar src={trip?.image || ""} size={40} className="border border-secondary shadow-sm" />
+            <Avatar src={trip?.image || ""} size={38} className="border border-secondary shadow-sm" />
             <span
               className={`position-absolute bottom-0 end-0 rounded-circle border border-2 border-dark ${
                 isTripMemberOnline() ? "bg-success" : "bg-secondary"
               }`}
-              style={{ width: "12px", height: "12px", right: "-2px", bottom: "-2px" }}
+              style={{ width: "10px", height: "10px", right: "-1px", bottom: "-1px" }}
               title={isTripMemberOnline() ? "Online" : "Offline"}
             />
           </div>
 
           <div className="d-flex flex-column flex-grow-1 justify-content-center" style={{ minWidth: 0 }}>
-            <h6 className="m-0 fw-bold text-white text-truncate" style={{ fontSize: "15px", lineHeight: "1.2" }}>
+            <h6 className="m-0 fw-bold text-white text-truncate" style={{ fontSize: "14.5px", lineHeight: "1.2" }}>
               {trip?.title || "Trip Chat"}
             </h6>
             <div className="text-secondary text-truncate mt-1 d-flex align-items-center gap-1" style={{ fontSize: "11px", lineHeight: "1.2" }}>
@@ -892,7 +893,7 @@ function Chat() {
           <button
             className={`btn btn-sm flex-shrink-0 d-flex align-items-center justify-content-center ${callActive ? "btn-danger text-light animate-pulse" : "btn-outline-warning text-warning"} fw-semibold`}
             onClick={callActive ? endVideoCall : startVideoCall}
-            style={{ borderRadius: "50%", width: "40px", height: "40px" }}
+            style={{ borderRadius: "50%", width: "38px", height: "38px" }}
             title={callActive ? "End Call" : "Call"}
           >
             {callActive ? "❌" : "📞"}
@@ -902,7 +903,7 @@ function Chat() {
             <Link
               to={`/profile/${trip.createdBy._id || trip.createdBy}`}
               className="btn btn-sm btn-outline-light flex-shrink-0 d-none d-md-flex align-items-center justify-content-center"
-              style={{ borderRadius: "20px", height: "40px", padding: "0 16px" }}
+              style={{ borderRadius: "20px", height: "38px", padding: "0 14px" }}
             >
               Owner
             </Link>
@@ -913,7 +914,7 @@ function Chat() {
       {/* VIDEO STREAMS OVERLAY PANEL */}
       {callActive && (
         <div
-          className="p-3 border-bottom border-secondary d-flex flex-column align-items-center bg-black"
+          className="p-3 border-bottom border-secondary d-flex flex-column align-items-center bg-black flex-shrink-0"
           style={{ background: "#050505", zIndex: 900 }}
         >
           <div className="d-flex flex-wrap gap-3 justify-content-center mb-3">
@@ -966,10 +967,11 @@ function Chat() {
       {/* 2. CHAT SCROLL STREAM CONTAINER */}
       <div
         ref={scrollContainerRef}
-        className="flex-grow-1 p-3"
+        className="flex-grow-1 p-2 p-sm-3"
         style={{
           overflowY: "auto",
           background: "#0d0d0d",
+          minHeight: 0,
         }}
       >
         {messages.length === 0 ? (
@@ -990,7 +992,7 @@ function Chat() {
                 msg.fileUrl.match(/\.(jpeg|jpg|gif|png|webp)/i)
               );
 
-              // Seen indicator calculation (seenBy architecture check)
+              // Seen indicator calculation
               const otherRead = msg.seen || (msg.readBy && msg.readBy.some(id => id && currentUserId && id.toString() !== currentUserId.toString()));
               const seenLabel = otherRead ? "Seen" : "Sent";
 
@@ -1001,8 +1003,8 @@ function Chat() {
                   style={{ width: "100%" }}
                 >
                   <div
-                    className={`d-flex gap-2 max-w-75 ${isMe ? "flex-row-reverse" : ""}`}
-                    style={{ maxWidth: "78%" }}
+                    className={`d-flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}
+                    style={{ maxWidth: "84%" }}
                   >
                     {/* Render Receiver avatar */}
                     {!isMe && (
@@ -1019,7 +1021,7 @@ function Chat() {
                         </span>
                       )}
 
-                      {/* 2. Chat Bubble (Step 2 layout) */}
+                      {/* Chat Bubble */}
                       <div
                         className={`p-3 position-relative ${
                           isMe ? "chat-bubble-sender" : "chat-bubble-receiver"
@@ -1030,8 +1032,8 @@ function Chat() {
                           )
                         }
                         style={{
-                          fontSize: "14.5px",
-                          lineHeight: "1.4",
+                          fontSize: "14px",
+                          lineHeight: "1.45",
                           cursor: "pointer",
                           wordBreak: "break-word",
                           overflowWrap: "break-word",
@@ -1041,7 +1043,7 @@ function Chat() {
                         }}
                       >
                         {/* 1. TEXT */}
-                        {msg.message && <div className="mb-2" style={{ minWidth: 0 }}>{msg.message}</div>}
+                        {msg.message && <div className="mb-1" style={{ minWidth: 0 }}>{msg.message}</div>}
 
                         {/* 2. IMAGE ATTACHMENT */}
                         {isImage && (
@@ -1126,7 +1128,7 @@ function Chat() {
                         )}
                       </div>
 
-                      {/* 3. POPUP REACTIONS PICKER (Step 14) */}
+                      {/* POPUP REACTIONS PICKER */}
                       {activeReactionMenuId === msg._id && (
                         <div
                           className="d-flex align-items-center gap-2 p-2 bg-dark border border-secondary mt-1 rounded-pill shadow-lg animate-fade"
@@ -1178,9 +1180,9 @@ function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 4. REAL-TIME TYPING INDICATOR (Step 7) */}
+      {/* 4. REAL-TIME TYPING INDICATOR */}
       {typingUser && (
-        <div className="px-3 py-1 bg-black d-flex align-items-center gap-2 border-top border-secondary" style={{ borderTopColor: "rgba(255,255,255,0.03) !important" }}>
+        <div className="px-3 py-1 bg-black d-flex align-items-center gap-2 border-top border-secondary flex-shrink-0" style={{ borderTopColor: "rgba(255,255,255,0.03) !important" }}>
           <small className="text-warning fw-semibold">{typingUser}</small>
           <div className="d-flex gap-1 align-items-center">
             <span className="typing-indicator-dot" />
@@ -1191,10 +1193,10 @@ function Chat() {
       )}
 
       {/* PREVIEW BARS PANEL */}
-      {/* A. Document or Image attachment preview (Step 11 & 12) */}
+      {/* A. Document or Image attachment preview */}
       {file && (
         <div
-          className="p-3 border-top border-secondary bg-dark d-flex align-items-center justify-content-between"
+          className="p-3 border-top border-secondary bg-dark d-flex align-items-center justify-content-between flex-shrink-0"
           style={{ background: "#1a1a1a", borderTopColor: "rgba(255,255,255,0.08) !important" }}
         >
           <div className="d-flex align-items-center gap-3">
@@ -1224,10 +1226,10 @@ function Chat() {
         </div>
       )}
 
-      {/* B. Voice recording clip preview (Step 13) */}
+      {/* B. Voice recording clip preview */}
       {audioPreviewUrl && (
         <div
-          className="p-3 border-top border-secondary bg-dark d-flex align-items-center justify-content-between"
+          className="p-3 border-top border-secondary bg-dark d-flex align-items-center justify-content-between flex-shrink-0"
           style={{ background: "#1a1a1a", borderTopColor: "rgba(255,255,255,0.08) !important" }}
         >
           <div className="d-flex align-items-center gap-2 flex-grow-1 me-3">
@@ -1244,7 +1246,7 @@ function Chat() {
       {/* C. Editing message preview */}
       {editingMessageId && (
         <div
-          className="p-3 border-top border-secondary bg-dark d-flex align-items-center justify-content-between"
+          className="p-3 border-top border-secondary bg-dark d-flex align-items-center justify-content-between flex-shrink-0"
           style={{ background: "#1a1a1a", borderTopColor: "rgba(255,255,255,0.08) !important" }}
         >
           <div className="d-flex align-items-center gap-2">
@@ -1257,9 +1259,9 @@ function Chat() {
         </div>
       )}
 
-      {/* 5. STICKY MESSAGE INPUT PANEL (Step 9 & 10) */}
+      {/* 5. MESSAGE COMPOSER PANEL */}
       <div
-        className="p-3 border-top border-secondary sticky-bottom"
+        className="p-2 p-sm-3 border-top border-secondary flex-shrink-0"
         style={{
           background: "rgba(20, 20, 20, 0.95)",
           backdropFilter: "blur(12px)",
@@ -1272,8 +1274,8 @@ function Chat() {
           <div className="position-relative flex-shrink-0">
             <button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="btn btn-outline-secondary p-2 text-warning border-0"
-              style={{ fontSize: "18px" }}
+              className="btn btn-outline-secondary p-0 text-warning border-0 d-flex align-items-center justify-content-center"
+              style={{ fontSize: "18px", width: "38px", height: "38px" }}
               title="Add Emoji"
             >
               😊
@@ -1310,8 +1312,8 @@ function Chat() {
           <div className="flex-shrink-0">
             <label
               htmlFor="chat-attachment-input"
-              className="btn btn-outline-secondary p-2 border-0"
-              style={{ cursor: "pointer", fontSize: "18px" }}
+              className="btn btn-outline-secondary p-0 border-0 d-flex align-items-center justify-content-center m-0"
+              style={{ cursor: "pointer", fontSize: "18px", width: "38px", height: "38px" }}
               title="Attach File"
             >
               📎
@@ -1335,7 +1337,7 @@ function Chat() {
               setMessage(e.target.value);
               handleTypingEvent();
               e.target.style.height = 'auto';
-              e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 140)}px`;
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -1349,11 +1351,12 @@ function Chat() {
             style={{ 
               resize: "none", 
               borderRadius: "20px", 
-              padding: "10px 16px", 
-              maxHeight: "150px", 
+              padding: "9px 15px", 
+              maxHeight: "140px", 
               overflowY: "auto",
               flexGrow: 1,
-              minWidth: 0 
+              minWidth: 0,
+              fontSize: "14px"
             }}
           />
 
@@ -1362,7 +1365,7 @@ function Chat() {
             <button 
               className="btn btn-danger flex-shrink-0 d-flex align-items-center justify-content-center p-0" 
               onClick={stopRecording} 
-              style={{ borderRadius: "50%", width: "44px", height: "44px" }}
+              style={{ borderRadius: "50%", width: "40px", height: "40px" }}
               title="Stop Recording"
             >
               ⏹
@@ -1371,7 +1374,7 @@ function Chat() {
             <button 
               className="btn btn-outline-warning flex-shrink-0 d-flex align-items-center justify-content-center p-0" 
               onClick={startRecording} 
-              style={{ borderRadius: "50%", width: "44px", height: "44px" }} 
+              style={{ borderRadius: "50%", width: "40px", height: "40px" }} 
               title="Record Voice"
             >
               🎤
@@ -1381,7 +1384,7 @@ function Chat() {
               onClick={sendMessage}
               disabled={sending}
               className="btn btn-warning text-dark fw-bold flex-shrink-0 d-flex align-items-center justify-content-center p-0"
-              style={{ borderRadius: "50%", width: "44px", height: "44px" }}
+              style={{ borderRadius: "50%", width: "40px", height: "40px" }}
               title="Send Message"
             >
               {sending ? "..." : "➤"}

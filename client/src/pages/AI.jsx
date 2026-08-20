@@ -16,6 +16,8 @@ function AI() {
   const abortRef = useRef(null);
   const textareaRef = useRef(null);
 
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+
   // CLEANUP ACTIVE STREAMS ON UNMOUNT
   useEffect(() => {
     return () => {
@@ -60,6 +62,7 @@ function AI() {
       setActiveId(id);
       setError("");
       setLoading(true);
+      setShowMobileSidebar(false);
       const res = await API.get(`/ai/conversations/${id}`);
       if (res.data.success) {
         setMessages(res.data.conversation.messages || []);
@@ -75,6 +78,7 @@ function AI() {
   const createSession = async () => {
     try {
       setError("");
+      setShowMobileSidebar(false);
       const res = await API.post("/ai/conversations", { title: "New Travel Discussion" });
       if (res.data.success) {
         const newSession = res.data.conversation;
@@ -336,235 +340,301 @@ function AI() {
 
   return (
     <div
+      className="d-flex flex-column w-100"
       style={{
         background: "#0c0c0e",
-        minHeight: "100vh",
+        height: "calc(100dvh - 68px)",
         color: "white",
-        paddingTop: "20px",
+        overflow: "hidden",
+        position: "relative"
       }}
     >
-      <div className="container-fluid container-responsive py-4" style={{ maxWidth: "1400px" }}>
-        <div style={{ marginBottom: "20px" }}>
-          <button className="btn btn-outline-light btn-sm btn-responsive" onClick={() => navigate(-1)}>
-            ← Back
-          </button>
-        </div>
-        <div className="row g-4">
-          
-          {/* SIDEBAR: CHAT SESSIONS */}
-          <div className="col-12 col-md-3">
-            <div className="glass-card p-4 h-100 ai-sidebar">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h5 className="fw-bold text-light mb-0 d-flex align-items-center gap-2">
-                  🤖 Chats History
-                </h5>
-                <button
-                  className="btn btn-warning btn-sm d-flex align-items-center justify-content-center p-2 rounded-3 shadow"
-                  onClick={createSession}
-                  title="New Session"
-                  style={{ transition: "all 0.3s ease" }}
+      <div className="d-flex h-100 w-100 overflow-hidden">
+        
+        {/* DESKTOP SIDEBAR: CHAT SESSIONS */}
+        <div
+          className="d-none d-md-flex flex-column h-100 p-3 border-end border-secondary border-opacity-20 flex-shrink-0"
+          style={{ width: "300px", background: "#111116" }}
+        >
+          <div className="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+            <h6 className="fw-bold text-light mb-0 d-flex align-items-center gap-2">
+              🤖 Chats History
+            </h6>
+            <button
+              className="btn btn-warning btn-sm d-flex align-items-center justify-content-center p-2 rounded-3 shadow text-dark fw-bold"
+              onClick={createSession}
+              title="New Session"
+              style={{ transition: "all 0.3s ease" }}
+            >
+              <FaPlus />
+            </button>
+          </div>
+
+          <div
+            className="flex-grow-1 overflow-y-auto pe-1"
+            style={{ scrollbarWidth: "thin" }}
+          >
+            {conversations.length === 0 ? (
+              <div className="text-center py-5 text-secondary">
+                <p className="small mb-0">No active discussions</p>
+                <small className="text-muted">Start a new session above ➕</small>
+              </div>
+            ) : (
+              conversations.map(session => (
+                <div
+                  key={session._id}
+                  onClick={() => selectConversation(session._id)}
+                  className={`d-flex justify-content-between align-items-center p-3 mb-2 rounded-4 text-start cursor-pointer position-relative border transition-all ${
+                    activeId === session._id
+                      ? "bg-warning-subtle text-dark border-warning shadow-sm fw-semibold"
+                      : "bg-dark bg-opacity-40 text-light border-secondary border-opacity-10 hover-chat-row"
+                  }`}
+                  style={{
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
                 >
-                  <FaPlus />
+                  <div className="d-flex align-items-center gap-2 overflow-hidden">
+                    <FaComment className={activeId === session._id ? "text-warning" : "text-secondary"} />
+                    <span className="small text-truncate" style={{ maxWidth: "160px", fontSize: "13px" }}>
+                      {session.title || "Travel Discussion"}
+                    </span>
+                  </div>
+                  <button
+                    className="btn btn-link text-danger p-0 border-0 ms-2"
+                    onClick={(e) => deleteSession(session._id, e)}
+                    style={{ opacity: 0.8 }}
+                  >
+                    <FaTrash size={12} />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* MOBILE SIDEBAR DRAWER MODAL OVERLAY */}
+        {showMobileSidebar && (
+          <div
+            className="position-fixed top-0 start-0 w-100 h-100 d-md-none"
+            style={{ background: "rgba(0,0,0,0.75)", zIndex: 1050, backdropFilter: "blur(4px)" }}
+            onClick={() => setShowMobileSidebar(false)}
+          >
+            <div
+              className="position-absolute top-0 start-0 h-100 p-3 bg-dark border-end border-secondary border-opacity-30 d-flex flex-column"
+              style={{ width: "280px", maxWidth: "80vw" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h6 className="fw-bold text-light mb-0">🤖 Chats History</h6>
+                <button className="btn btn-sm btn-outline-light" onClick={() => setShowMobileSidebar(false)}>
+                  ✖
                 </button>
               </div>
-
-              <div
-                className="overflow-y-auto pe-1"
-                style={{ maxHeight: "60vh", scrollbarWidth: "thin" }}
-              >
-                {conversations.length === 0 ? (
-                  <div className="text-center py-5 text-secondary">
-                    <p className="small mb-0">No active discussions</p>
-                    <small className="text-muted">Start a new session above ➕</small>
+              <button className="btn btn-warning btn-sm w-100 mb-3 text-dark fw-bold" onClick={createSession}>
+                ➕ New Session
+              </button>
+              <div className="flex-grow-1 overflow-y-auto">
+                {conversations.map(session => (
+                  <div
+                    key={session._id}
+                    onClick={() => selectConversation(session._id)}
+                    className={`d-flex justify-content-between align-items-center p-2 mb-2 rounded-3 text-start border ${
+                      activeId === session._id ? "bg-warning text-dark border-warning" : "bg-black text-light border-secondary border-opacity-20"
+                    }`}
+                  >
+                    <span className="small text-truncate" style={{ maxWidth: "160px" }}>{session.title || "Travel Discussion"}</span>
+                    <button className="btn btn-link text-danger p-0 border-0 ms-2" onClick={(e) => deleteSession(session._id, e)}>
+                      <FaTrash size={12} />
+                    </button>
                   </div>
-                ) : (
-                  conversations.map(session => (
-                    <div
-                      key={session._id}
-                      onClick={() => selectConversation(session._id)}
-                      className={`d-flex justify-content-between align-items-center p-3 mb-2 rounded-4 text-start cursor-pointer position-relative border transition-all ${
-                        activeId === session._id
-                          ? "bg-warning-subtle text-dark border-warning shadow-sm"
-                          : "bg-dark bg-opacity-20 text-light border-secondary border-opacity-10 hover-chat-row"
-                      }`}
-                      style={{
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      <div className="d-flex align-items-center gap-3 overflow-hidden">
-                        <FaComment className={activeId === session._id ? "text-warning" : "text-secondary"} />
-                        <span className="small text-truncate" style={{ maxWidth: "160px", fontWeight: "500" }}>
-                          {session.title || "Travel Discussion"}
-                        </span>
-                      </div>
-                      <button
-                        className="btn btn-link text-danger p-0 border-0 ms-2"
-                        onClick={(e) => deleteSession(session._id, e)}
-                        style={{ opacity: 0.8 }}
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </div>
-                  ))
-                )}
+                ))}
               </div>
             </div>
           </div>
+        )}
 
-          {/* MAIN CHAT AREA */}
-          <div className="col-12 col-md-9">
-            <div className="glass-card p-4 d-flex flex-column ai-chat-main">
-              
-              {/* CHAT HEADER */}
-              <div className="border-bottom border-secondary border-opacity-20 pb-3 mb-3 d-flex align-items-center justify-content-between">
-                <div>
-                  <h4 className="fw-bold mb-1 text-warning">TripShare AI Buddy</h4>
-                  <p className="small text-secondary mb-0">
-                    Your premium assistant for global itineraries, transport, and travel tips
-                  </p>
-                </div>
-              </div>
-
-              {/* ERROR STATE CONTAINER */}
-              {error && (
-                <div className="alert alert-warning py-2 px-3 mb-3 small d-flex justify-content-between align-items-center rounded-4 border-0 shadow-sm">
-                  <span>⚠️ {error}</span>
-                  <button className="btn btn-link text-warning p-0 text-decoration-none small fw-bold" onClick={fetchConversations}>
-                    Refresh
-                  </button>
-                </div>
-              )}
-
-              {/* MESSAGES THREAD */}
-              <div
-                className="flex-grow-1 overflow-y-auto px-2 mb-4 d-flex flex-column gap-3"
-                style={{ scrollbarWidth: "thin" }}
+        {/* MAIN CHAT AREA */}
+        <div className="flex-grow-1 d-flex flex-column h-100 overflow-hidden" style={{ minWidth: 0 }}>
+          
+          {/* AI HEADER */}
+          <div className="p-3 border-bottom border-secondary border-opacity-20 d-flex align-items-center justify-content-between flex-shrink-0" style={{ background: "rgba(18, 18, 22, 0.95)" }}>
+            <div className="d-flex align-items-center gap-2 overflow-hidden" style={{ minWidth: 0 }}>
+              <button
+                className="btn btn-outline-light btn-sm flex-shrink-0 d-flex align-items-center justify-content-center me-1"
+                onClick={() => navigate(-1)}
+                style={{ width: "36px", height: "36px", borderRadius: "50%" }}
+                title="Go Back"
               >
-                {messages.length === 0 ? (
-                  <div className="my-auto text-center py-5">
-                    <h2 className="display-6 mb-3">✈️ Where to next?</h2>
-                    <p className="text-secondary mb-5">
-                      Ask about destination budgets, hotels, transport options, or hidden sights.
-                    </p>
-                    
-                    {/* SUGGESTION CARDS */}
-                    <div className="row g-3 justify-content-center">
-                      {[
-                        "Best places to visit in Goa under ₹10,000?",
-                        "Plan a 5-day cultural trip to Kyoto, Japan.",
-                        "What are the top safety tips for solo travel?",
-                        "Recommend budget hotels and street food in Hanoi.",
-                      ].map((item, idx) => (
-                        <div key={idx} className="col-12 col-sm-6 max-w-lg">
-                          <div
-                            onClick={() => handleSuggestion(item)}
-                            className="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-20 rounded-4 text-start cursor-pointer hover-suggestion transition-all"
-                            style={{
-                              cursor: "pointer",
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            <span className="small text-light text-opacity-75">{item}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  messages.map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`d-flex flex-column ${
-                        msg.role === "user" ? "align-items-end" : "align-items-start"
-                      }`}
-                    >
+                ←
+              </button>
+              <div className="overflow-hidden" style={{ minWidth: 0 }}>
+                <h5 className="fw-bold mb-0 text-warning text-truncate" style={{ fontSize: "16px", lineHeight: "1.2" }}>
+                  TripShare AI Buddy
+                </h5>
+                <p className="small text-secondary mb-0 text-truncate" style={{ fontSize: "11px", lineHeight: "1.2" }}>
+                  Your premium assistant for global itineraries, transport, and travel tips
+                </p>
+              </div>
+            </div>
+            
+            <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-2">
+              <button
+                className="btn btn-outline-warning btn-sm d-md-none flex-shrink-0 px-2 py-1"
+                onClick={() => setShowMobileSidebar(true)}
+                style={{ fontSize: "12px", borderRadius: "8px" }}
+              >
+                📜 History
+              </button>
+              <button
+                className="btn btn-warning btn-sm flex-shrink-0 px-2 py-1 text-dark fw-bold"
+                onClick={createSession}
+                title="New Session"
+                style={{ fontSize: "12px", borderRadius: "8px" }}
+              >
+                ➕ New
+              </button>
+            </div>
+          </div>
+
+          {/* ERROR STATE CONTAINER */}
+          {error && (
+            <div className="alert alert-warning py-2 px-3 m-3 mb-0 small d-flex justify-content-between align-items-center rounded-4 border-0 shadow-sm flex-shrink-0">
+              <span>⚠️ {error}</span>
+              <button className="btn btn-link text-warning p-0 text-decoration-none small fw-bold" onClick={fetchConversations}>
+                Refresh
+              </button>
+            </div>
+          )}
+
+          {/* MESSAGES THREAD */}
+          <div
+            className="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-3"
+            style={{ scrollbarWidth: "thin", minHeight: 0 }}
+          >
+            {messages.length === 0 ? (
+              <div className="my-auto text-center py-4">
+                <h3 className="fw-bold mb-2">✈️ Where to next?</h3>
+                <p className="text-secondary mb-4 small" style={{ maxWidth: "480px", margin: "0 auto" }}>
+                  Ask about destination budgets, hotels, transport options, or hidden sights.
+                </p>
+                
+                {/* SUGGESTION CARDS */}
+                <div className="row g-2 justify-content-center" style={{ maxWidth: "800px", margin: "0 auto" }}>
+                  {[
+                    "Best places to visit in Goa under ₹10,000?",
+                    "Plan a 5-day cultural trip to Kyoto, Japan.",
+                    "What are the top safety tips for solo travel?",
+                    "Recommend budget hotels and street food in Hanoi.",
+                  ].map((item, idx) => (
+                    <div key={idx} className="col-12 col-sm-6">
                       <div
-                        className={`p-3 max-w-85 rounded-4 shadow-sm ${
-                          msg.role === "user"
-                            ? "bg-warning text-dark fw-medium"
-                            : "bg-dark bg-opacity-50 border border-secondary border-opacity-20 text-light"
-                        }`}
-                        style={{
-                          maxWidth: "75%",
-                          whiteSpace: "pre-wrap",
-                          lineHeight: "1.6",
-                          fontSize: "15px",
-                        }}
+                        onClick={() => handleSuggestion(item)}
+                        className="p-3 bg-dark bg-opacity-50 border border-secondary border-opacity-20 rounded-4 text-start cursor-pointer hover-suggestion transition-all"
+                        style={{ cursor: "pointer", transition: "all 0.2s ease" }}
                       >
-                        {msg.role === "user" ? msg.content : renderFormattedContent(msg.content)}
+                        <span className="small text-light text-opacity-90">{item}</span>
                       </div>
-                      <span className="text-muted small mt-1 px-2" style={{ fontSize: "10px" }}>
-                        {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
-                      </span>
                     </div>
-                  ))
-                )}
-
-                {/* AI LOADING SKELETON */}
-                {loading && (
-                  <div className="d-flex align-items-center gap-2 p-3 bg-dark bg-opacity-30 border border-secondary border-opacity-10 rounded-4 text-secondary align-self-start" style={{ width: "fit-content" }}>
-                    <div className="spinner-grow spinner-grow-sm text-warning" role="status" style={{ animationDelay: "0ms" }}></div>
-                    <div className="spinner-grow spinner-grow-sm text-warning" role="status" style={{ animationDelay: "150ms" }}></div>
-                    <div className="spinner-grow spinner-grow-sm text-warning" role="status" style={{ animationDelay: "300ms" }}></div>
-                    <span className="ms-2 small">Thinking...</span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`d-flex flex-column ${
+                    msg.role === "user" ? "align-items-end" : "align-items-start"
+                  }`}
+                >
+                  <div
+                    className={`p-3 rounded-4 shadow-sm ${
+                      msg.role === "user"
+                        ? "bg-warning text-dark fw-medium"
+                        : "bg-dark bg-opacity-60 border border-secondary border-opacity-20 text-light"
+                    }`}
+                    style={{
+                      maxWidth: msg.role === "user" ? "82%" : "90%",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                      whiteSpace: "pre-wrap",
+                      lineHeight: "1.55",
+                      fontSize: "14.5px",
+                    }}
+                  >
+                    {msg.role === "user" ? msg.content : renderFormattedContent(msg.content)}
                   </div>
-                )}
+                  <span className="text-muted small mt-1 px-2" style={{ fontSize: "10px" }}>
+                    {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                  </span>
+                </div>
+              ))
+            )}
 
-                <div ref={messagesEndRef} />
+            {/* AI LOADING SKELETON */}
+            {loading && (
+              <div className="d-flex align-items-center gap-2 p-3 bg-dark bg-opacity-30 border border-secondary border-opacity-10 rounded-4 text-secondary align-self-start" style={{ width: "fit-content" }}>
+                <div className="spinner-grow spinner-grow-sm text-warning" role="status" style={{ animationDelay: "0ms" }}></div>
+                <div className="spinner-grow spinner-grow-sm text-warning" role="status" style={{ animationDelay: "150ms" }}></div>
+                <div className="spinner-grow spinner-grow-sm text-warning" role="status" style={{ animationDelay: "300ms" }}></div>
+                <span className="ms-2 small">Thinking...</span>
               </div>
+            )}
 
-              {/* INPUT BOX */}
-              <div className="d-flex gap-2 align-items-end w-100 mt-3">
-                <textarea
-                  ref={textareaRef}
-                  rows="1"
-                  placeholder="Ask AI Travel Buddy anything..."
-                  className="form-control bg-dark text-light border-secondary border-opacity-35 p-3 rounded-4"
-                  value={question}
-                  onChange={(e) => {
-                    setQuestion(e.target.value);
-                    e.target.style.height = 'auto';
-                    e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      if (!loading) askAI();
-                    }
-                  }}
-                  disabled={loading}
-                  style={{
-                    resize: "none",
-                    boxShadow: "none",
-                    maxHeight: "150px",
-                    overflowY: "auto",
-                    flexGrow: 1,
-                    minWidth: 0
-                  }}
-                />
-                {loading ? (
-                  <button
-                    className="btn btn-danger rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center"
-                    onClick={stopGeneration}
-                    style={{ width: "52px", height: "52px" }}
-                    title="Stop"
-                  >
-                    ⏹️
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-warning rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center text-dark"
-                    onClick={askAI}
-                    disabled={!question.trim()}
-                    style={{ width: "52px", height: "52px", fontSize: "20px" }}
-                    title="Send"
-                  >
-                    ➤
-                  </button>
-                )}
-              </div>
+            <div ref={messagesEndRef} />
+          </div>
 
+          {/* AI COMPOSER */}
+          <div className="p-2 p-sm-3 border-top border-secondary border-opacity-20 flex-shrink-0" style={{ background: "rgba(18, 18, 22, 0.95)" }}>
+            <div className="d-flex gap-2 align-items-end w-100">
+              <textarea
+                ref={textareaRef}
+                rows="1"
+                placeholder="Ask AI Travel Buddy anything..."
+                className="form-control bg-dark text-light border-secondary border-opacity-35 p-3 rounded-4 shadow-none"
+                value={question}
+                onChange={(e) => {
+                  setQuestion(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${Math.min(e.target.scrollHeight, 140)}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!loading) askAI();
+                  }
+                }}
+                disabled={loading}
+                style={{
+                  resize: "none",
+                  maxHeight: "140px",
+                  overflowY: "auto",
+                  flexGrow: 1,
+                  minWidth: 0,
+                  fontSize: "14px",
+                  borderRadius: "20px"
+                }}
+              />
+              {loading ? (
+                <button
+                  className="btn btn-danger rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center"
+                  onClick={stopGeneration}
+                  style={{ width: "42px", height: "42px" }}
+                  title="Stop"
+                >
+                  ⏹️
+                </button>
+              ) : (
+                <button
+                  className="btn btn-warning rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center text-dark"
+                  onClick={askAI}
+                  disabled={!question.trim()}
+                  style={{ width: "42px", height: "42px", fontSize: "18px" }}
+                  title="Send"
+                >
+                  ➤
+                </button>
+              )}
             </div>
           </div>
 
@@ -579,9 +649,6 @@ function AI() {
           background-color: rgba(255, 193, 7, 0.08) !important;
           border-color: rgba(255, 193, 7, 0.4) !important;
           transform: translateY(-2px);
-        }
-        .max-w-85 {
-          max-width: 85%;
         }
         .cursor-pointer {
           cursor: pointer;
