@@ -103,6 +103,9 @@ import Trip
 
 const app = express();
 
+// TRUST PROXY (Required for Render reverse proxy & express-rate-limit)
+app.set("trust proxy", 1);
+
 // HELMET SECURITY HEADERS (CORS Compatible)
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
