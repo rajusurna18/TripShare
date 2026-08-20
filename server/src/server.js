@@ -29,6 +29,8 @@ import {
 import connectDB
   from "./config/db.js";
 
+import mongoose from "mongoose";
+
 import genAI
   from "./config/gemini.js";
 
@@ -105,6 +107,7 @@ const app = express();
 
 // TRUST PROXY (Required for Render reverse proxy & express-rate-limit)
 app.set("trust proxy", 1);
+console.log(`[Express Config] Trust proxy setting initialized: ${app.get("trust proxy")}`);
 
 // HELMET SECURITY HEADERS (CORS Compatible)
 app.use(helmet({
