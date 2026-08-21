@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import toast from "react-hot-toast";
 
@@ -14,6 +15,9 @@ function Register() {
   const [loading, setLoading] =
     useState(false);
 
+  const [showPassword, setShowPassword] =
+    useState(false);
+
   const [formData, setFormData] =
     useState({
       name: "",
@@ -23,6 +27,12 @@ function Register() {
     });
 
   useEffect(() => {
+    const existingToken = localStorage.getItem("token");
+    if (existingToken) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
     const searchParams = new URLSearchParams(window.location.search);
     const token = searchParams.get("token");
     const userStr = searchParams.get("user");
@@ -62,6 +72,12 @@ function Register() {
         return;
       }
 
+      const passwordRegex = /^(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        toast.error("Must contain: 1 number, 1 special character, minimum 6 characters.");
+        return;
+      }
+
       try {
         setLoading(true);
         // Clear any old state before starting a fresh registration
@@ -94,7 +110,7 @@ function Register() {
 
   return (
 
-    <div className="container vh-100 d-flex justify-content-center align-items-center">
+    <div className="container min-vh-100 d-flex justify-content-center align-items-center py-4">
 
       <div
         className="card p-4 bg-dark text-white shadow-lg auth-card"
@@ -158,50 +174,116 @@ function Register() {
 
             </label>
 
-            <input
-              type="password"
-              name="password"
-              className="form-control"
-              placeholder="******"
+            <div className="position-relative d-flex align-items-center">
 
-              pattern="^(?=.*[A-Z])(?=.*[0-9]).{6,}$"
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                className="form-control pe-5"
+                placeholder="******"
 
-              title="
+                pattern="^(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$"
+
+                title="
 Password must contain:
-- 1 uppercase letter
 - 1 number
+- 1 special character
 - Minimum 6 characters
 "
 
-              onChange={handleChange}
+                onChange={handleChange}
 
-              required
-            />
+                required
+              />
 
-            <small className="text-secondary">
+              <button
+                type="button"
+                className="position-absolute end-0 top-50 translate-middle-y me-2 p-0 border-0 bg-transparent d-flex align-items-center justify-content-center"
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  cursor: "pointer",
+                  zIndex: 5,
+                  outline: "none"
+                }}
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <FaEye className="fs-5 text-warning" />
+                ) : (
+                  <FaEyeSlash className="fs-5 text-light opacity-75" />
+                )}
+              </button>
 
-              Must contain:
-              1 uppercase letter,
-              1 number,
-              minimum 6 characters.
+            </div>
+
+            <small className="text-secondary d-block mt-1">
+
+              Must contain: 1 number, 1 special character, minimum 6 characters.
 
             </small>
 
           </div>
 
           {/* TERMS & CONDITIONS */}
-          <div className="mb-4 form-check d-flex align-items-center">
-            <input
-              type="checkbox"
-              name="termsAccepted"
-              className="form-check-input mt-0 me-2"
-              id="termsCheck"
-              checked={formData.termsAccepted}
-              onChange={handleChange}
-              required
-            />
-            <label className="form-check-label text-secondary small" htmlFor="termsCheck">
-              I agree to the TripShare <Link to="/terms" className="text-info text-decoration-none">Terms & Conditions</Link>
+          <div className="mb-4 d-flex align-items-start">
+            <div
+              className="position-relative flex-shrink-0 me-2"
+              style={{ width: "21px", height: "21px", marginTop: "2px" }}
+            >
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                className="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                id="termsCheck"
+                checked={formData.termsAccepted}
+                onChange={handleChange}
+                required
+                style={{ cursor: "pointer", zIndex: 2 }}
+              />
+              <div
+                className="w-100 h-100 rounded d-flex align-items-center justify-content-center transition-all"
+                style={{
+                  backgroundColor: formData.termsAccepted ? "#ffc107" : "rgba(255, 255, 255, 0.05)",
+                  border: formData.termsAccepted ? "2px solid #ffc107" : "2px solid rgba(255, 255, 255, 0.5)",
+                  color: "#000000",
+                  pointerEvents: "none",
+                  boxShadow: formData.termsAccepted ? "0 0 8px rgba(255, 193, 7, 0.4)" : "none"
+                }}
+              >
+                {formData.termsAccepted && (
+                  <svg
+                    width="13"
+                    height="10"
+                    viewBox="0 0 13 10"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M1.5 5L4.5 8L11.5 1"
+                      stroke="#000000"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <label
+              className="form-check-label text-light small mb-0 flex-grow-1"
+              htmlFor="termsCheck"
+              style={{ cursor: "pointer", userSelect: "none", lineHeight: "1.4" }}
+            >
+              I agree to the TripShare{" "}
+              <Link
+                to="/terms"
+                className="text-info text-decoration-none fw-semibold"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Terms & Conditions
+              </Link>
             </label>
           </div>
 

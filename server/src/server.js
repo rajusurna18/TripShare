@@ -411,7 +411,7 @@ const io = new Server(
     cors: {
 
       origin:
-        "http://localhost:5173",
+        process.env.CLIENT_URL || "http://localhost:5173",
 
       methods:
         ["GET", "POST"],
@@ -432,6 +432,16 @@ const onlineUsers =
 // LIVE LOCATIONS
 
 let liveLocations = [];
+
+// HELPER FOR SOCKET ROOM ID EXTRACTION
+const getTripRoomId = (data) => {
+  if (!data) return null;
+  if (typeof data.trip === "object" && data.trip?._id) return data.trip._id.toString();
+  if (typeof data.trip === "string" && data.trip) return data.trip;
+  if (typeof data.tripId === "object" && data.tripId?._id) return data.tripId._id.toString();
+  if (typeof data.tripId === "string" && data.tripId) return data.tripId;
+  return null;
+};
 
 // SOCKET AUTHENTICATION MIDDLEWARE
 io.use((socket, next) => {
@@ -471,11 +481,13 @@ io.on(
       "register_user",
 
       (userId) => {
+        if (!userId) return;
+        const uIdStr = typeof userId === "object" ? (userId._id || userId.id)?.toString() : userId.toString();
 
-        if (!onlineUsers.has(userId)) {
-          onlineUsers.set(userId, new Set());
+        if (!onlineUsers.has(uIdStr)) {
+          onlineUsers.set(uIdStr, new Set());
         }
-        onlineUsers.get(userId).add(socket.id);
+        onlineUsers.get(uIdStr).add(socket.id);
 
         io.emit(
 
@@ -527,10 +539,10 @@ io.on(
             return;
           }
 
-          socket.join(tripId);
+          socket.join(tripId.toString());
 
           console.log(
-            `Joined Room: ${tripId}`
+            `[Socket] User ${userId} joined room: ${tripId}`
           );
         } catch (err) {
           console.error("Socket join error:", err.message);
@@ -574,15 +586,10 @@ io.on(
 
         }
 
-        io.to(data.tripId)
-
-          .emit(
-
-            "update_locations",
-
-            liveLocations
-
-          );
+        const roomId = getTripRoomId(data);
+        if (roomId) {
+          io.to(roomId).emit("update_locations", liveLocations);
+        }
 
       }
 
@@ -596,7 +603,15 @@ io.on(
 
       (data) => {
 
-        io.to(data.trip)
+        const roomId = getTripRoomId(data);
+        if (!roomId) {
+          console.error("Socket error: Missing trip room ID in send_message event");
+          return;
+        }
+
+        console.log(`[Socket] Broadcasting receive_message to room: ${roomId}`);
+
+        io.to(roomId)
 
           .emit(
 
@@ -606,7 +621,7 @@ io.on(
 
           );
 
-        socket.to(data.trip)
+        socket.to(roomId)
 
           .emit(
 
@@ -621,19 +636,11 @@ io.on(
                 `${data.sender?.name || "Traveler"} sent a message`,
 
               tripId:
-                data.trip,
+                roomId,
 
             }
 
           );
-
-        console.log(
-
-          "Message Sent:",
-
-          data.message
-
-        );
 
       }
 
@@ -647,15 +654,10 @@ io.on(
 
       (data) => {
 
-        io.to(data.tripId)
-
-          .emit(
-
-            "message_deleted",
-
-            data
-
-          );
+        const roomId = getTripRoomId(data);
+        if (roomId) {
+          io.to(roomId).emit("message_deleted", data);
+        }
 
       }
 
@@ -669,15 +671,10 @@ io.on(
 
       (data) => {
 
-        io.to(data.tripId)
-
-          .emit(
-
-            "message_reaction_update",
-
-            data
-
-          );
+        const roomId = getTripRoomId(data);
+        if (roomId) {
+          io.to(roomId).emit("message_reaction_update", data);
+        }
 
       }
 
@@ -691,15 +688,10 @@ io.on(
 
       (data) => {
 
-        socket.to(data.tripId)
-
-          .emit(
-
-            "user_typing",
-
-            data
-
-          );
+        const roomId = getTripRoomId(data);
+        if (roomId) {
+          socket.to(roomId).emit("user_typing", data);
+        }
 
       }
 
@@ -713,13 +705,10 @@ io.on(
 
       (data) => {
 
-        socket.to(data.tripId)
-
-          .emit(
-
-            "user_stop_typing"
-
-          );
+        const roomId = getTripRoomId(data);
+        if (roomId) {
+          socket.to(roomId).emit("user_stop_typing");
+        }
 
       }
 
@@ -733,54 +722,240 @@ io.on(
 
       (data) => {
 
-        socket.to(data.tripId)
-
-          .emit(
-
-            "message_seen_update",
-
-            {
-
-              messageId:
-                data.messageId,
-
-              userId:
-                data.userId,
-
-            }
-
-          );
+        const roomId = getTripRoomId(data);
+        if (roomId) {
+          socket.to(roomId).emit("message_seen_update", {
+            messageId: data.messageId,
+            userId: data.userId,
+          });
+        }
 
       }
 
     );
 
+// IN-MEMORY GROUP CALLS REGISTRY
+// Map<tripId, { tripId, callType, callerId, callerName, callerAvatar, participants: Map<userId, { userId, name, avatar, socketId, muted, videoOff }> }>
+const activeGroupCalls = new Map();
+
+    // ==========================================
+    // GROUP VOICE & VIDEO CALLING (WhatsApp Style)
+    // ==========================================
+
+    socket.on("start_group_call", (data) => {
+      const { tripId, callType, callerId, callerName, callerAvatar } = data;
+      if (!tripId || !callerId) return;
+
+      const tIdStr = tripId.toString();
+      const uIdStr = callerId.toString();
+
+      let callState = activeGroupCalls.get(tIdStr);
+      if (!callState) {
+        callState = {
+          tripId: tIdStr,
+          callType: callType || "voice",
+          callerId: uIdStr,
+          callerName: callerName || "Traveler",
+          callerAvatar: callerAvatar || "",
+          participants: new Map(),
+        };
+        activeGroupCalls.set(tIdStr, callState);
+      } else {
+        callState.callType = callType || callState.callType;
+      }
+
+      callState.participants.set(uIdStr, {
+        userId: uIdStr,
+        name: callerName || "Traveler",
+        avatar: callerAvatar || "",
+        socketId: socket.id,
+        muted: false,
+        videoOff: callType === "voice",
+      });
+
+      const payload = {
+        tripId: tIdStr,
+        callType: callState.callType,
+        callerId: uIdStr,
+        callerName: callerName || "Traveler",
+        callerAvatar: callerAvatar || "",
+        participants: Array.from(callState.participants.values()),
+      };
+
+      // Notify other trip room members
+      socket.to(tIdStr).emit("incoming_group_call", payload);
+      socket.emit("group_call_state", payload);
+
+      console.log(`[Group Call] ${callerName} started ${callState.callType} call in trip ${tIdStr}`);
+    });
+
+    socket.on("join_group_call", (data) => {
+      const { tripId, userId, name, avatar } = data;
+      if (!tripId || !userId) return;
+
+      const tIdStr = tripId.toString();
+      const uIdStr = userId.toString();
+
+      let callState = activeGroupCalls.get(tIdStr);
+      if (!callState) {
+        callState = {
+          tripId: tIdStr,
+          callType: data.callType || "voice",
+          callerId: uIdStr,
+          callerName: name || "Traveler",
+          callerAvatar: avatar || "",
+          participants: new Map(),
+        };
+        activeGroupCalls.set(tIdStr, callState);
+      }
+
+      callState.participants.set(uIdStr, {
+        userId: uIdStr,
+        name: name || "Traveler",
+        avatar: avatar || "",
+        socketId: socket.id,
+        muted: false,
+        videoOff: callState.callType === "voice",
+      });
+
+      const participantList = Array.from(callState.participants.values());
+      const payload = {
+        tripId: tIdStr,
+        callType: callState.callType,
+        userId: uIdStr,
+        name: name || "Traveler",
+        avatar: avatar || "",
+        socketId: socket.id,
+        participants: participantList,
+      };
+
+      socket.to(tIdStr).emit("group_call_user_joined", payload);
+      socket.emit("group_call_state", payload);
+
+      console.log(`[Group Call] ${name} joined ${callState.callType} call in trip ${tIdStr}`);
+    });
+
+    socket.on("group_webrtc_offer", (data) => {
+      const { targetUserId } = data;
+      emitToTargetUser(targetUserId, "group_webrtc_offer", data);
+    });
+
+    socket.on("group_webrtc_answer", (data) => {
+      const { targetUserId } = data;
+      emitToTargetUser(targetUserId, "group_webrtc_answer", data);
+    });
+
+    socket.on("group_ice_candidate", (data) => {
+      const { targetUserId } = data;
+      emitToTargetUser(targetUserId, "group_ice_candidate", data);
+    });
+
+    socket.on("toggle_group_media", (data) => {
+      const { tripId, userId, muted, videoOff } = data;
+      if (!tripId || !userId) return;
+      const tIdStr = tripId.toString();
+      const uIdStr = userId.toString();
+
+      const callState = activeGroupCalls.get(tIdStr);
+      if (callState && callState.participants.has(uIdStr)) {
+        const p = callState.participants.get(uIdStr);
+        if (typeof muted === "boolean") p.muted = muted;
+        if (typeof videoOff === "boolean") p.videoOff = videoOff;
+
+        socket.to(tIdStr).emit("group_media_updated", {
+          tripId: tIdStr,
+          userId: uIdStr,
+          muted: p.muted,
+          videoOff: p.videoOff,
+        });
+      }
+    });
+
+    socket.on("leave_group_call", (data) => {
+      const { tripId, userId } = data;
+      if (!tripId || !userId) return;
+      const tIdStr = tripId.toString();
+      const uIdStr = userId.toString();
+
+      const callState = activeGroupCalls.get(tIdStr);
+      if (callState) {
+        callState.participants.delete(uIdStr);
+        socket.to(tIdStr).emit("group_call_user_left", {
+          tripId: tIdStr,
+          userId: uIdStr,
+          remainingParticipants: Array.from(callState.participants.values()),
+        });
+
+        console.log(`[Group Call] User ${uIdStr} left group call in trip ${tIdStr}`);
+
+        if (callState.participants.size === 0) {
+          activeGroupCalls.delete(tIdStr);
+          io.to(tIdStr).emit("group_call_ended", { tripId: tIdStr });
+          console.log(`[Group Call] Group call in trip ${tIdStr} ended (all participants left)`);
+        }
+      }
+    });
+
+    socket.on("reject_group_call", (data) => {
+      const { tripId, userId } = data;
+      if (!tripId || !userId) return;
+      const tIdStr = tripId.toString();
+      const uIdStr = userId.toString();
+
+      socket.to(tIdStr).emit("group_call_rejected", { tripId: tIdStr, userId: uIdStr });
+    });
+
     // =========================
-    // VIDEO CALL FEATURE
+    // ONE-TO-ONE VIDEO CALL BACKWARD COMPATIBILITY
     // =========================
     
     const emitToTargetUser = (targetId, event, data) => {
-      if (onlineUsers.has(targetId)) {
-        const socketIds = onlineUsers.get(targetId);
+      if (!targetId) return;
+      const targetIdStr = typeof targetId === "object" ? (targetId._id || targetId.id)?.toString() : targetId.toString();
+      let sentCount = 0;
+      if (onlineUsers.has(targetIdStr)) {
+        const socketIds = onlineUsers.get(targetIdStr);
         socketIds.forEach(id => {
           io.to(id).emit(event, data);
+          sentCount++;
         });
+      }
+      
+      const roomId = getTripRoomId(data);
+      if (roomId) {
+        socket.to(roomId).emit(event, data);
       }
     };
 
-    // START VIDEO CALL (Rings the other user)
+    socket.on("start_call", (data) => {
+      emitToTargetUser(data.targetId, "incoming_call", data);
+    });
 
     socket.on("start_video_call", (data) => {
       emitToTargetUser(data.targetId, "incoming_video_call", data);
-      console.log(`${data.callerId} started video call with ${data.targetId}`);
+      emitToTargetUser(data.targetId, "incoming_call", { ...data, callType: "video" });
+    });
+
+    socket.on("accept_call", (data) => {
+      emitToTargetUser(data.targetId, "call_accepted", data);
+    });
+
+    socket.on("end_call", (data) => {
+      emitToTargetUser(data.targetId, "call_ended", data);
     });
 
     socket.on("end_video_call", (data) => {
       emitToTargetUser(data.targetId, "video_call_ended", data);
+      emitToTargetUser(data.targetId, "call_ended", data);
     });
-    
+
+    socket.on("reject_call", (data) => {
+      emitToTargetUser(data.targetId, "call_rejected", data);
+    });
+
     socket.on("video_call_rejected", (data) => {
       emitToTargetUser(data.targetId, "video_call_rejected", data);
+      emitToTargetUser(data.targetId, "call_rejected", data);
     });
 
     socket.on("webrtc_offer", (data) => {
@@ -797,55 +972,44 @@ io.on(
 
     // DISCONNECT
 
-    socket.on(
-
-      "disconnect",
-
-      () => {
-
-        for (
-
-          const [userId, socketsSet]
-
-          of onlineUsers.entries()
-
-        ) {
-
-          if (socketsSet.has(socket.id)) {
-
-            socketsSet.delete(socket.id);
-
-            if (socketsSet.size === 0) {
-
-              onlineUsers.delete(
-                userId
-              );
-
-            }
-
-            break;
-
+    socket.on("disconnect", () => {
+      for (const [userId, socketsSet] of onlineUsers.entries()) {
+        if (socketsSet.has(socket.id)) {
+          socketsSet.delete(socket.id);
+          if (socketsSet.size === 0) {
+            onlineUsers.delete(userId);
           }
-
+          break;
         }
-
-        // Notify room of disconnect to handle abandoned calls
-        if (socket.user && socket.user.id) {
-          socket.broadcast.emit("peer_disconnected", { userId: socket.user.id });
-        }
-
-        io.emit(
-          "online_users",
-          Array.from(
-            onlineUsers.keys()
-          )
-        );
-        console.log(
-          "User Disconnected"
-        );
       }
 
-    );
+      // Cleanup user from active group calls on disconnect
+      if (socket.user && (socket.user._id || socket.user.id)) {
+        const uIdStr = (socket.user._id || socket.user.id).toString();
+        for (const [tIdStr, callState] of activeGroupCalls.entries()) {
+          if (callState.participants.has(uIdStr)) {
+            callState.participants.delete(uIdStr);
+            socket.to(tIdStr).emit("group_call_user_left", {
+              tripId: tIdStr,
+              userId: uIdStr,
+              remainingParticipants: Array.from(callState.participants.values()),
+            });
+
+            if (callState.participants.size === 0) {
+              activeGroupCalls.delete(tIdStr);
+              io.to(tIdStr).emit("group_call_ended", { tripId: tIdStr });
+            }
+          }
+        }
+      }
+
+      if (socket.user && socket.user.id) {
+        socket.broadcast.emit("peer_disconnected", { userId: socket.user.id });
+      }
+
+      io.emit("online_users", Array.from(onlineUsers.keys()));
+      console.log("User Disconnected");
+    });
 
   }
 

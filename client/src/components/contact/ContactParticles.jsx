@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 export default function ContactParticles({ count = 20 }) {
-  const staticParticles = Array.from({ length: count }).map((_, i) => ({
-    size: Math.random() * 4 + 2,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    duration: Math.random() * 20 + 10,
-    delay: Math.random() * 5
-  }));
+  const [staticParticles, setStaticParticles] = useState([]);
+
+  useEffect(() => {
+    setStaticParticles(
+      Array.from({ length: count }).map((_, i) => ({
+        size: Math.random() * 4 + 2,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        duration: Math.random() * 20 + 10,
+        delay: Math.random() * 5
+      }))
+    );
+  }, [count]);
 
   return (
     <>

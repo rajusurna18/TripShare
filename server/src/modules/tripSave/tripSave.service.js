@@ -30,15 +30,6 @@ export const saveTripService = async (tripId, userId) => {
   // Fetch actor's name
   const userSaving = await User.findById(userId).select("name");
 
-  // Send real-time notification to owner
-  await createNotificationService(
-    trip.createdBy,
-    `${userSaving.name} bookmarked your trip to ${trip.destination}! ⭐`,
-    "trip_save",
-    `/trip/${tripId}`,
-    userId
-  );
-
   // Log Activity
   await logActivityService(
     userId,
@@ -155,18 +146,8 @@ export const shareTripService = async (tripId, userId, platform, ipAddress) => {
   // Increment sharesCount cache
   await Trip.findByIdAndUpdate(tripId, { $inc: { sharesCount: 1 } });
 
-  // Send real-time notification if user is logged in
+  // Log Activity
   if (userId) {
-    const userSharing = await User.findById(userId).select("name");
-    await createNotificationService(
-      trip.createdBy,
-      `${userSharing.name} shared your trip to ${trip.destination} on ${platform}! 🔗`,
-      "trip_share",
-      `/trip/${tripId}`,
-      userId
-    );
-
-    // Log Activity
     await logActivityService(
       userId,
       "TRIP_SHARED",

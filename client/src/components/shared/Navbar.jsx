@@ -9,8 +9,8 @@ import {
 } from "react";
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { 
-  Menu, X, Home, Compass, FileText, Info, Sparkles, Phone, 
+import {
+  Menu, X, Home, Compass, FileText, Info, Sparkles, Phone,
   Bell, User, LogIn, LogOut, Bookmark, Settings as SettingsIcon,
   ChevronRight, ArrowLeft
 } from "lucide-react";
@@ -19,12 +19,19 @@ import API from "../../services/api";
 
 function Navbar() {
   const [notifications, setNotifications] = useState([]);
-  const [user, setUser] = useState(null);
-  
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  
+
   const dropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -80,6 +87,7 @@ function Navbar() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(res.data);
+      localStorage.setItem("user", JSON.stringify(res.data));
     } catch (err) {
       console.log(err);
     }
@@ -103,9 +111,11 @@ function Navbar() {
     fetchProfile();
     fetchNotifications();
 
-    socket.on("new_notification", () => {
+    const handleNewNotification = () => {
       fetchNotifications();
-    });
+    };
+
+    socket.on("new_notification", handleNewNotification);
 
     const handleAuthExpired = () => {
       setUser(null);
@@ -120,7 +130,7 @@ function Navbar() {
     window.addEventListener("auth-expired", handleAuthExpired);
     window.addEventListener("auth-success", handleAuthSuccess);
     return () => {
-      socket.off("new_notification");
+      socket.off("new_notification", handleNewNotification);
       window.removeEventListener("auth-expired", handleAuthExpired);
       window.removeEventListener("auth-success", handleAuthSuccess);
     };
@@ -129,6 +139,7 @@ function Navbar() {
   // LOGOUT
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     localStorage.removeItem("activeTripId");
     setUser(null);
     setNotifications([]);
@@ -144,7 +155,7 @@ function Navbar() {
     { name: "Blogs", path: "/blogs", Icon: FileText },
     { name: "About", path: "/about", Icon: Info },
     { name: "Features", path: "/features", Icon: Sparkles },
-    { name: "Contact", path: "/contact", Icon: Phone },
+    { name: "Contact Us", path: "/contact", Icon: Phone },
   ];
 
   // FRAMER MOTION VARIANTS
@@ -188,15 +199,15 @@ function Navbar() {
   };
 
   return (
-    <nav 
-      className="navbar navbar-expand-lg navbar-dark position-sticky top-0 shadow-sm" 
-      style={{ 
-        zIndex: 1000, 
-        backdropFilter: isMobileMenuOpen ? 'blur(24px)' : 'blur(14px)', 
-        background: isMobileMenuOpen ? 'rgba(10, 10, 15, 0.98)' : 'rgba(10, 10, 20, 0.85)', 
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)', 
-        minHeight: '68px', 
-        transition: 'background 0.3s ease, backdrop-filter 0.3s ease' 
+    <nav
+      className="navbar navbar-expand-lg navbar-dark position-sticky top-0 shadow-sm"
+      style={{
+        zIndex: 1000,
+        backdropFilter: isMobileMenuOpen ? 'blur(24px)' : 'blur(14px)',
+        background: isMobileMenuOpen ? 'rgba(10, 10, 15, 0.98)' : 'rgba(10, 10, 20, 0.85)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        minHeight: '68px',
+        transition: 'background 0.3s ease, backdrop-filter 0.3s ease'
       }}
     >
       <div className="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-between">
@@ -251,7 +262,7 @@ function Navbar() {
                   <link.Icon size={18} strokeWidth={location.pathname === link.path ? 2.5 : 2} />
                   <span>{link.name}</span>
                   {location.pathname === link.path && !shouldReduceMotion && (
-                    <motion.div 
+                    <motion.div
                       layoutId="nav-indicator"
                       className="position-absolute bottom-0 start-0 w-100 bg-warning"
                       style={{ height: '2px', borderRadius: '2px' }}
@@ -265,17 +276,17 @@ function Navbar() {
 
             {/* SEPARATOR */}
             <li className="nav-item mx-2 d-none d-xl-block">
-               <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.1)' }}></div>
+              <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.1)' }}></div>
             </li>
 
             {user ? (
               <>
                 {/* NOTIFICATION */}
                 <li className="nav-item position-relative mx-1">
-                  <Link 
-                    className={`nav-link p-2 d-flex align-items-center justify-content-center transition-colors rounded-circle ${location.pathname === "/notifications" ? 'text-warning bg-white bg-opacity-10' : 'text-light text-opacity-75 hover:text-warning hover:bg-white hover:bg-opacity-5'}`} 
-                    to="/notifications" 
-                    aria-label="Notifications" 
+                  <Link
+                    className={`nav-link p-2 d-flex align-items-center justify-content-center transition-colors rounded-circle ${location.pathname === "/notifications" ? 'text-warning bg-white bg-opacity-10' : 'text-light text-opacity-75 hover:text-warning hover:bg-white hover:bg-opacity-5'}`}
+                    to="/notifications"
+                    aria-label="Notifications"
                     style={{ width: '40px', height: '40px' }}
                   >
                     <Bell size={20} strokeWidth={location.pathname === "/notifications" ? 2.5 : 2} />
@@ -392,8 +403,8 @@ function Navbar() {
         {isMobileMenuOpen && (
           <motion.div
             className="d-lg-none position-absolute start-0 w-100 overflow-y-auto overflow-x-hidden"
-            style={{ 
-              top: "100%", 
+            style={{
+              top: "100%",
               height: "calc(100dvh - 68px)",
               background: "rgba(10, 10, 15, 0.98)",
               backdropFilter: "blur(24px)",
@@ -409,7 +420,7 @@ function Navbar() {
             <div className="container-fluid px-4 py-3 d-flex flex-column h-100 overflow-hidden position-relative">
               <AnimatePresence mode="wait">
                 {!isAccountMenuOpen ? (
-                  <motion.ul 
+                  <motion.ul
                     key="main-menu"
                     initial={{ x: shouldReduceMotion ? 0 : -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -455,15 +466,15 @@ function Navbar() {
                         to="/notifications"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                         <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
-                            <Bell size={20} strokeWidth={location.pathname === "/notifications" ? 2.5 : 2} />
-                         </div>
-                         <span className="fs-5 flex-grow-1">Notifications</span>
-                         {unreadCount > 0 && (
-                           <span className="bg-danger text-white rounded-pill fw-bold px-2 py-1 d-flex align-items-center justify-content-center" style={{ fontSize: '12px', minWidth: '24px' }}>
-                             {unreadCount > 99 ? '99+' : unreadCount}
-                           </span>
-                         )}
+                        <div style={{ width: '24px', display: 'flex', justifyContent: 'center' }}>
+                          <Bell size={20} strokeWidth={location.pathname === "/notifications" ? 2.5 : 2} />
+                        </div>
+                        <span className="fs-5 flex-grow-1">Notifications</span>
+                        {unreadCount > 0 && (
+                          <span className="bg-danger text-white rounded-pill fw-bold px-2 py-1 d-flex align-items-center justify-content-center" style={{ fontSize: '12px', minWidth: '24px' }}>
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </span>
+                        )}
                       </Link>
                     </motion.li>
 
@@ -518,7 +529,7 @@ function Navbar() {
                     )}
                   </motion.ul>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     key="account-menu"
                     initial={{ x: shouldReduceMotion ? 0 : 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -528,7 +539,7 @@ function Navbar() {
                   >
                     {/* BACK BUTTON ROW */}
                     <div className="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-                      <button 
+                      <button
                         className="d-flex align-items-center gap-3 p-2 border-0 bg-transparent text-white rounded-3 transition-all duration-200 active:scale-95 hover:bg-white hover:bg-opacity-5 flex-grow-1 text-start"
                         onClick={() => setIsAccountMenuOpen(false)}
                       >
@@ -540,7 +551,7 @@ function Navbar() {
                         onClick={() => setIsMobileMenuOpen(false)}
                         aria-label="Close menu"
                       >
-                         <X size={24} className="opacity-75" />
+                        <X size={24} className="opacity-75" />
                       </button>
                     </div>
 
@@ -596,11 +607,11 @@ function Navbar() {
                           <span className="fs-5">Settings</span>
                         </Link>
                       </li>
-                      
+
                       <li>
                         <hr className="border-secondary opacity-25 my-2 mx-2" />
                       </li>
-                      
+
                       <li className="mt-auto pt-2 pb-4">
                         <button
                           className="d-flex align-items-center gap-3 border-0 bg-transparent w-100 p-3 rounded-3 transition-all duration-200 text-start active:scale-95 hover:bg-white hover:bg-opacity-5 text-danger opacity-85 hover:opacity-100"

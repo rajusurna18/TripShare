@@ -11,6 +11,19 @@ export const createNotificationService =
     sender = null
   ) => {
 
+    // Deduplication check: prevent creating exact duplicate notification within 5 minutes
+    const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const existingDup = await Notification.findOne({
+      user: userId,
+      type,
+      link,
+      message,
+      createdAt: { $gte: fiveMinsAgo }
+    });
+    if (existingDup) {
+      return existingDup;
+    }
+
     let category = "SYSTEM";
     const friendTypes = ["friend", "follow"];
     const tripTypes = ["join_request", "trip_leave", "trip_remove", "trip_ownership_transfer", "expense", "trip_save", "trip_share"];
@@ -69,7 +82,7 @@ export const getNotificationsService =
   async (userId, options = {}) => {
     const { page, limit, category } = options;
 
-    const query = { user: userId };
+    const query = { user: userId, type: { $nin: ["trip_save", "trip_share"] } };
     if (category && category !== "ALL") {
       query.category = category;
     }
@@ -89,7 +102,7 @@ export const getNotificationsService =
 
     const totalResults = await Notification.countDocuments(query);
     const totalPages = Math.ceil(totalResults / limitNum);
-    const unreadCount = await Notification.countDocuments({ user: userId, read: false });
+    const unreadCount = await Notification.countDocuments({ user: userId, read: false, type: { $nin: ["trip_save", "trip_share"] } });
 
     const notifications = await Notification.find(query)
       .populate("sender", "name profileImage")

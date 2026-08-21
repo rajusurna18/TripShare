@@ -4,6 +4,7 @@ import API from "../services/api";
 import socket from "../socket";
 import Avatar from "../components/shared/Avatar";
 import toast, { Toaster } from "react-hot-toast";
+import { ringtonePlayer } from "../utils/ringtone";
 
 function Chat() {
   const { tripId } = useParams();
@@ -41,9 +42,19 @@ function Chat() {
   // REACTION POPOVER FOR MESSAGES
   const [activeReactionMenuId, setActiveReactionMenuId] = useState(null);
 
-  // VIDEO CALL (WebRTC)
+  // GROUP INFO MODAL
+  const [showGroupInfoModal, setShowGroupInfoModal] = useState(false);
+
+  // VOICE & VIDEO CALL (WebRTC)
   const [callActive, setCallActive] = useState(false);
+  const [groupCallActive, setGroupCallActive] = useState(false);
+  const [callType, setCallType] = useState("video"); // 'voice' or 'video'
   const [callStatus, setCallStatus] = useState("");
+  const [callDuration, setCallDuration] = useState(0);
+  const [incomingCall, setIncomingCall] = useState(null); // { callerId, callerName, callerAvatar, offer, callType, tripId }
+  const [incomingGroupCall, setIncomingGroupCall] = useState(null); // { tripId, callType, callerId, callerName, callerAvatar, participants }
+  const [participants, setParticipants] = useState([]); // [{ userId, name, avatar, muted, videoOff }]
+  const [remoteStreams, setRemoteStreams] = useState({}); // userId -> MediaStream
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   
@@ -51,7 +62,11 @@ function Chat() {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerConnectionRef = useRef(null);
+  const peerConnectionsRef = useRef(new Map()); // userId -> RTCPeerConnection
+  const remoteStreamsRef = useRef(new Map()); // userId -> MediaStream
   const pendingCandidatesRef = useRef([]); // ICE candidate buffer
+  const pendingCandidatesMapRef = useRef(new Map()); // userId -> ICE candidates
+  const callTimerRef = useRef(null);
 
   // REFS FOR SCROLL & INPUT
   const messagesEndRef = useRef(null);
@@ -412,181 +427,257 @@ function Chat() {
   };
 
   // ======================
-  // VIDEO CALL (WebRTC)
+  // VOICE & VIDEO CALL (WebRTC Multi-Peer Mesh)
   // ======================
   const stunConfig = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
   };
 
+  const getTargetUserObj = () => {
+    if (!trip) return null;
+    const allMembers = [
+      ...(trip.createdBy ? [trip.createdBy] : []),
+      ...(trip.members || [])
+    ];
+    return allMembers.find((m) => {
+      const id = typeof m === "object" ? (m._id || m.id) : m;
+      return id && currentUserId && id.toString() !== currentUserId.toString();
+    });
+  };
+
   const getTargetUserId = () => {
-    if (!trip || !trip.members) return null;
-    return trip.members.find(m => m && currentUserId && m.toString() !== currentUserId.toString());
+    if (!trip) return null;
+    const targetObj = getTargetUserObj();
+    if (!targetObj) return null;
+    const targetId = typeof targetObj === "object" ? (targetObj._id || targetObj.id) : targetObj;
+    return targetId ? targetId.toString() : null;
   };
 
-  const startVideoCall = async () => {
-    const targetId = getTargetUserId();
-    if (!targetId) {
-      toast.error("No trip members to call.");
-      return;
-    }
-    if (callActive) return;
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      setLocalStream(stream);
-      setCallActive(true);
-      setCallStatus("Calling...");
-      setIsMuted(false);
-      setIsVideoEnabled(true);
-
-      setTimeout(() => {
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-      }, 100);
-
-      const pc = new RTCPeerConnection(stunConfig);
-      peerConnectionRef.current = pc;
-
-      setupPeerConnectionListeners(pc, targetId);
-
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      socket.emit("start_video_call", {
-        tripId,
-        callerId: currentUserId,
-        caller: currentUser?.name,
-        targetId,
-        offer,
-      });
-    } catch (err) {
-      console.error("Video call error:", err);
-      toast.error("Camera or microphone permission was denied.");
-      endVideoCall();
-    }
+  const formatDuration = (secs) => {
+    const mins = Math.floor(secs / 60);
+    const remainderSecs = secs % 60;
+    return `${mins.toString().padStart(2, "0")}:${remainderSecs.toString().padStart(2, "0")}`;
   };
 
-  const acceptVideoCall = async (data) => {
-    if (callActive) {
-      rejectVideoCall(data.callerId);
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      setLocalStream(stream);
-      setCallActive(true);
-      setCallStatus("Connected");
-      setIsMuted(false);
-      setIsVideoEnabled(true);
-
-      setTimeout(() => {
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-      }, 100);
-
-      const pc = new RTCPeerConnection(stunConfig);
-      peerConnectionRef.current = pc;
-
-      setupPeerConnectionListeners(pc, data.callerId);
-
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-
-      // Flush queued candidates
-      while (pendingCandidatesRef.current.length > 0) {
-        const candidate = pendingCandidatesRef.current.shift();
-        await pc.addIceCandidate(new RTCIceCandidate(candidate));
-      }
-
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      socket.emit("webrtc_answer", {
-        tripId,
-        targetId: data.callerId,
-        answer,
-      });
-    } catch (err) {
-      console.error("Accept video call error:", err);
-      toast.error("Camera or microphone permission was denied.");
-      endVideoCall();
-    }
+  const startCallTimer = () => {
+    clearInterval(callTimerRef.current);
+    setCallDuration(0);
+    callTimerRef.current = setInterval(() => {
+      setCallDuration((prev) => prev + 1);
+    }, 1000);
   };
 
-  const rejectVideoCall = (callerId) => {
-    socket.emit("video_call_rejected", { tripId, targetId: callerId });
+  const stopCallTimer = () => {
+    clearInterval(callTimerRef.current);
+    setCallDuration(0);
   };
 
-  const setupPeerConnectionListeners = (pc, remoteUserId) => {
+  // WEB RTC MULTI-PEER MESH CREATOR
+  const createGroupPeerConnection = (remoteUserId) => {
+    const uIdStr = remoteUserId.toString();
+    if (peerConnectionsRef.current.has(uIdStr)) {
+      return peerConnectionsRef.current.get(uIdStr);
+    }
+
+    const pc = new RTCPeerConnection(stunConfig);
+    peerConnectionsRef.current.set(uIdStr, pc);
+
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        socket.emit("ice_candidate", {
+        socket.emit("group_ice_candidate", {
           tripId,
-          targetId: remoteUserId,
+          targetUserId: uIdStr,
+          fromUserId: currentUserId,
           candidate: event.candidate,
         });
       }
     };
 
     pc.ontrack = (event) => {
-      if (remoteVideoRef.current && event.streams[0]) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-        setCallStatus("Connected");
+      console.log(`[Group Call] Received remote track from ${uIdStr}`);
+      const stream = event.streams[0];
+      if (stream) {
+        remoteStreamsRef.current.set(uIdStr, stream);
+        setRemoteStreams({ ...Object.fromEntries(remoteStreamsRef.current) });
       }
+      setCallStatus("Connected");
+      startCallTimer();
     };
 
     pc.onconnectionstatechange = () => {
       if (["failed", "disconnected", "closed"].includes(pc.connectionState)) {
-        toast.error("Connection lost");
-        endVideoCall();
+        console.log(`[Group Call] Peer connection to ${uIdStr} lost`);
       }
     };
+
+    if (localStream) {
+      localStream.getTracks().forEach((track) => {
+        pc.addTrack(track, localStream);
+      });
+    }
+
+    return pc;
   };
 
-  const endVideoCall = (isLocal = true) => {
-    const targetId = getTargetUserId();
-    
+  // GROUP CALL ACTION HANDLERS
+  const startGroupCall = async (type = "voice") => {
+    if (groupCallActive || callActive) return;
+
+    try {
+      const wantVideo = type === "video";
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: wantVideo });
+      setLocalStream(stream);
+      setGroupCallActive(true);
+      setCallType(type);
+      setCallStatus("Calling...");
+      setIsMuted(false);
+      setIsVideoEnabled(wantVideo);
+      startCallTimer();
+
+      setTimeout(() => {
+        if (wantVideo && localVideoRef.current) localVideoRef.current.srcObject = stream;
+      }, 100);
+
+      const callerName = currentUser?.name || "Traveler";
+      const callerAvatar = currentUser?.profileImage || "";
+
+      setParticipants([
+        {
+          userId: currentUserId,
+          name: callerName,
+          avatar: callerAvatar,
+          muted: false,
+          videoOff: !wantVideo,
+        },
+      ]);
+
+      socket.emit("start_group_call", {
+        tripId,
+        callType: type,
+        callerId: currentUserId,
+        callerName,
+        callerAvatar,
+      });
+    } catch (err) {
+      console.error("Start group call error:", err);
+      toast.error("Microphone or camera permission was denied.");
+      leaveGroupCall();
+    }
+  };
+
+  const joinGroupCall = async (incCallData) => {
+    ringtonePlayer.stop();
+    const incData = incCallData || incomingGroupCall;
+    if (!incData) return;
+
+    try {
+      const wantVideo = (incData.callType || callType) === "video";
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: wantVideo });
+      setLocalStream(stream);
+      setGroupCallActive(true);
+      setCallType(incData.callType || "voice");
+      setCallStatus("Connected");
+      setIsMuted(false);
+      setIsVideoEnabled(wantVideo);
+      setIncomingGroupCall(null);
+      startCallTimer();
+
+      setTimeout(() => {
+        if (wantVideo && localVideoRef.current) localVideoRef.current.srcObject = stream;
+      }, 100);
+
+      socket.emit("join_group_call", {
+        tripId,
+        userId: currentUserId,
+        name: currentUser?.name || "Traveler",
+        avatar: currentUser?.profileImage || "",
+        callType: incData.callType || "voice",
+      });
+    } catch (err) {
+      console.error("Join group call error:", err);
+      toast.error("Microphone or camera permission was denied.");
+      rejectGroupCall();
+    }
+  };
+
+  const rejectGroupCall = () => {
+    ringtonePlayer.stop();
+    if (incomingGroupCall) {
+      socket.emit("reject_group_call", { tripId, userId: currentUserId });
+    }
+    setIncomingGroupCall(null);
+  };
+
+  const leaveGroupCall = () => {
+    ringtonePlayer.stop();
     if (localStream) {
       localStream.getTracks().forEach((track) => track.stop());
     }
-    if (peerConnectionRef.current) {
-      peerConnectionRef.current.close();
-      peerConnectionRef.current = null;
-    }
-    
+
+    peerConnectionsRef.current.forEach((pc) => {
+      try {
+        pc.close();
+      } catch (err) {
+        console.debug("Error closing peer connection:", err);
+      }
+    });
+    peerConnectionsRef.current.clear();
+    remoteStreamsRef.current.clear();
+    pendingCandidatesMapRef.current.clear();
+
+    stopCallTimer();
     setLocalStream(null);
+    setGroupCallActive(false);
     setCallActive(false);
     setCallStatus("");
-    pendingCandidatesRef.current = [];
+    setIncomingGroupCall(null);
+    setParticipants([]);
+    setRemoteStreams({});
 
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
-    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
 
-    if (isLocal && targetId) {
-      socket.emit("end_video_call", { tripId, targetId });
-    }
+    socket.emit("leave_group_call", { tripId, userId: currentUserId });
   };
 
-  const toggleMute = () => {
+  const toggleGroupMute = () => {
     if (localStream) {
       const audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
-        setIsMuted(!audioTrack.enabled);
+        const newMutedState = !audioTrack.enabled;
+        setIsMuted(newMutedState);
+        socket.emit("toggle_group_media", {
+          tripId,
+          userId: currentUserId,
+          muted: newMutedState,
+        });
       }
     }
   };
 
-  const toggleVideo = () => {
+  const toggleGroupVideo = () => {
     if (localStream) {
       const videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
+        const newVideoOffState = !videoTrack.enabled;
         setIsVideoEnabled(videoTrack.enabled);
+        socket.emit("toggle_group_media", {
+          tripId,
+          userId: currentUserId,
+          videoOff: newVideoOffState,
+        });
       }
     }
   };
+
+  // BACKWARD COMPATIBLE ONE-TO-ONE CALL HANDLERS
+  const startCall = (type = "voice") => startGroupCall(type);
+  const acceptCall = (callData) => joinGroupCall(callData);
+  const rejectCall = () => rejectGroupCall();
+  const endCall = () => leaveGroupCall();
+  const toggleMute = () => toggleGroupMute();
+  const toggleVideo = () => toggleGroupVideo();
 
   // ======================
   // INITIAL LIFECYCLE
@@ -611,9 +702,20 @@ function Chat() {
     // ==========================================
     // SOCKET EVENT REGISTRATION & CLEANUP AUDIT
     // ==========================================
-    const onConnect = () => setConnected(true);
-    const onDisconnect = () => setConnected(false);
+    const onConnect = () => {
+      console.log(`[Socket] Connected: ${socket.id}`);
+      setConnected(true);
+      socket.emit("join_trip", tripId);
+      if (currentUserId) {
+        socket.emit("register_user", currentUserId);
+      }
+    };
+    const onDisconnect = () => {
+      console.log("[Socket] Disconnected");
+      setConnected(false);
+    };
     const onReceiveMessage = (data) => {
+      console.log("[Socket] Received new_message:", data._id);
       setMessages((prev) => {
         // Prevent duplicate loads
         if (prev.some((m) => m._id === data._id)) return prev;
@@ -631,66 +733,237 @@ function Chat() {
     const onOnlineUsers = (users) => setOnlineUsers(users);
     const onUserTyping = (data) => setTypingUser(`${data.name} is typing...`);
     const onUserStopTyping = () => setTypingUser("");
-    const onIncomingVideoCall = (data) => {
-      if (peerConnectionRef.current) return;
-      toast((t) => (
-        <span className="d-flex align-items-center gap-2">
-          📞 <b>{data.caller}</b> calls video
-          <button
-            className="btn btn-xs btn-success text-dark fw-bold ms-2"
-            onClick={() => {
-              toast.dismiss(t.id);
-              acceptVideoCall(data);
-            }}
-          >
-            Accept
-          </button>
-          <button
-            className="btn btn-xs btn-danger text-light fw-bold ms-1"
-            onClick={() => {
-              toast.dismiss(t.id);
-              rejectVideoCall(data.callerId);
-            }}
-          >
-            Reject
-          </button>
-        </span>
-      ), { duration: 15000 });
-    };
-    
-    const onVideoCallEnded = () => {
-      toast("Call ended");
-      endVideoCall(false);
+    // ==========================================
+    // GROUP CALL SOCKET LISTENERS
+    // ==========================================
+    const onIncomingGroupCall = (data) => {
+      console.log("[Group Call] Incoming call received:", data);
+      if (groupCallActive || data.callerId === currentUserId) return;
+
+      setIncomingGroupCall({
+        tripId: data.tripId,
+        callType: data.callType || "voice",
+        callerId: data.callerId,
+        callerName: data.callerName || "Traveler",
+        callerAvatar: data.callerAvatar || "",
+        participants: data.participants || [],
+      });
+      ringtonePlayer.start();
     };
 
-    const onVideoCallRejected = () => {
-      toast("Call declined by user");
-      endVideoCall(false);
+    const onGroupCallState = (data) => {
+      console.log("[Group Call] Received call state:", data);
+      if (data.participants) setParticipants(data.participants);
+    };
+
+    const onGroupCallUserJoined = async (data) => {
+      console.log(`[Group Call] User joined: ${data.name} (${data.userId})`);
+      if (data.participants) setParticipants(data.participants);
+
+      const joinedUserId = data.userId ? data.userId.toString() : null;
+      if (!joinedUserId || joinedUserId === currentUserId.toString()) return;
+
+      try {
+        const pc = createGroupPeerConnection(joinedUserId);
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        socket.emit("group_webrtc_offer", {
+          tripId,
+          targetUserId: joinedUserId,
+          fromUserId: currentUserId,
+          offer,
+        });
+      } catch (err) {
+        console.error("Error creating group offer:", err);
+      }
+    };
+
+    const onGroupWebRtcOffer = async (data) => {
+      const { fromUserId, offer } = data;
+      if (!fromUserId) return;
+      const senderId = fromUserId.toString();
+      console.log(`[Group Call] Received offer from ${senderId}`);
+
+      try {
+        const pc = createGroupPeerConnection(senderId);
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+
+        const pending = pendingCandidatesMapRef.current.get(senderId) || [];
+        while (pending.length > 0) {
+          const candidate = pending.shift();
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        socket.emit("group_webrtc_answer", {
+          tripId,
+          targetUserId: senderId,
+          fromUserId: currentUserId,
+          answer,
+        });
+      } catch (err) {
+        console.error("Error handling group offer:", err);
+      }
+    };
+
+    const onGroupWebRtcAnswer = async (data) => {
+      const { fromUserId, answer } = data;
+      if (!fromUserId) return;
+      const senderId = fromUserId.toString();
+      console.log(`[Group Call] Received answer from ${senderId}`);
+
+      const pc = peerConnectionsRef.current.get(senderId);
+      if (pc) {
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(answer));
+          const pending = pendingCandidatesMapRef.current.get(senderId) || [];
+          while (pending.length > 0) {
+            const candidate = pending.shift();
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          }
+        } catch (err) {
+          console.error("Error setting remote answer:", err);
+        }
+      }
+    };
+
+    const onGroupIceCandidate = async (data) => {
+      const { fromUserId, candidate } = data;
+      if (!fromUserId) return;
+      const senderId = fromUserId.toString();
+
+      const pc = peerConnectionsRef.current.get(senderId);
+      if (pc && pc.remoteDescription) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (err) {
+          console.error("Error adding ice candidate:", err);
+        }
+      } else {
+        if (!pendingCandidatesMapRef.current.has(senderId)) {
+          pendingCandidatesMapRef.current.set(senderId, []);
+        }
+        pendingCandidatesMapRef.current.get(senderId).push(candidate);
+      }
+    };
+
+    const onGroupMediaUpdated = (data) => {
+      const { userId, muted, videoOff } = data;
+      setParticipants((prev) =>
+        prev.map((p) => (p.userId === userId ? { ...p, muted, videoOff } : p))
+      );
+    };
+
+    const onGroupCallUserLeft = (data) => {
+      const { userId, remainingParticipants } = data;
+      if (!userId) return;
+      const leaverId = userId.toString();
+      console.log(`[Group Call] User left: ${leaverId}`);
+
+      if (peerConnectionsRef.current.has(leaverId)) {
+        try {
+          peerConnectionsRef.current.get(leaverId).close();
+        } catch (err) {
+          console.debug("Error closing peer connection:", err);
+        }
+        peerConnectionsRef.current.delete(leaverId);
+      }
+      remoteStreamsRef.current.delete(leaverId);
+      pendingCandidatesMapRef.current.delete(leaverId);
+
+      setRemoteStreams({ ...Object.fromEntries(remoteStreamsRef.current) });
+      if (remainingParticipants) setParticipants(remainingParticipants);
+    };
+
+    const onGroupCallEnded = () => {
+      console.log("[Group Call] Group call ended by server");
+      ringtonePlayer.stop();
+      toast("Group call ended");
+      leaveGroupCall();
+    };
+
+    const onIncomingCall = (data) => {
+      console.log("[Socket Call] Incoming call received:", data);
+      if (groupCallActive || callActive || peerConnectionRef.current || data.callerId === currentUserId) {
+        return;
+      }
+      setIncomingCall({
+        callerId: data.callerId,
+        callerName: data.callerName || data.caller || "Traveler",
+        callerAvatar: data.callerAvatar || "",
+        offer: data.offer,
+        callType: data.callType || "video",
+        tripId: data.tripId,
+      });
+      ringtonePlayer.start();
+    };
+    
+    const onCallAccepted = async (data) => {
+      console.log("[Socket Call] Call accepted by remote peer");
+      ringtonePlayer.stop();
+      setCallStatus("Connected");
+      startCallTimer();
+      if (data.answer && peerConnectionRef.current) {
+        try {
+          await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+          while (pendingCandidatesRef.current.length > 0) {
+            const candidate = pendingCandidatesRef.current.shift();
+            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          }
+        } catch (err) {
+          console.error("Error setting remote description:", err);
+        }
+      }
+    };
+
+    const onCallRejected = () => {
+      console.log("[Socket Call] Call rejected");
+      ringtonePlayer.stop();
+      toast.error("Call declined");
+      endCall(false);
+    };
+
+    const onCallEnded = () => {
+      console.log("[Socket Call] Call ended");
+      ringtonePlayer.stop();
+      toast("Call ended");
+      endCall(false);
     };
 
     const onWebRtcAnswer = async (data) => {
       if (peerConnectionRef.current) {
-        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.answer));
-        
-        while (pendingCandidatesRef.current.length > 0) {
-          const candidate = pendingCandidatesRef.current.shift();
-          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+        try {
+          await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+          while (pendingCandidatesRef.current.length > 0) {
+            const candidate = pendingCandidatesRef.current.shift();
+            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          }
+        } catch (err) {
+          console.error("Error setting remote description:", err);
         }
       }
     };
 
     const onIceCandidate = async (data) => {
       if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
-        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+        try {
+          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } catch (err) {
+          console.error("Error adding ice candidate:", err);
+        }
       } else {
         pendingCandidatesRef.current.push(data.candidate);
       }
     };
 
     const onPeerDisconnected = () => {
+      ringtonePlayer.stop();
       if (peerConnectionRef.current) {
         toast("Peer disconnected");
-        endVideoCall(false);
+        endCall(false);
       }
     };
     const onMessageSeenUpdate = (data) => {
@@ -719,9 +992,22 @@ function Chat() {
     socket.on("online_users", onOnlineUsers);
     socket.on("user_typing", onUserTyping);
     socket.on("user_stop_typing", onUserStopTyping);
-    socket.on("incoming_video_call", onIncomingVideoCall);
-    socket.on("video_call_ended", onVideoCallEnded);
-    socket.on("video_call_rejected", onVideoCallRejected);
+    socket.on("incoming_group_call", onIncomingGroupCall);
+    socket.on("group_call_state", onGroupCallState);
+    socket.on("group_call_user_joined", onGroupCallUserJoined);
+    socket.on("group_webrtc_offer", onGroupWebRtcOffer);
+    socket.on("group_webrtc_answer", onGroupWebRtcAnswer);
+    socket.on("group_ice_candidate", onGroupIceCandidate);
+    socket.on("group_media_updated", onGroupMediaUpdated);
+    socket.on("group_call_user_left", onGroupCallUserLeft);
+    socket.on("group_call_ended", onGroupCallEnded);
+    socket.on("incoming_call", onIncomingCall);
+    socket.on("incoming_video_call", onIncomingCall);
+    socket.on("call_accepted", onCallAccepted);
+    socket.on("call_rejected", onCallRejected);
+    socket.on("video_call_rejected", onCallRejected);
+    socket.on("call_ended", onCallEnded);
+    socket.on("video_call_ended", onCallEnded);
     socket.on("webrtc_answer", onWebRtcAnswer);
     socket.on("ice_candidate", onIceCandidate);
     socket.on("peer_disconnected", onPeerDisconnected);
@@ -730,15 +1016,29 @@ function Chat() {
     socket.on("message_deleted", onMessageDeleted);
 
     return () => {
+      ringtonePlayer.stop();
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("receive_message", onReceiveMessage);
       socket.off("online_users", onOnlineUsers);
       socket.off("user_typing", onUserTyping);
       socket.off("user_stop_typing", onUserStopTyping);
-      socket.off("incoming_video_call", onIncomingVideoCall);
-      socket.off("video_call_ended", onVideoCallEnded);
-      socket.off("video_call_rejected", onVideoCallRejected);
+      socket.off("incoming_group_call", onIncomingGroupCall);
+      socket.off("group_call_state", onGroupCallState);
+      socket.off("group_call_user_joined", onGroupCallUserJoined);
+      socket.off("group_webrtc_offer", onGroupWebRtcOffer);
+      socket.off("group_webrtc_answer", onGroupWebRtcAnswer);
+      socket.off("group_ice_candidate", onGroupIceCandidate);
+      socket.off("group_media_updated", onGroupMediaUpdated);
+      socket.off("group_call_user_left", onGroupCallUserLeft);
+      socket.off("group_call_ended", onGroupCallEnded);
+      socket.off("incoming_call", onIncomingCall);
+      socket.off("incoming_video_call", onIncomingCall);
+      socket.off("call_accepted", onCallAccepted);
+      socket.off("call_rejected", onCallRejected);
+      socket.off("video_call_rejected", onCallRejected);
+      socket.off("call_ended", onCallEnded);
+      socket.off("video_call_ended", onCallEnded);
       socket.off("webrtc_answer", onWebRtcAnswer);
       socket.off("ice_candidate", onIceCandidate);
       socket.off("peer_disconnected", onPeerDisconnected);
@@ -747,17 +1047,46 @@ function Chat() {
       socket.off("message_deleted", onMessageDeleted);
       clearTimeout(typingTimeoutRef.current);
       clearInterval(recordTimerRef.current);
-      endVideoCall(false); // Cleanup on unmount
+      leaveGroupCall(); // Cleanup on unmount
     };
   }, [tripId]);
 
+  // Helper to extract ALL members of the trip (createdBy + members array)
+  const getAllTripMembers = () => {
+    if (!trip) return [];
+    const membersMap = new Map();
+
+    const addMember = (m, isOwner = false) => {
+      if (!m) return;
+      const idStr = typeof m === "object" ? (m._id || m.id)?.toString() : m.toString();
+      if (!idStr) return;
+
+      if (!membersMap.has(idStr)) {
+        membersMap.set(idStr, {
+          _id: idStr,
+          name: typeof m === "object" ? (m.name || m.username || "Traveler") : "Traveler",
+          profileImage: typeof m === "object" ? (m.profileImage || m.avatar || "") : "",
+          email: typeof m === "object" ? m.email : "",
+          isOwner,
+          isOnline: onlineUsers.includes(idStr),
+        });
+      } else if (isOwner) {
+        membersMap.get(idStr).isOwner = true;
+      }
+    };
+
+    if (trip.createdBy) addMember(trip.createdBy, true);
+    if (Array.isArray(trip.members)) {
+      trip.members.forEach((m) => addMember(m, false));
+    }
+
+    return Array.from(membersMap.values());
+  };
+
   // Check if someone else in the trip is online
   const isTripMemberOnline = () => {
-    if (!trip || !trip.members) return false;
-    // Check if any members (excluding self) is in the onlineUsers array
-    return trip.members.some(
-      (mId) => mId && currentUserId && mId.toString() !== currentUserId.toString() && onlineUsers.includes(mId.toString())
-    );
+    const allMembers = getAllTripMembers();
+    return allMembers.some((m) => m._id !== currentUserId && m.isOnline);
   };
 
   // Rendering Helper for single message reaction indicators
@@ -860,105 +1189,452 @@ function Chat() {
           <span style={{ fontSize: "18px", lineHeight: 1 }}>⬅</span>
         </button>
 
-        {/* AVATAR + TRIP INFO */}
-        <div className="d-flex align-items-center flex-grow-1" style={{ minWidth: 0, paddingRight: "8px" }}>
+        {/* AVATAR + TRIP INFO (CLICKABLE HEADER FOR GROUP INFO) */}
+        <div
+          className="d-flex align-items-center flex-grow-1 user-select-none"
+          style={{ minWidth: 0, paddingRight: "8px", cursor: "pointer" }}
+          onClick={() => setShowGroupInfoModal(true)}
+          title="Click to view Group Info & Members"
+        >
           <div className="position-relative flex-shrink-0 me-2">
-            <Avatar src={trip?.image || ""} size={38} className="border border-secondary shadow-sm" />
+            <Avatar src={trip?.image || ""} size={40} className="border border-warning shadow-sm" />
             <span
               className={`position-absolute bottom-0 end-0 rounded-circle border border-2 border-dark ${
                 isTripMemberOnline() ? "bg-success" : "bg-secondary"
               }`}
-              style={{ width: "10px", height: "10px", right: "-1px", bottom: "-1px" }}
-              title={isTripMemberOnline() ? "Online" : "Offline"}
+              style={{ width: "11px", height: "11px", right: "-1px", bottom: "-1px" }}
+              title={isTripMemberOnline() ? "Online members available" : "All members offline"}
             />
           </div>
 
           <div className="d-flex flex-column flex-grow-1 justify-content-center" style={{ minWidth: 0 }}>
-            <h6 className="m-0 fw-bold text-white text-truncate" style={{ fontSize: "14.5px", lineHeight: "1.2" }}>
-              {trip?.title || "Trip Chat"}
+            <h6 className="m-0 fw-bold text-white text-truncate" style={{ fontSize: "15px", lineHeight: "1.2" }}>
+              {trip?.title || "Trip Group Chat"}
             </h6>
-            <div className="text-secondary text-truncate mt-1 d-flex align-items-center gap-1" style={{ fontSize: "11px", lineHeight: "1.2" }}>
-              <span className="text-truncate">📍 {trip?.destination || "Unknown"}</span>
-              <span className="flex-shrink-0">•</span>
-              <span className={`flex-shrink-0 ${isTripMemberOnline() ? "text-success" : "text-secondary"}`}>
-                {isTripMemberOnline() ? "Online" : "Offline"}
+            <div className="text-secondary text-truncate mt-1 d-flex align-items-center gap-1" style={{ fontSize: "11.5px", lineHeight: "1.2" }}>
+              <span className="text-warning fw-medium">
+                {getAllTripMembers().length} {getAllTripMembers().length === 1 ? "member" : "members"}
               </span>
+              <span>•</span>
+              <span className={getAllTripMembers().filter((m) => m.isOnline).length > 0 ? "text-success fw-medium" : "text-secondary"}>
+                {getAllTripMembers().filter((m) => m.isOnline).length} online
+              </span>
+              {trip?.destination && (
+                <>
+                  <span>•</span>
+                  <span className="text-truncate">📍 {trip.destination}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
         {/* ACTIONS */}
         <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
-          {/* RTC Video Call toggle trigger */}
+          {/* VOICE CALL BUTTON */}
           <button
-            className={`btn btn-sm flex-shrink-0 d-flex align-items-center justify-content-center ${callActive ? "btn-danger text-light animate-pulse" : "btn-outline-warning text-warning"} fw-semibold`}
-            onClick={callActive ? endVideoCall : startVideoCall}
+            className="btn btn-sm btn-outline-warning text-warning flex-shrink-0 d-flex align-items-center justify-content-center"
+            onClick={() => startCall("voice")}
             style={{ borderRadius: "50%", width: "38px", height: "38px" }}
-            title={callActive ? "End Call" : "Call"}
+            title="Group Voice Call 📞"
+            disabled={callActive || groupCallActive}
           >
-            {callActive ? "❌" : "📞"}
+            📞
           </button>
 
-          {trip?.createdBy && (
-            <Link
-              to={`/profile/${trip.createdBy._id || trip.createdBy}`}
-              className="btn btn-sm btn-outline-light flex-shrink-0 d-none d-md-flex align-items-center justify-content-center"
-              style={{ borderRadius: "20px", height: "38px", padding: "0 14px" }}
-            >
-              Owner
-            </Link>
-          )}
+          {/* VIDEO CALL BUTTON */}
+          <button
+            className="btn btn-sm btn-outline-info text-info flex-shrink-0 d-flex align-items-center justify-content-center"
+            onClick={() => startCall("video")}
+            style={{ borderRadius: "50%", width: "38px", height: "38px" }}
+            title="Group Video Call 📹"
+            disabled={callActive || groupCallActive}
+          >
+            📹
+          </button>
+
+          <button
+            className="btn btn-sm btn-outline-light text-light flex-shrink-0 d-none d-md-flex align-items-center justify-content-center"
+            onClick={() => setShowGroupInfoModal(true)}
+            style={{ borderRadius: "20px", height: "38px", padding: "0 14px" }}
+            title="Group Info"
+          >
+            👥 Members ({getAllTripMembers().length})
+          </button>
         </div>
       </div>
 
-      {/* VIDEO STREAMS OVERLAY PANEL */}
-      {callActive && (
+      {/* WHATSAPP-STYLE GROUP INFO MODAL */}
+      {showGroupInfoModal && (
         <div
-          className="p-3 border-bottom border-secondary d-flex flex-column align-items-center bg-black flex-shrink-0"
-          style={{ background: "#050505", zIndex: 900 }}
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+          style={{
+            background: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: "blur(12px)",
+            zIndex: 9999,
+          }}
+          onClick={() => setShowGroupInfoModal(false)}
         >
-          <div className="d-flex flex-wrap gap-3 justify-content-center mb-3">
-            <div className="position-relative" style={{ width: "240px", height: "160px" }}>
-              <video
-                ref={localVideoRef}
-                autoPlay
-                muted
-                playsInline
-                className="w-100 h-100 rounded border border-warning"
-                style={{ objectFit: "cover" }}
+          <div
+            className="glass-card text-light rounded-4 shadow-lg border border-secondary p-0 overflow-hidden"
+            style={{
+              maxWidth: "460px",
+              width: "92%",
+              maxHeight: "85vh",
+              background: "rgba(22, 22, 28, 0.98)",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.9)",
+              display: "flex",
+              flexDirection: "column",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* MODAL HEADER */}
+            <div className="d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary bg-dark bg-opacity-50">
+              <h5 className="m-0 fw-bold text-white d-flex align-items-center gap-2">
+                <span>👥 Group Info</span>
+              </h5>
+              <button
+                className="btn btn-sm btn-outline-secondary text-light rounded-circle d-flex align-items-center justify-content-center"
+                style={{ width: "32px", height: "32px" }}
+                onClick={() => setShowGroupInfoModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* MODAL BODY (SCROLLABLE) */}
+            <div className="p-4 overflow-auto flex-grow-1">
+              {/* GROUP HERO CARD */}
+              <div className="text-center pb-4 border-bottom border-secondary mb-3">
+                <Avatar
+                  src={trip?.image || ""}
+                  size={96}
+                  className="rounded-circle border border-3 border-warning shadow-lg mb-3"
+                />
+                <h4 className="fw-bold text-white mb-1">{trip?.title || "Trip Group"}</h4>
+                {trip?.destination && (
+                  <p className="text-warning small mb-2">📍 {trip.destination}</p>
+                )}
+                <div className="d-flex justify-content-center gap-2 mt-2">
+                  <span className="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+                    {getAllTripMembers().length} Members
+                  </span>
+                  <span className="badge bg-success px-3 py-2 rounded-pill fw-bold">
+                    {getAllTripMembers().filter((m) => m.isOnline).length} Online
+                  </span>
+                </div>
+              </div>
+
+              {/* MEMBERS LIST SECTION */}
+              <div>
+                <h6 className="fw-bold text-secondary text-uppercase mb-3" style={{ fontSize: "12px", letterSpacing: "1px" }}>
+                  Group Members ({getAllTripMembers().length})
+                </h6>
+
+                <div className="d-flex flex-column gap-2">
+                  {getAllTripMembers().map((member) => (
+                    <div
+                      key={member._id}
+                      className="d-flex align-items-center justify-content-between p-2.5 rounded-3 hover-lift"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                    >
+                      <div className="d-flex align-items-center gap-3 min-w-0">
+                        <div className="position-relative flex-shrink-0">
+                          <Avatar src={member.profileImage} size={42} className="border border-secondary" />
+                          <span
+                            className={`position-absolute bottom-0 end-0 rounded-circle border border-2 border-dark ${
+                              member.isOnline ? "bg-success" : "bg-secondary"
+                            }`}
+                            style={{ width: "10px", height: "10px" }}
+                          />
+                        </div>
+
+                        <div className="d-flex flex-column min-w-0">
+                          <span className="fw-semibold text-white text-truncate" style={{ fontSize: "14px" }}>
+                            {member.name} {member._id === currentUserId && "(You)"}
+                          </span>
+                          <span className="text-secondary small text-truncate" style={{ fontSize: "11px" }}>
+                            {member.isOnline ? "🟢 Online" : "⚪ Offline"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                        {member.isOwner ? (
+                          <span className="badge bg-warning text-dark font-mono" style={{ fontSize: "10px" }}>
+                            Admin / Owner
+                          </span>
+                        ) : (
+                          <span className="badge bg-secondary font-mono" style={{ fontSize: "10px" }}>
+                            Member
+                          </span>
+                        )}
+
+                        <Link
+                          to={`/profile/${member._id}`}
+                          className="btn btn-sm btn-outline-light rounded-circle p-0 d-flex align-items-center justify-content-center"
+                          style={{ width: "30px", height: "30px", fontSize: "12px" }}
+                          title="View Profile"
+                        >
+                          👤
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* MODAL FOOTER */}
+            <div className="p-3 border-top border-secondary bg-dark bg-opacity-50 text-center">
+              <button
+                className="btn btn-sm btn-outline-warning w-100 rounded-pill py-2 fw-semibold"
+                onClick={() => setShowGroupInfoModal(false)}
+              >
+                Close Info
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. INCOMING GROUP CALL OVERLAY MODAL (WhatsApp Style) */}
+      {incomingGroupCall && !groupCallActive && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+          style={{
+            background: "rgba(0, 0, 0, 0.88)",
+            backdropFilter: "blur(16px)",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            className="glass-card text-center p-4 p-sm-5 rounded-4 shadow-lg border border-secondary"
+            style={{
+              maxWidth: "400px",
+              width: "90%",
+              background: "rgba(20, 20, 25, 0.95)",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
+            }}
+          >
+            <span className="badge bg-warning text-dark fw-bold mb-2 px-3 py-2 rounded-pill" style={{ fontSize: "12px" }}>
+              {incomingGroupCall.callType === "voice" ? "Incoming Group Voice Call 📞" : "Incoming Group Video Call 📹"}
+            </span>
+            <p className="text-warning fw-semibold small mb-3">📍 {trip?.title || "Trip Group Call"}</p>
+
+            <div className="position-relative d-inline-block my-2">
+              <Avatar
+                src={incomingGroupCall.callerAvatar || ""}
+                size={96}
+                className="rounded-circle border border-3 border-warning shadow-lg"
               />
-              <span className="position-absolute bottom-0 start-0 bg-dark text-warning px-2 py-1 rounded-end" style={{ fontSize: "11px" }}>
-                You {isMuted && "(Muted)"} {!isVideoEnabled && "(No Video)"}
+              <span className="position-absolute top-0 start-0 w-100 h-100 rounded-circle border border-warning animate-ping opacity-75" />
+            </div>
+
+            <h4 className="fw-bold text-white mb-1">{incomingGroupCall.callerName || "Traveler"}</h4>
+            <p className="text-secondary small mb-4">is calling the trip group</p>
+
+            <div className="d-flex justify-content-center gap-4 mt-2">
+              {/* REJECT BUTTON */}
+              <button
+                className="btn btn-danger rounded-circle d-flex align-items-center justify-content-center shadow-lg hover-lift"
+                style={{ width: "60px", height: "60px", fontSize: "24px" }}
+                onClick={rejectGroupCall}
+                title="Decline Call"
+              >
+                ❌
+              </button>
+
+              {/* JOIN BUTTON */}
+              <button
+                className="btn btn-success rounded-circle d-flex align-items-center justify-content-center shadow-lg hover-lift"
+                style={{ width: "60px", height: "60px", fontSize: "24px" }}
+                onClick={() => joinGroupCall(incomingGroupCall)}
+                title="Join Call"
+              >
+                {incomingGroupCall.callType === "voice" ? "📞" : "📹"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. ACTIVE GROUP CALL OVERLAY MODAL */}
+      {groupCallActive && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-between align-items-center p-2 p-md-4"
+          style={{
+            background: "#08080a",
+            zIndex: 9990,
+          }}
+        >
+          {/* TOP CALL STATUS BAR */}
+          <div className="d-flex align-items-center justify-content-between w-100 text-white px-3 py-2 rounded-4 glass-card bg-dark bg-opacity-75" style={{ maxWidth: "800px" }}>
+            <div className="d-flex align-items-center gap-2">
+              <span className="fs-5">{callType === "voice" ? "📞 Group Voice" : "📹 Group Video"}</span>
+              <span className="badge bg-success rounded-pill px-2 py-1" style={{ fontSize: "11px" }}>
+                {participants.length} Active
               </span>
             </div>
 
-            <div className="position-relative bg-dark rounded border border-secondary" style={{ width: "240px", height: "160px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                className="w-100 h-100 rounded"
-                style={{ objectFit: "cover", zIndex: 1 }}
-              />
-              <span className="text-secondary position-absolute" style={{ fontSize: "12px", zIndex: 0 }}>
-                {callStatus || "Connecting..."}
-              </span>
+            <div className="fw-mono text-warning fw-bold fs-5">
+              {formatDuration(callDuration)}
             </div>
           </div>
-          
-          {/* WebRTC Controls */}
-          <div className="d-flex gap-2">
-            <button 
-              className={`btn btn-sm ${isMuted ? "btn-danger" : "btn-secondary"}`}
-              onClick={toggleMute}
+
+          {/* MAIN PARTICIPANTS CONTAINER */}
+          <div className="d-flex flex-column align-items-center justify-content-center flex-grow-1 w-100 my-3 position-relative" style={{ maxWidth: "1000px", overflowY: "auto" }}>
+            {callType === "voice" ? (
+              /* GROUP VOICE CALL DISPLAY */
+              <div className="d-flex flex-wrap justify-content-center align-items-center gap-4 p-3 my-auto w-100">
+                {/* LOCAL PARTICIPANT AVATAR CARD */}
+                <div className="text-center p-3 rounded-4 glass-card bg-dark bg-opacity-75 border border-secondary" style={{ width: "160px" }}>
+                  <div className="position-relative d-inline-block mb-2">
+                    <Avatar
+                      src={currentUser?.profileImage || ""}
+                      size={80}
+                      className={`rounded-circle border border-3 ${isMuted ? "border-danger" : "border-success"}`}
+                    />
+                    <span className="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style={{ fontSize: "14px" }}>
+                      {isMuted ? "🔇" : "🎤"}
+                    </span>
+                  </div>
+                  <h6 className="fw-bold text-white text-truncate mb-0" style={{ fontSize: "13px" }}>
+                    You ({currentUser?.name?.split(" ")[0] || "Me"})
+                  </h6>
+                  <span className="badge bg-success mt-1" style={{ fontSize: "9px" }}>Connected</span>
+                </div>
+
+                {/* REMOTE PARTICIPANTS AVATAR CARDS */}
+                {participants
+                  .filter((p) => p.userId.toString() !== currentUserId.toString())
+                  .map((p) => (
+                    <div key={p.userId} className="text-center p-3 rounded-4 glass-card bg-dark bg-opacity-75 border border-secondary" style={{ width: "160px" }}>
+                      <div className="position-relative d-inline-block mb-2">
+                        <Avatar
+                          src={p.avatar || ""}
+                          size={80}
+                          className={`rounded-circle border border-3 ${p.muted ? "border-danger" : "border-success"}`}
+                        />
+                        <span className="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style={{ fontSize: "14px" }}>
+                          {p.muted ? "🔇" : "🎤"}
+                        </span>
+                      </div>
+                      <h6 className="fw-bold text-white text-truncate mb-0" style={{ fontSize: "13px" }}>
+                        {p.name || "Traveler"}
+                      </h6>
+                      <span className="badge bg-success mt-1" style={{ fontSize: "9px" }}>Connected</span>
+
+                      {/* Hidden audio element for remote voice stream */}
+                      {remoteStreams[p.userId] && (
+                        <audio
+                          autoPlay
+                          playsInline
+                          ref={(el) => {
+                            if (el && remoteStreams[p.userId]) el.srcObject = remoteStreams[p.userId];
+                          }}
+                        />
+                      )}
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              /* GROUP VIDEO CALL GRID DISPLAY */
+              <div className="w-100 h-100 d-flex flex-wrap align-items-center justify-content-center gap-2 p-2 rounded-4 border border-secondary bg-black overflow-hidden" style={{ minHeight: "350px" }}>
+                {/* LOCAL VIDEO PARTICIPANT TILE */}
+                <div
+                  className="position-relative rounded-3 overflow-hidden border border-warning bg-dark flex-grow-1"
+                  style={{
+                    minWidth: "220px",
+                    maxHeight: "100%",
+                    flexBasis: participants.length <= 2 ? "45%" : "30%",
+                  }}
+                >
+                  <video
+                    ref={localVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-100 h-100 object-fit-cover"
+                  />
+                  <span className="position-absolute bottom-0 start-0 bg-dark bg-opacity-75 text-warning px-2 py-1 rounded-end small" style={{ fontSize: "11px" }}>
+                    You ({currentUser?.name?.split(" ")[0]}) {isMuted && "🔇"}
+                  </span>
+                </div>
+
+                {/* REMOTE VIDEO PARTICIPANTS TILES */}
+                {participants
+                  .filter((p) => p.userId.toString() !== currentUserId.toString())
+                  .map((p) => (
+                    <div
+                      key={p.userId}
+                      className="position-relative rounded-3 overflow-hidden border border-secondary bg-dark flex-grow-1"
+                      style={{
+                        minWidth: "220px",
+                        maxHeight: "100%",
+                        flexBasis: participants.length <= 2 ? "45%" : "30%",
+                      }}
+                    >
+                      {remoteStreams[p.userId] ? (
+                        <video
+                          autoPlay
+                          playsInline
+                          ref={(el) => {
+                            if (el && remoteStreams[p.userId]) el.srcObject = remoteStreams[p.userId];
+                          }}
+                          className="w-100 h-100 object-fit-cover"
+                        />
+                      ) : (
+                        <div className="w-100 h-100 d-flex flex-column justify-content-center align-items-center p-3 text-center">
+                          <Avatar src={p.avatar} size={70} className="mb-2 border border-warning" />
+                          <span className="text-secondary small">{p.name} (Connecting...)</span>
+                        </div>
+                      )}
+
+                      <span className="position-absolute bottom-0 start-0 bg-dark bg-opacity-75 text-white px-2 py-1 rounded-end small" style={{ fontSize: "11px" }}>
+                        {p.name} {p.muted && "🔇"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          {/* FLOATING CONTROLS BAR */}
+          <div
+            className="d-flex align-items-center justify-content-center gap-3 p-3 rounded-pill glass-card bg-dark bg-opacity-75 shadow-lg mb-2"
+            style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            {/* MUTE MIC BUTTON */}
+            <button
+              className={`btn ${isMuted ? "btn-warning text-dark" : "btn-outline-light text-white"} rounded-circle d-flex align-items-center justify-content-center`}
+              style={{ width: "50px", height: "50px", fontSize: "20px" }}
+              onClick={toggleGroupMute}
+              title={isMuted ? "Unmute Mic" : "Mute Mic"}
             >
-              {isMuted ? "Unmute" : "Mute"}
+              {isMuted ? "🔇" : "🎤"}
             </button>
-            <button 
-              className={`btn btn-sm ${!isVideoEnabled ? "btn-danger" : "btn-secondary"}`}
-              onClick={toggleVideo}
+
+            {/* TOGGLE CAMERA BUTTON (Video call only) */}
+            {callType === "video" && (
+              <button
+                className={`btn ${!isVideoEnabled ? "btn-warning text-dark" : "btn-outline-light text-white"} rounded-circle d-flex align-items-center justify-content-center`}
+                style={{ width: "50px", height: "50px", fontSize: "20px" }}
+                onClick={toggleGroupVideo}
+                title={isVideoEnabled ? "Turn Camera Off" : "Turn Camera On"}
+              >
+                {isVideoEnabled ? "📹" : "🙈"}
+              </button>
+            )}
+
+            {/* LEAVE CALL BUTTON */}
+            <button
+              className="btn btn-danger rounded-pill px-4 d-flex align-items-center justify-content-center gap-2 shadow-lg fw-bold"
+              style={{ height: "50px", fontSize: "15px" }}
+              onClick={leaveGroupCall}
+              title="Leave Group Call"
             >
-              {!isVideoEnabled ? "Turn Video On" : "Turn Video Off"}
+              🔴 Leave Call
             </button>
           </div>
         </div>

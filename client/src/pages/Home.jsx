@@ -47,6 +47,30 @@ function Home() {
   const [loadingFeed, setLoadingFeed] = useState(false);
   const token = localStorage.getItem("token");
 
+  const handleStartJourney = () => {
+    if (token) {
+      navigate("/dashboard");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const handleStartExploring = () => {
+    if (token) {
+      navigate("/discover");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const handleCreateTrip = () => {
+    if (token) {
+      navigate("/create-trip");
+    } else {
+      navigate("/login");
+    }
+  };
+
   useEffect(() => {
     document.title = "TripShare | AI-Powered Social Travel Platform";
     window.scrollTo(0, 0);
@@ -83,7 +107,7 @@ function Home() {
         <div className="container container-responsive hero-content">
           <h1>Travel Together. Explore Smarter.</h1>
           <p>The AI-powered travel platform that helps travelers discover companions, plan unforgettable trips, collaborate in real time, split expenses, preserve memories, and create lasting travel stories.</p>
-          <button className="btn btn-custom mt-3 px-4 py-3 flex-shrink-0 w-auto" onClick={() => navigate("/register")}>Start Your Journey</button>
+          <button className="btn btn-custom mt-3 px-4 py-3 flex-shrink-0 w-auto" onClick={handleStartJourney}>Start Your Journey</button>
         </div>
       </section>
 
@@ -336,10 +360,10 @@ function Home() {
             <div className="cta-content">
               <h2 className="fw-bold text-white mb-5" style={{ fontSize: "2.5rem" }}>Ready for Your Next Adventure?</h2>
               <div className="d-flex justify-content-center gap-4 flex-wrap">
-                <button className="btn btn-outline-light btn-lg btn-responsive fw-bold px-5 rounded-pill" onClick={() => navigate("/login")}>
+                <button className="btn btn-outline-light btn-lg btn-responsive fw-bold px-5 rounded-pill" onClick={handleStartExploring}>
                   Start Exploring
                 </button>
-                <button className="btn btn-warning btn-lg btn-responsive fw-bold px-5 rounded-pill" onClick={() => navigate("/register")}>
+                <button className="btn btn-warning btn-lg btn-responsive fw-bold px-5 rounded-pill" onClick={handleCreateTrip}>
                   Create Trip
                 </button>
               </div>

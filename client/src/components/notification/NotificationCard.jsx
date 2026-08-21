@@ -1,11 +1,73 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Avatar from "../shared/Avatar";
+import API from "../../services/api";
+import toast from "react-hot-toast";
 
 function NotificationCard({
   notification,
   onRead,
   onDelete,
 }) {
+  const [requestStatus, setRequestStatus] = useState(null); // 'accepted', 'rejected'
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const isJoinRequest = notification.type === "join_request" && notification.link?.startsWith("/join-requests/");
+  const tripId = isJoinRequest ? notification.link.split("/join-requests/")[1] : null;
+
+  const handleAcceptRequest = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      setActionLoading(true);
+      // Fetch pending requests for this trip to match sender or handle directly
+      if (tripId) {
+        const res = await API.get(`/join-requests/${tripId}`);
+        const requests = res.data.requests || [];
+        const match = requests.find(r => r.user?._id === notification.sender?._id || r.user === notification.sender?._id);
+        if (match) {
+          await API.put(`/join-requests/accept/${match._id}`);
+          setRequestStatus("accepted");
+          toast.success("Join request accepted! 🎉");
+          if (onRead) onRead(notification._id);
+          return;
+        }
+      }
+      toast.success("Opening join requests...");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to accept request");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectRequest = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      setActionLoading(true);
+      if (tripId) {
+        const res = await API.get(`/join-requests/${tripId}`);
+        const requests = res.data.requests || [];
+        const match = requests.find(r => r.user?._id === notification.sender?._id || r.user === notification.sender?._id);
+        if (match) {
+          await API.put(`/join-requests/reject/${match._id}`);
+          setRequestStatus("rejected");
+          toast.success("Join request declined.");
+          if (onRead) onRead(notification._id);
+          return;
+        }
+      }
+      toast.error("Failed to find request");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to reject request");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getCategoryIcon = (category) => {
     switch (category?.toUpperCase()) {
       case "FRIEND":
@@ -94,6 +156,39 @@ function NotificationCard({
                 <span>{notification.message}</span>
               )}
             </h6>
+
+            {/* INLINE JOIN REQUEST ACTIONS */}
+            {isJoinRequest && !requestStatus && (
+              <div className="d-flex gap-2 my-2">
+                <button
+                  className="btn btn-success btn-sm fw-bold px-3"
+                  onClick={handleAcceptRequest}
+                  disabled={actionLoading}
+                  style={{ borderRadius: "6px", fontSize: "11px" }}
+                >
+                  Accept ✅
+                </button>
+                <button
+                  className="btn btn-outline-danger btn-sm fw-bold px-3"
+                  onClick={handleRejectRequest}
+                  disabled={actionLoading}
+                  style={{ borderRadius: "6px", fontSize: "11px" }}
+                >
+                  Reject ❌
+                </button>
+              </div>
+            )}
+
+            {requestStatus === "accepted" && (
+              <span className="badge bg-success text-white my-1" style={{ fontSize: "11px" }}>
+                Request Accepted ✅
+              </span>
+            )}
+            {requestStatus === "rejected" && (
+              <span className="badge bg-danger text-white my-1" style={{ fontSize: "11px" }}>
+                Request Declined ❌
+              </span>
+            )}
 
             <small className="text-secondary d-block">
               {new Date(notification.createdAt).toLocaleString(undefined, {

@@ -19,6 +19,12 @@ function Login() {
     });
 
   useEffect(() => {
+    const existingToken = localStorage.getItem("token");
+    if (existingToken) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
     const searchParams = new URLSearchParams(window.location.search);
     const token = searchParams.get("token");
     const userStr = searchParams.get("user");
