@@ -31,7 +31,6 @@ function ProfileForm({
   setLanguages,
   visitedPlaces,
   setVisitedPlaces,
-  setImage,
   updateProfile,
   saving,
 }) {
@@ -267,16 +266,6 @@ function ProfileForm({
             onChange={(e) => setLinkedin(e.target.value)}
           />
         </div>
-      </div>
-
-      {/* IMAGE */}
-      <div className="mb-4">
-        <label className="form-label fw-bold">Upload Profile Image</label>
-        <input
-          type="file"
-          className="form-control profile-input"
-          onChange={(e) => setImage(e.target.files[0])}
-        />
       </div>
 
       {/* BUTTON */}

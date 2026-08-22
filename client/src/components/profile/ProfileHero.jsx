@@ -1,3 +1,6 @@
+import { useState, useRef, useEffect } from "react";
+import { Camera } from "lucide-react";
+import toast from "react-hot-toast";
 import Avatar from "../shared/Avatar";
 
 function ProfileHero({
@@ -6,7 +9,60 @@ function ProfileHero({
   missingFields = [],
   onFollowersClick,
   onFollowingClick,
+  onUploadImage,
 }) {
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  // Clean up object URL when component unmounts or previewUrl changes
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const handleAvatarClick = () => {
+    if (uploading) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Accepted format check (JPG/JPEG, PNG, WEBP)
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+      toast.error("Please select a valid image file (JPG, PNG, or WEBP)");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Instant local preview
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setUploading(true);
+
+    try {
+      if (onUploadImage) {
+        await onUploadImage(file);
+        toast.success("Profile picture updated");
+      }
+    } catch (err) {
+      console.error("Profile picture upload error:", err);
+      setPreviewUrl(null);
+      toast.error("Unable to update profile picture. Please try again.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const currentAvatarSrc = previewUrl || user?.profileImage;
+
   return (
     <div className="glass-card p-5 mb-5 text-center position-relative overflow-hidden">
       {/* COVER */}
@@ -19,13 +75,64 @@ function ProfileHero({
         }}
       />
 
-      {/* PROFILE IMAGE */}
-      <Avatar
-        src={user?.profileImage}
-        alt="profile"
-        className="profile-page-image shadow-lg border border-5 border-dark"
-        size={180}
-      />
+      {/* PROFILE IMAGE AVATAR WRAPPER */}
+      <div
+        className="profile-avatar-wrapper mx-auto"
+        onClick={handleAvatarClick}
+        title="Click to update profile picture"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleAvatarClick();
+          }
+        }}
+      >
+        <Avatar
+          src={currentAvatarSrc}
+          alt={user?.name || "profile"}
+          className="profile-page-image shadow-lg border border-5 border-dark"
+          size={180}
+        />
+
+        {/* LOADING OVERLAY */}
+        {uploading && (
+          <div
+            className="position-absolute top-0 start-0 w-100 h-100 rounded-circle d-flex align-items-center justify-content-center"
+            style={{
+              backgroundColor: "rgba(0, 0, 0, 0.65)",
+              backdropFilter: "blur(2px)",
+              zIndex: 10,
+            }}
+          >
+            <div
+              className="spinner-border text-warning"
+              role="status"
+              style={{ width: "2.2rem", height: "2.2rem", borderWidth: "3px" }}
+            >
+              <span className="visually-hidden">Uploading...</span>
+            </div>
+          </div>
+        )}
+
+        {/* CAMERA BADGE INDICATOR */}
+        {!uploading && (
+          <div className="profile-camera-badge" title="Update profile picture">
+            <Camera size={18} strokeWidth={2.3} />
+          </div>
+        )}
+
+        {/* HIDDEN FILE INPUT */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+      </div>
+
 
       {/* NAME */}
       <h1 className="fw-bold mt-3">{user?.name}</h1>

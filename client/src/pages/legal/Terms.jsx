@@ -2,11 +2,44 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const Terms = () => {
+  const token = localStorage.getItem("token");
+  let user = null;
+  try {
+    const savedUser = localStorage.getItem("user");
+    user = savedUser ? JSON.parse(savedUser) : null;
+  } catch (e) {
+    user = null;
+  }
+
+  const isAuthenticated = Boolean(token || user);
+  const homePath = isAuthenticated ? "/dashboard" : "/";
+
   return (
     <div style={{ background: "#0c0c0e", minHeight: "100vh", color: "white", paddingTop: "80px", paddingBottom: "40px" }}>
       <div className="container" style={{ maxWidth: "800px" }}>
         <div className="glass-card p-5 rounded-4 border border-secondary border-opacity-20" style={{ background: "rgba(25, 25, 25, 0.45)", backdropFilter: "blur(12px)" }}>
           
+          <div className="mb-4">
+            <Link to="/" className="d-inline-flex align-items-center text-decoration-none transition-transform hover:scale-105">
+              <img
+                src="/tripshare-logo.png"
+                alt="TripShare Logo"
+                className="d-inline-block"
+                style={{
+                  height: "36px",
+                  width: "36px",
+                  marginRight: "12px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "1px solid rgba(255,193,7,0.3)",
+                }}
+              />
+              <span className="fs-4 fw-bold" style={{ color: "#ffc107", letterSpacing: "0.5px" }}>
+                TripShare
+              </span>
+            </Link>
+          </div>
+
           <h1 className="fw-bold text-warning mb-2">Terms & Conditions</h1>
           <p className="text-secondary mb-1 small">Last Updated: August 15, 2026</p>
           <p className="text-secondary mb-4 small">Version: 1.0</p>
@@ -91,7 +124,7 @@ const Terms = () => {
           </div>
 
           <div className="mt-5 pt-4 border-top border-secondary border-opacity-20">
-            <Link to="/" className="btn btn-outline-warning rounded-pill px-4">Return Home</Link>
+            <Link to={homePath} className="btn btn-outline-warning rounded-pill px-4">Return Home</Link>
           </div>
         </div>
       </div>

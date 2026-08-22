@@ -20,8 +20,64 @@ function AI() {
   const messagesEndRef = useRef(null);
   const abortRef = useRef(null);
   const textareaRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+
+  // INITIALIZE SPEECH RECOGNITION (WEB SPEECH API)
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map((result) => result[0])
+          .map((result) => result.transcript)
+          .join("");
+        if (transcript) {
+          setQuestion(transcript);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+      } catch (err) {
+        console.error("Failed to start speech recognition:", err);
+      }
+    }
+  };
 
   // CLEANUP ACTIVE STREAMS ON UNMOUNT
   useEffect(() => {
@@ -29,8 +85,11 @@ function AI() {
       if (abortRef.current) {
         abortRef.current.abort();
       }
+      if (recognitionRef.current && isListening) {
+        recognitionRef.current.stop();
+      }
     };
-  }, []);
+  }, [isListening]);
 
   // FETCH CONVERSATIONS & SUBSCRIPTION USAGE ON MOUNT
   useEffect(() => {
@@ -497,50 +556,75 @@ function AI() {
         {/* MAIN CHAT AREA */}
         <div className="flex-grow-1 d-flex flex-column h-100 overflow-hidden" style={{ minWidth: 0 }}>
           
-          {/* AI HEADER WITH USAGE BADGE */}
-          <div className="p-3 border-bottom border-secondary border-opacity-20 d-flex align-items-center justify-content-between flex-shrink-0" style={{ background: "rgba(18, 18, 22, 0.95)" }}>
-            <div className="d-flex align-items-center gap-2 overflow-hidden" style={{ minWidth: 0 }}>
-              <button
-                className="btn btn-outline-light btn-sm flex-shrink-0 d-flex align-items-center justify-content-center me-1"
-                onClick={() => navigate(-1)}
-                style={{ width: "36px", height: "36px", borderRadius: "50%" }}
-                title="Go Back"
-              >
-                ←
-              </button>
-              <div className="overflow-hidden" style={{ minWidth: 0 }}>
-                <div className="d-flex align-items-center gap-2">
-                  <h5 className="fw-bold mb-0 text-warning text-truncate" style={{ fontSize: "16px", lineHeight: "1.2" }}>
-                    TripShare AI Buddy
-                  </h5>
-                  <AIUsageBadge
-                    toolSummary={toolSummary}
-                    onUpgrade={() => navigate("/ai/subscription")}
-                    compact
-                  />
+          {/* RESPONSIVE AI HEADER WITH USAGE BADGE & CONTROLS */}
+          <div
+            className="p-2.5 p-sm-3 border-bottom border-secondary border-opacity-20 flex-shrink-0"
+            style={{ background: "rgba(18, 18, 22, 0.95)" }}
+          >
+            <div className="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-2">
+              
+              {/* HEADER TOP ROW: BACK BUTTON, TITLE, AND MOBILE ACTION BUTTONS */}
+              <div className="d-flex align-items-center justify-content-between w-100 w-md-auto" style={{ minWidth: 0 }}>
+                <div className="d-flex align-items-center gap-2 overflow-hidden" style={{ minWidth: 0 }}>
+                  <button
+                    className="btn btn-outline-light btn-sm flex-shrink-0 d-flex align-items-center justify-content-center me-1"
+                    onClick={() => navigate(-1)}
+                    style={{ width: "34px", height: "34px", borderRadius: "50%" }}
+                    title="Go Back"
+                  >
+                    ←
+                  </button>
+                  <div className="overflow-hidden" style={{ minWidth: 0 }}>
+                    <h5 className="fw-bold mb-0 text-warning text-truncate" style={{ fontSize: "16px", lineHeight: "1.2" }}>
+                      TripShare AI Buddy
+                    </h5>
+                    <p className="small text-secondary mb-0 text-truncate d-none d-sm-block" style={{ fontSize: "11px", lineHeight: "1.2" }}>
+                      Your premium assistant for global itineraries, transport, and travel tips
+                    </p>
+                  </div>
                 </div>
-                <p className="small text-secondary mb-0 text-truncate" style={{ fontSize: "11px", lineHeight: "1.2" }}>
-                  Your premium assistant for global itineraries, transport, and travel tips
-                </p>
+
+                {/* MOBILE CONTROLS: HISTORY & NEW SESSION BUTTONS */}
+                <div className="d-flex align-items-center gap-1.5 flex-shrink-0 d-md-none ms-2">
+                  <button
+                    className="btn btn-outline-warning btn-sm flex-shrink-0 px-2 py-1"
+                    onClick={() => setShowMobileSidebar(true)}
+                    style={{ fontSize: "12px", borderRadius: "8px" }}
+                  >
+                    📜 History
+                  </button>
+                  <button
+                    className="btn btn-warning btn-sm flex-shrink-0 px-2 py-1 text-dark fw-bold"
+                    onClick={createSession}
+                    title="New Session"
+                    style={{ fontSize: "12px", borderRadius: "8px" }}
+                  >
+                    ➕ New
+                  </button>
+                </div>
               </div>
-            </div>
-            
-            <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-2">
-              <button
-                className="btn btn-outline-warning btn-sm d-md-none flex-shrink-0 px-2 py-1"
-                onClick={() => setShowMobileSidebar(true)}
-                style={{ fontSize: "12px", borderRadius: "8px" }}
-              >
-                📜 History
-              </button>
-              <button
-                className="btn btn-warning btn-sm flex-shrink-0 px-2 py-1 text-dark fw-bold"
-                onClick={createSession}
-                title="New Session"
-                style={{ fontSize: "12px", borderRadius: "8px" }}
-              >
-                ➕ New
-              </button>
+
+              {/* HEADER SECOND ROW (MOBILE) / RIGHT SIDE (DESKTOP): USAGE BADGE & DESKTOP NEW BUTTON */}
+              <div className="d-flex align-items-center justify-content-between justify-content-md-end gap-2 w-100 w-md-auto flex-wrap">
+                <AIUsageBadge
+                  toolSummary={toolSummary}
+                  onUpgrade={() => navigate("/ai/subscription")}
+                  compact
+                />
+
+                {/* DESKTOP CONTROLS */}
+                <div className="d-none d-md-flex align-items-center gap-2 flex-shrink-0 ms-2">
+                  <button
+                    className="btn btn-warning btn-sm flex-shrink-0 px-3 py-1.5 text-dark fw-bold"
+                    onClick={createSession}
+                    title="New Session"
+                    style={{ fontSize: "12px", borderRadius: "8px" }}
+                  >
+                    ➕ New Session
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -557,7 +641,11 @@ function AI() {
           {/* MESSAGES THREAD */}
           <div
             className="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-3"
-            style={{ scrollbarWidth: "thin", minHeight: 0 }}
+            style={{
+              scrollbarWidth: "thin",
+              minHeight: 0,
+              paddingBottom: "calc(24px + env(safe-area-inset-bottom))"
+            }}
           >
             {messages.length === 0 ? (
               <div className="my-auto text-center py-4">
@@ -631,13 +719,44 @@ function AI() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* AI COMPOSER */}
-          <div className="p-2 p-sm-3 border-top border-secondary border-opacity-20 flex-shrink-0" style={{ background: "rgba(18, 18, 22, 0.95)" }}>
+          {/* AI COMPOSER WITH VOICE MICROPHONE BUTTON */}
+          <div
+            className="p-2 p-sm-3 border-top border-secondary border-opacity-20 flex-shrink-0"
+            style={{
+              background: "rgba(18, 18, 22, 0.95)",
+              paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))"
+            }}
+          >
             <div className="d-flex gap-2 align-items-end w-100">
+              
+              {/* VOICE INPUT MICROPHONE BUTTON */}
+              <button
+                type="button"
+                className={`btn ${
+                  isListening
+                    ? "btn-danger pulse-recording"
+                    : "btn-outline-warning text-warning"
+                } rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center me-1`}
+                onClick={toggleVoiceInput}
+                disabled={loading}
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  minWidth: "40px",
+                  minHeight: "40px",
+                  fontSize: "18px",
+                  transition: "all 0.2s ease"
+                }}
+                title={isListening ? "Stop recording (Listening...)" : "Voice to text"}
+              >
+                {isListening ? "🔴" : "🎤"}
+              </button>
+
+              {/* CHAT INPUT TEXTAREA */}
               <textarea
                 ref={textareaRef}
                 rows="1"
-                placeholder="Ask AI Travel Buddy anything..."
+                placeholder={isListening ? "🔴 Listening... Speak now" : "Ask AI Travel Buddy anything..."}
                 className="form-control bg-dark text-light border-secondary border-opacity-35 p-3 rounded-4 shadow-none"
                 value={question}
                 onChange={(e) => {
@@ -662,11 +781,13 @@ function AI() {
                   borderRadius: "20px"
                 }}
               />
+
+              {/* SEND / STOP BUTTON */}
               {loading ? (
                 <button
                   className="btn btn-danger rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center"
                   onClick={stopGeneration}
-                  style={{ width: "42px", height: "42px" }}
+                  style={{ width: "40px", height: "40px", minWidth: "40px", minHeight: "40px" }}
                   title="Stop"
                 >
                   ⏹️
@@ -676,7 +797,7 @@ function AI() {
                   className="btn btn-warning rounded-circle shadow-sm flex-shrink-0 p-0 d-flex align-items-center justify-content-center text-dark"
                   onClick={askAI}
                   disabled={!question.trim()}
-                  style={{ width: "42px", height: "42px", fontSize: "18px" }}
+                  style={{ width: "40px", height: "40px", minWidth: "40px", minHeight: "40px", fontSize: "18px" }}
                   title="Send"
                 >
                   ➤
@@ -699,6 +820,14 @@ function AI() {
         }
         .cursor-pointer {
           cursor: pointer;
+        }
+        @keyframes pulseRed {
+          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+          70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        .pulse-recording {
+          animation: pulseRed 1.5s infinite;
         }
       `}</style>
 

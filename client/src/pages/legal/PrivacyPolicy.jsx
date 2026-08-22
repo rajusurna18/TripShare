@@ -2,6 +2,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const PrivacyPolicy = () => {
+  const token = localStorage.getItem("token");
+  let user = null;
+  try {
+    const savedUser = localStorage.getItem("user");
+    user = savedUser ? JSON.parse(savedUser) : null;
+  } catch (e) {
+    user = null;
+  }
+
+  const isAuthenticated = Boolean(token || user);
+  const homePath = isAuthenticated ? "/dashboard" : "/";
+
   return (
     <div style={{ background: "#0c0c0e", minHeight: "100vh", color: "white", paddingTop: "80px", paddingBottom: "40px" }}>
       <div className="container" style={{ maxWidth: "800px" }}>
@@ -81,7 +93,7 @@ const PrivacyPolicy = () => {
           </div>
 
           <div className="mt-5 pt-4 border-top border-secondary border-opacity-20">
-            <Link to="/" className="btn btn-outline-warning rounded-pill px-4">Return Home</Link>
+            <Link to={homePath} className="btn btn-outline-warning rounded-pill px-4">Return Home</Link>
           </div>
         </div>
       </div>

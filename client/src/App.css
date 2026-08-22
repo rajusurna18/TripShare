@@ -4238,6 +4238,56 @@ button,
 
 }
 
+/* PROFILE PICTURE INTERACTIVE AVATAR */
+.profile-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.profile-avatar-wrapper:hover .profile-page-image {
+  filter: brightness(1.08);
+  box-shadow: 0 0 25px rgba(255, 183, 3, 0.45) !important;
+}
+
+.profile-avatar-wrapper:hover .profile-camera-badge {
+  transform: scale(1.12);
+  background: linear-gradient(135deg, #ffc107, #ff9100) !important;
+}
+
+.profile-camera-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffb703, #fb8500);
+  color: #000;
+  border: 3px solid #121212;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+  z-index: 5;
+}
+
+@media (max-width: 768px) {
+  .profile-camera-badge {
+    width: 34px;
+    height: 34px;
+    bottom: 4px;
+    right: 4px;
+    border: 2px solid #121212;
+  }
+}
+
+
 @media (max-width:768px) {
 
   .match-card-modern {

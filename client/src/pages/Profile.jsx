@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import API from "../services/api";
 
 // COMPONENTS
@@ -28,7 +29,6 @@ function Profile() {
   const [destinationPreference, setDestinationPreference] = useState("");
   const [languages, setLanguages] = useState("");
   const [visitedPlaces, setVisitedPlaces] = useState("");
-  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -71,7 +71,34 @@ function Profile() {
     }
   };
 
-  // UPDATE PROFILE
+  // UPLOAD PROFILE IMAGE (Called automatically when image is picked)
+  const handleUploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append("profileImage", file);
+
+    const res = await API.put("/profile", formData);
+    const updatedUser = res.data.user || res.data;
+
+    setUser(updatedUser);
+
+    // Sync local storage user
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        localStorage.setItem("user", JSON.stringify({ ...parsed, ...updatedUser }));
+      } else {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      window.dispatchEvent(new Event("storage"));
+    } catch (e) {
+      console.error("Failed to sync localStorage user:", e);
+    }
+
+    return updatedUser;
+  };
+
+  // UPDATE PROFILE TEXT DETAILS
   const updateProfile = async () => {
     try {
       setSaving(true);
@@ -114,10 +141,6 @@ function Profile() {
         formData.append("visitedPlaces", place);
       });
 
-      if (image) {
-        formData.append("profileImage", image);
-      }
-
       const res = await API.put("/profile", formData);
       const updatedUser = res.data.user || res.data;
 
@@ -139,9 +162,10 @@ function Profile() {
       setLanguages(updatedUser.languages?.join(", ") || "");
       setVisitedPlaces(updatedUser.visitedPlaces?.join(", ") || "");
 
-      alert("Profile Updated 🚀");
+      toast.success("Profile Updated 🚀");
     } catch (err) {
       console.log(err);
+      toast.error("Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -198,6 +222,7 @@ function Profile() {
           missingFields={missingFields}
           onFollowersClick={openFollowers}
           onFollowingClick={openFollowing}
+          onUploadImage={handleUploadImage}
         />
 
         {/* BADGES */}
@@ -250,7 +275,6 @@ function Profile() {
           setLanguages={setLanguages}
           visitedPlaces={visitedPlaces}
           setVisitedPlaces={setVisitedPlaces}
-          setImage={setImage}
           updateProfile={updateProfile}
           saving={saving}
         />
