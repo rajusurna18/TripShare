@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
-import { FaTrash, FaPlus, FaComment, FaPaperPlane } from "react-icons/fa";
+import { FaTrash, FaPlus, FaComment } from "react-icons/fa";
+import AIUsageBadge from "../components/ai/AIUsageBadge";
+import UpgradeModal from "../components/ai/UpgradeModal";
+import { getSubscriptionStatus } from "../services/aiSubscriptionService";
 
 function AI() {
   const navigate = useNavigate();
@@ -11,6 +14,8 @@ function AI() {
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [toolSummary, setToolSummary] = useState(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const messagesEndRef = useRef(null);
   const abortRef = useRef(null);
@@ -27,9 +32,10 @@ function AI() {
     };
   }, []);
 
-  // FETCH CONVERSATIONS ON MOUNT
+  // FETCH CONVERSATIONS & SUBSCRIPTION USAGE ON MOUNT
   useEffect(() => {
     fetchConversations();
+    fetchSubscriptionUsage();
   }, []);
 
   // SCROLL TO BOTTOM ON NEW MESSAGES
@@ -39,6 +45,26 @@ function AI() {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const fetchSubscriptionUsage = async () => {
+    try {
+      const res = await getSubscriptionStatus();
+      if (res.success && res.data && res.data.tools) {
+        const assistantTool = res.data.tools.find((t) => t.id === "ai_assistant");
+        if (assistantTool) {
+          setToolSummary({
+            limit: assistantTool.limit,
+            consumed: assistantTool.consumed,
+            remaining: assistantTool.remaining,
+            isFreeLimit: assistantTool.isFreeLimit,
+            plan: res.data.plan,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load AI usage badge:", err);
+    }
   };
 
   async function fetchConversations() {
@@ -55,7 +81,7 @@ function AI() {
       console.error("Failed to load chat history:", err);
       setError("Unable to load chat sessions. Please try refreshing.");
     }
-  };
+  }
 
   const selectConversation = async (id) => {
     try {
@@ -146,7 +172,12 @@ function AI() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to receive stream from AI server");
+        const errData = await response.json().catch(() => ({}));
+        if (response.status === 403 && errData.code === "USAGE_LIMIT_EXCEEDED") {
+          setShowUpgradeModal(true);
+          throw new Error("AI usage limit reached. Upgrade your plan to continue.");
+        }
+        throw new Error(errData.message || "Failed to receive stream from AI server");
       }
 
       const reader = response.body.getReader();
@@ -181,6 +212,15 @@ function AI() {
               }
               if (data.done) {
                 setMessages(data.conversation.messages || []);
+                if (data.entitlement) {
+                  setToolSummary({
+                    limit: data.entitlement.limit,
+                    consumed: data.entitlement.consumed,
+                    remaining: data.entitlement.remaining,
+                    isFreeLimit: data.entitlement.plan === "FREE",
+                    plan: data.entitlement.plan,
+                  });
+                }
                 if (!activeId) {
                   setActiveId(data.conversation._id);
                   fetchConversations();
@@ -192,7 +232,6 @@ function AI() {
               }
             } catch (e) {
               console.error("JSON parse error:", e);
-              // Re-throw so the outer catch block can handle the error properly
               throw e;
             }
           }
@@ -203,7 +242,7 @@ function AI() {
         console.log("AI stream aborted by user.");
       } else {
         console.error(err);
-        setError("AI assistant is temporarily busy. Check connection and retry.");
+        setError(err.message || "AI assistant is temporarily busy. Check connection and retry.");
         // Remove the empty message block if we failed before receiving anything
         setMessages(prev => {
           const last = prev[prev.length - 1];
@@ -216,6 +255,7 @@ function AI() {
     } finally {
       setLoading(false);
       abortRef.current = null;
+      fetchSubscriptionUsage();
     }
   };
 
@@ -457,7 +497,7 @@ function AI() {
         {/* MAIN CHAT AREA */}
         <div className="flex-grow-1 d-flex flex-column h-100 overflow-hidden" style={{ minWidth: 0 }}>
           
-          {/* AI HEADER */}
+          {/* AI HEADER WITH USAGE BADGE */}
           <div className="p-3 border-bottom border-secondary border-opacity-20 d-flex align-items-center justify-content-between flex-shrink-0" style={{ background: "rgba(18, 18, 22, 0.95)" }}>
             <div className="d-flex align-items-center gap-2 overflow-hidden" style={{ minWidth: 0 }}>
               <button
@@ -469,9 +509,16 @@ function AI() {
                 ←
               </button>
               <div className="overflow-hidden" style={{ minWidth: 0 }}>
-                <h5 className="fw-bold mb-0 text-warning text-truncate" style={{ fontSize: "16px", lineHeight: "1.2" }}>
-                  TripShare AI Buddy
-                </h5>
+                <div className="d-flex align-items-center gap-2">
+                  <h5 className="fw-bold mb-0 text-warning text-truncate" style={{ fontSize: "16px", lineHeight: "1.2" }}>
+                    TripShare AI Buddy
+                  </h5>
+                  <AIUsageBadge
+                    toolSummary={toolSummary}
+                    onUpgrade={() => navigate("/ai/subscription")}
+                    compact
+                  />
+                </div>
                 <p className="small text-secondary mb-0 text-truncate" style={{ fontSize: "11px", lineHeight: "1.2" }}>
                   Your premium assistant for global itineraries, transport, and travel tips
                 </p>
@@ -654,6 +701,13 @@ function AI() {
           cursor: pointer;
         }
       `}</style>
+
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        onSuccess={() => fetchSubscriptionUsage()}
+        initialToolId="ai_assistant"
+      />
     </div>
   );
 }

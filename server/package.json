@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npx kill-port 5000 & nodemon src/bootstrap.js"
+    "dev": "npx kill-port 5000 && nodemon src/bootstrap.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,7 @@
     "multer": "^2.1.1",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^8.0.8",
+    "razorpay": "^2.9.8",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3"
   },

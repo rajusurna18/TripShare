@@ -2,8 +2,15 @@ import {
   generateAIReplyService,
   generateItineraryService,
   generateAIReplyServiceStream,
+  generateGenericAIToolService,
 } from "./ai.service.js";
 import AIConversation from "./ai.model.js";
+import { getFullSubscriptionStatus } from "./aiEntitlement.service.js";
+import {
+  createOrderService,
+  verifyPaymentService,
+  handleWebhookService,
+} from "./aiPayment.service.js";
 
 // AI CHAT
 export const generateAIReply = async (req, res) => {
@@ -30,6 +37,7 @@ export const generateAIReply = async (req, res) => {
         success: true,
         reply,
         conversation,
+        entitlement: req.aiEntitlement,
       });
     }
 
@@ -50,7 +58,7 @@ export const generateAIReply = async (req, res) => {
     );
 
     // Send final completed payload
-    res.write(`data: ${JSON.stringify({ done: true, conversation })}\n\n`);
+    res.write(`data: ${JSON.stringify({ done: true, conversation, entitlement: req.aiEntitlement })}\n\n`);
     res.end();
 
   } catch (err) {
@@ -74,6 +82,7 @@ export const generateItinerary = async (req, res) => {
     res.status(200).json({
       success: true,
       itinerary,
+      entitlement: req.aiEntitlement,
     });
   } catch (err) {
     console.log("AI ITINERARY ERROR:", err);
@@ -82,6 +91,27 @@ export const generateItinerary = async (req, res) => {
       message: "AI itinerary failed",
     });
   }
+};
+
+// GENERIC AI TOOL HANDLER (planner, destination, safety, budget, trip_assistant)
+export const generateGenericTool = (toolId) => {
+  return async (req, res) => {
+    try {
+      const query = req.body.prompt || req.body.query || req.body.destination || "General guide";
+      const resultText = await generateGenericAIToolService(toolId, query, req.body);
+      res.status(200).json({
+        success: true,
+        result: resultText,
+        entitlement: req.aiEntitlement,
+      });
+    } catch (err) {
+      console.log(`AI TOOL ERROR (${toolId}):`, err);
+      res.status(500).json({
+        success: false,
+        message: `Failed to generate AI response for ${toolId}`,
+      });
+    }
+  };
 };
 
 // GET CONVERSATIONS
@@ -139,5 +169,60 @@ export const deleteConversation = async (req, res) => {
     res.status(200).json({ success: true, message: "Conversation deleted" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// SUBSCRIPTION STATUS & USAGE SUMMARY
+export const getSubscriptionStatus = async (req, res) => {
+  try {
+    const status = await getFullSubscriptionStatus(req.user.id);
+    res.status(200).json({ success: true, data: status });
+  } catch (err) {
+    console.error("GET SUBSCRIPTION STATUS ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Unable to load subscription details.",
+    });
+  }
+};
+
+// CREATE PAYMENT ORDER
+export const createPaymentOrder = async (req, res) => {
+  try {
+    const { plan, purchasedToolId } = req.body;
+    const orderData = await createOrderService(req.user.id, plan, purchasedToolId);
+    res.status(200).json({ success: true, data: orderData });
+  } catch (err) {
+    console.error("CREATE PAYMENT ORDER ERROR:", err);
+    res.status(400).json({
+      success: false,
+      message: err.message || "Unable to create payment order.",
+    });
+  }
+};
+
+// VERIFY PAYMENT & ACTIVATE SUBSCRIPTION
+export const verifyPayment = async (req, res) => {
+  try {
+    const result = await verifyPaymentService(req.user.id, req.body);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("VERIFY PAYMENT ERROR:", err);
+    res.status(400).json({
+      success: false,
+      message: err.message || "Your subscription could not be activated.",
+    });
+  }
+};
+
+// WEBHOOK HANDLER
+export const handleWebhook = async (req, res) => {
+  try {
+    const signature = req.headers["x-razorpay-signature"];
+    const result = await handleWebhookService(req.body, signature);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("WEBHOOK ERROR:", err);
+    res.status(400).json({ success: false, message: "Webhook processing failed" });
   }
 };

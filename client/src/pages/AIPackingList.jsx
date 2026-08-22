@@ -83,7 +83,11 @@ function AIPackingList() {
       }
     } catch (err) {
       console.error(err);
-      setError("AI generation failed. Please try again.");
+      if (err.response?.status === 403 && err.response?.data?.code === "USAGE_LIMIT_EXCEEDED") {
+        setError("AI packing usage limit reached. Upgrade your plan to continue.");
+      } else {
+        setError(err.response?.data?.message || "AI generation failed. Please try again.");
+      }
     } finally {
       setGenerating(false);
     }

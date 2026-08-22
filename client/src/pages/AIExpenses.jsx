@@ -25,7 +25,11 @@ function AIExpenses() {
       }
     } catch (err) {
       console.error(err);
-      setError("Failed to compile AI insights. Verify trip participation.");
+      if (err.response?.status === 403 && err.response?.data?.code === "USAGE_LIMIT_EXCEEDED") {
+        setError("AI Expense Insights usage limit reached. Upgrade your plan to continue.");
+      } else {
+        setError(err.response?.data?.message || "Failed to compile AI insights. Verify trip participation.");
+      }
     } finally {
       setLoading(false);
     }

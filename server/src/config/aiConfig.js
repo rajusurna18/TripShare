@@ -1,0 +1,50 @@
+export const AI_TOOLS = [
+  { id: "ai_assistant", name: "AI Assistant", freeLimit: 15, icon: "🤖", description: "Your 24/7 personal travel companion & chat assistant" },
+  { id: "itinerary", name: "AI Itinerary", freeLimit: 5, icon: "🗺️", description: "Custom day-wise itinerary planner" },
+  { id: "packing", name: "AI Packing List", freeLimit: 5, icon: "🧳", description: "Smart contextual packing list generator" },
+  { id: "expenses", name: "AI Expense Insights", freeLimit: 5, icon: "💡", description: "Intelligent trip budget & spending insights" },
+  { id: "recommendations", name: "AI Recommendation", freeLimit: 5, icon: "✨", description: "Personalized travel & destination suggestions" },
+  { id: "planner", name: "AI Travel Planner", freeLimit: 5, icon: "📅", description: "End-to-end trip planning assistant" },
+  { id: "destination", name: "AI Destination Insights", freeLimit: 5, icon: "🏛️", description: "Deep cultural & destination guide" },
+  { id: "safety", name: "AI Safety Assistant", freeLimit: 5, icon: "🛡️", description: "Real-time safety, emergency & local advice" },
+  { id: "budget", name: "AI Budget Assistant", freeLimit: 5, icon: "💰", description: "Expense forecasting & cost saving expert" },
+  { id: "trip_assistant", name: "AI Trip Assistant", freeLimit: 5, icon: "🧭", description: "Real-time on-trip navigator & helper" },
+];
+
+export const PLANS = {
+  FREE: {
+    id: "FREE",
+    name: "Free Plan",
+    price: 0,
+    currency: "INR",
+    periodMonths: 1,
+  },
+  INDIVIDUAL: {
+    id: "INDIVIDUAL",
+    name: "Individual Tool",
+    price: 9,
+    amountPaise: 900,
+    currency: "INR",
+    periodMonths: 1,
+    limitPerTool: 200,
+  },
+  COMBO: {
+    id: "COMBO",
+    name: "AI Combo",
+    price: 99,
+    amountPaise: 9900,
+    currency: "INR",
+    periodMonths: 3,
+    limitPerTool: 300,
+  },
+  PRO: {
+    id: "PRO",
+    name: "AI Pro Annual",
+    price: 299,
+    amountPaise: 29900,
+    currency: "INR",
+    periodMonths: 12,
+    limitPerTool: 500,
+    badge: "BEST VALUE ⭐",
+  },
+};

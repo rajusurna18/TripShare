@@ -37,6 +37,7 @@ const Features = lazy(() => import("./pages/Features"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AI = lazy(() => import("./pages/AI"));
+const AISubscriptionHub = lazy(() => import("./pages/AISubscriptionHub"));
 const Blogs = lazy(() => import("./pages/Blogs"));
 const BlogDetails = lazy(() => import("./pages/BlogDetails"));
 const CreateBlog = lazy(() => import("./pages/CreateBlog"));
@@ -270,6 +271,17 @@ function App() {
             <ProtectedRoute>
 
               <AI />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ai/subscription"
+          element={
+            <ProtectedRoute>
+
+              <AISubscriptionHub />
 
             </ProtectedRoute>
           }
