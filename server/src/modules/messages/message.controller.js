@@ -35,7 +35,8 @@ export const saveMessage = async (req, res) => {
     if (!isCreator && !isMember) {
       return res.status(403).json({
         success: false,
-        message: "Access denied: You are not a member of this trip",
+        code: "TRIP_MEMBERSHIP_REQUIRED",
+        message: "Join or create a trip to access Group Chat.",
       });
     }
 
@@ -95,7 +96,8 @@ export const getMessages = async (req, res) => {
     if (!isCreator && !isMember) {
       return res.status(403).json({
         success: false,
-        message: "Access denied: You are not a member of this trip",
+        code: "TRIP_MEMBERSHIP_REQUIRED",
+        message: "Join or create a trip to access Group Chat.",
       });
     }
 
@@ -159,7 +161,8 @@ export const reactToMessage = async (req, res) => {
     if (!isCreator && !isMember) {
       return res.status(403).json({
         success: false,
-        message: "Access denied: You are not a member of this trip",
+        code: "TRIP_MEMBERSHIP_REQUIRED",
+        message: "Join or create a trip to access Group Chat.",
       });
     }
 

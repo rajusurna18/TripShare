@@ -111,44 +111,44 @@ function Dashboard() {
 
   async function fetchDashboardStats() {
 
-      try {
+    try {
 
-        const token =
-          localStorage.getItem(
-            "token"
-          );
+      const token =
+        localStorage.getItem(
+          "token"
+        );
 
-        const res =
-          await API.get(
+      const res =
+        await API.get(
 
-            "/dashboard",
+          "/dashboard",
 
-            {
+          {
 
-              headers: {
+            headers: {
 
-                Authorization:
-                  `Bearer ${token}`,
+              Authorization:
+                `Bearer ${token}`,
 
-              },
+            },
 
-            }
-
-          );
-
-        setDashboardStats(
-
-          res.data.stats
+          }
 
         );
 
-      } catch (err) {
+      setDashboardStats(
 
-        console.log(err);
+        res.data.stats
 
-      }
+      );
 
-    };
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
 
   // FETCH PERSONALIZED FEED
   async function fetchFeed(pageNum = 1) {
@@ -264,7 +264,7 @@ function Dashboard() {
 
                 </span>
 
-                🌍
+
 
               </h1>
 
@@ -772,7 +772,7 @@ function Dashboard() {
                 <div className="mt-5 mb-5">
                   <h2 className="text-warning fw-bold mb-4">⚡ Latest Activities & Connections</h2>
                   <div className="row g-4">
-                    
+
                     {/* LATEST TRIP */}
                     <div className="col-12 col-md-6 col-lg-3">
                       <div className="glass-card p-4 h-100 d-flex flex-column justify-content-between">
@@ -874,7 +874,7 @@ function Dashboard() {
                 <div className="mt-5 mb-5">
                   <h2 className="text-warning fw-bold mb-4">📊 Travel Analytics Dashboard</h2>
                   <div className="row g-4">
-                    
+
                     {/* TRIPS MONTHLY COMPARISON */}
                     <div className="col-12 col-lg-6">
                       <div className="glass-card p-4 h-100">
@@ -924,7 +924,7 @@ function Dashboard() {
                       <div className="glass-card p-4 h-100">
                         <h5 className="fw-bold text-warning mb-3">💸 Category Spending Shares</h5>
                         <p className="text-secondary small mb-4">Distribution of expenses paid by you across trip categories.</p>
-                        
+
                         {dashboardStats.analytics.expenseCategoryStats?.length === 0 ? (
                           <div className="text-center py-5">
                             <p className="text-secondary small italic mb-0">No expense records found.</p>

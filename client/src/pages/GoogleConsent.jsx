@@ -10,6 +10,8 @@ function GoogleConsent() {
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [pendingToken, setPendingToken] = useState("");
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -83,23 +85,95 @@ function GoogleConsent() {
         </p>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4 form-check d-flex align-items-center justify-content-center">
-            <input
-              type="checkbox"
-              className="form-check-input mt-0 me-2"
-              id="termsCheck"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-              required
-            />
+          <div className="mb-4">
             <label
-              className="form-check-label text-secondary small"
               htmlFor="termsCheck"
+              className="d-flex align-items-center gap-3 p-3 rounded-3 border border-secondary border-opacity-25 bg-dark bg-opacity-40"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              style={{
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                userSelect: "none",
+                borderColor: isHovered || isFocused ? "rgba(255, 193, 7, 0.4)" : "rgba(255, 255, 255, 0.15)",
+              }}
             >
-              I agree to the TripShare{" "}
-              <Link to="/terms" className="text-info text-decoration-none" target="_blank">
-                Terms & Conditions
-              </Link>
+              <div className="position-relative flex-shrink-0 d-flex align-items-center justify-content-center">
+                <input
+                  type="checkbox"
+                  id="termsCheck"
+                  name="termsCheck"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  required
+                  aria-label="I agree to the TripShare Terms & Conditions"
+                  style={{
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    width: "22px",
+                    height: "22px",
+                    borderRadius: "5px",
+                    border: termsAccepted
+                      ? "2px solid #FFC107"
+                      : isHovered || isFocused
+                      ? "2px solid #FFC107"
+                      : "2px solid rgba(255, 255, 255, 0.65)",
+                    backgroundColor: termsAccepted
+                      ? "#FFC107"
+                      : isHovered
+                      ? "rgba(255, 255, 255, 0.16)"
+                      : "rgba(255, 255, 255, 0.08)",
+                    boxShadow: isFocused
+                      ? "0 0 0 3px rgba(255, 193, 7, 0.45)"
+                      : isHovered
+                      ? "0 0 8px rgba(255, 193, 7, 0.3)"
+                      : "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    display: "block",
+                    outline: "none",
+                  }}
+                />
+                {termsAccepted && (
+                  <svg
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: "14px",
+                      height: "14px",
+                      pointerEvents: "none",
+                    }}
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3.5 8.5L6.5 11.5L12.5 4.5"
+                      stroke="#0C0C0E"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </div>
+
+              <span className="text-light small" style={{ fontSize: "14px", lineHeight: "1.4" }}>
+                I agree to the TripShare{" "}
+                <Link
+                  to="/terms"
+                  className="text-info text-decoration-none fw-semibold"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Terms & Conditions
+                </Link>
+              </span>
             </label>
           </div>
 

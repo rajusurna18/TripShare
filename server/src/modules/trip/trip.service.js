@@ -490,3 +490,19 @@ export const inviteMemberService = async (tripId, targetUserId, inviterId) => {
     .populate("createdBy", "name email profileImage")
     .populate("members", "name profileImage travelStyle");
 };
+
+// CHECK USER TRIP MEMBERSHIP
+export const checkUserMembershipService = async (userId) => {
+  const userTrips = await Trip.find({
+    $or: [
+      { createdBy: userId },
+      { members: userId }
+    ]
+  }).select("_id title destination image createdBy members status");
+
+  return {
+    hasTrips: userTrips.length > 0,
+    count: userTrips.length,
+    trips: userTrips
+  };
+};

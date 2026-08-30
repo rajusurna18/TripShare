@@ -108,6 +108,8 @@ function CreateTrip() {
           "Trip Created Successfully ✈️"
         );
 
+        navigate("/dashboard");
+
         setTripData({
 
           title: "",

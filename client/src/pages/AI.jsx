@@ -4,6 +4,7 @@ import API from "../services/api";
 import { FaTrash, FaPlus, FaComment } from "react-icons/fa";
 import AIUsageBadge from "../components/ai/AIUsageBadge";
 import UpgradeModal from "../components/ai/UpgradeModal";
+import AgenticCommerceCard from "../components/ai/AgenticCommerceCard";
 import { getSubscriptionStatus } from "../services/aiSubscriptionService";
 
 function AI() {
@@ -329,10 +330,24 @@ function AI() {
   const renderFormattedContent = (content) => {
     if (!content) return null;
 
-    // Split content into blocks: code blocks vs text blocks
-    const parts = content.split(/(```[\s\S]*?```)/g);
+    let agenticPkg = null;
+    let cleanContent = content;
 
-    return parts.map((part, index) => {
+    // Extract agentic package tag if present
+    const pkgMatch = content.match(/<!--AGENTIC_COMMERCE_PACKAGE:([\s\S]*?)-->/);
+    if (pkgMatch) {
+      try {
+        agenticPkg = JSON.parse(pkgMatch[1]);
+        cleanContent = content.replace(/<!--AGENTIC_COMMERCE_PACKAGE:[\s\S]*?-->/g, "").trim();
+      } catch (e) {
+        console.error("Failed to parse agentic package metadata:", e);
+      }
+    }
+
+    // Split content into blocks: code blocks vs text blocks
+    const parts = cleanContent.split(/(```[\s\S]*?```)/g);
+
+    const renderedMarkdown = parts.map((part, index) => {
       if (part.startsWith("```")) {
         // Code block
         const match = part.match(/```(\w*)\n([\s\S]*?)```/);
@@ -407,6 +422,13 @@ function AI() {
         });
       }
     });
+
+    return (
+      <>
+        {renderedMarkdown}
+        {agenticPkg && <AgenticCommerceCard pkg={agenticPkg} />}
+      </>
+    );
   };
 
   const parseInlineFormatting = (text) => {
@@ -657,9 +679,9 @@ function AI() {
                 {/* SUGGESTION CARDS */}
                 <div className="row g-2 justify-content-center" style={{ maxWidth: "800px", margin: "0 auto" }}>
                   {[
-                    "Best places to visit in Goa under ₹10,000?",
-                    "Plan a 5-day cultural trip to Kyoto, Japan.",
-                    "What are the top safety tips for solo travel?",
+                    "Plan a 5-day Goa trip for 3 people under ₹15,000 per person.",
+                    "Plan a 5-day Goa trip for 3 people under ₹5,000 per person.",
+                    "Plan a 4-day trip to Kyoto for 2 people under ₹30,000 each.",
                     "Recommend budget hotels and street food in Hanoi.",
                   ].map((item, idx) => (
                     <div key={idx} className="col-12 col-sm-6">

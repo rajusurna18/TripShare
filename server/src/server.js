@@ -100,6 +100,9 @@ import contactRoutes
 import settingsRoutes
   from "./modules/settings/settings.routes.js";
 
+import travelCommerceRoutes
+  from "./modules/travelCommerce/travelCommerce.routes.js";
+
 import Trip
   from "./modules/trip/trip.model.js";
 
@@ -243,6 +246,12 @@ app.use(
   "/api/ai/packing",
   aiPackingLimiter,
   aiPackingRoutes
+);
+
+app.use(
+  "/api/travel-commerce",
+  generalLimiter,
+  travelCommerceRoutes
 );
 
 app.use(

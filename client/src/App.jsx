@@ -257,7 +257,7 @@ function App() {
           element={
             <ProtectedRoute>
 
-              <Trips />
+              <Chat />
 
             </ProtectedRoute>
           }

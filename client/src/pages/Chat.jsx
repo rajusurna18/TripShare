@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
 import socket from "../socket";
 import Avatar from "../components/shared/Avatar";
+import GroupChatLockedModal from "../components/chat/GroupChatLockedModal";
 import toast, { Toaster } from "react-hot-toast";
 import { ringtonePlayer } from "../utils/ringtone";
 
@@ -79,21 +80,38 @@ function Chat() {
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const currentUserId = currentUser?._id || currentUser?.id;
 
-  // ======================
-  // NO TRIP REDIRECT
-  // ======================
-  if (!tripId) {
-    return (
-      <div className="min-vh-100 d-flex justify-content-center align-items-center text-light bg-black">
-        <div className="text-center">
-          <h1>💬 No Active Trip</h1>
-          <Link to="/trips" className="btn btn-warning mt-3">
-            Open Trips
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // TRIP MEMBERSHIP VERIFICATION STATES
+  const [checkingMembership, setCheckingMembership] = useState(true);
+  const [membershipError, setMembershipError] = useState("");
+  const [hasTrips, setHasTrips] = useState(null);
+  const [userTrips, setUserTrips] = useState([]);
+
+  const verifyMembership = async () => {
+    try {
+      setCheckingMembership(true);
+      setMembershipError("");
+      const res = await API.get("/trips/check-membership");
+      if (res.data.success) {
+        setHasTrips(res.data.hasTrips);
+        setUserTrips(res.data.trips || []);
+
+        if (res.data.hasTrips && res.data.trips.length > 0) {
+          if (!tripId || tripId === "undefined") {
+            navigate(`/chat/${res.data.trips[0]._id}`, { replace: true });
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Membership verification error:", err);
+      setMembershipError("Unable to verify trip membership. Please try again.");
+    } finally {
+      setCheckingMembership(false);
+    }
+  };
+
+  useEffect(() => {
+    verifyMembership();
+  }, []);
 
   // ======================
   // FETCH TRIP & MESSAGES
@@ -118,7 +136,11 @@ function Chat() {
       }
     } catch (err) {
       console.error(err);
-      setError("Failed to load messages");
+      if (err.response?.status === 403 || err.response?.data?.code === "TRIP_MEMBERSHIP_REQUIRED") {
+        setError("TRIP_MEMBERSHIP_REQUIRED");
+      } else {
+        setError("Failed to load messages");
+      }
     } finally {
       setLoading(false);
     }
@@ -683,6 +705,8 @@ function Chat() {
   // INITIAL LIFECYCLE
   // ======================
   useEffect(() => {
+    if (!tripId || tripId === "undefined" || hasTrips === false) return;
+
     fetchTrip();
     fetchMessages();
 
@@ -1049,7 +1073,7 @@ function Chat() {
       clearInterval(recordTimerRef.current);
       leaveGroupCall(); // Cleanup on unmount
     };
-  }, [tripId]);
+  }, [tripId, hasTrips]);
 
   // Helper to extract ALL members of the trip (createdBy + members array)
   const getAllTripMembers = () => {
@@ -1113,6 +1137,62 @@ function Chat() {
       </div>
     );
   };
+
+  // ==========================================
+  // CONDITIONAL RENDER VIEWS (AFTER ALL HOOKS)
+  // ==========================================
+
+  // 1. MEMBERSHIP VERIFICATION LOADING STATE
+  if (checkingMembership) {
+    return (
+      <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center text-light bg-black">
+        <div className="spinner-border text-warning mb-3" role="status" style={{ width: "3rem", height: "3rem" }} />
+        <h5 className="fw-bold text-white mb-1">Verifying trip access...</h5>
+        <p className="text-secondary small">Checking your trip memberships</p>
+      </div>
+    );
+  }
+
+  // 2. MEMBERSHIP VERIFICATION ERROR STATE
+  if (membershipError) {
+    return (
+      <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center text-light bg-black p-3">
+        <div className="bg-dark text-light p-4 rounded-4 border border-secondary border-opacity-30 text-center shadow-lg" style={{ maxWidth: "420px" }}>
+          <div className="text-warning mb-3 fs-1">⚠️</div>
+          <h5 className="fw-bold mb-2">Unable to Verify Trip Membership</h5>
+          <p className="small text-secondary mb-4">{membershipError}</p>
+          <button className="btn btn-warning fw-bold px-4 py-2 text-dark rounded-3" onClick={verifyMembership}>
+            🔄 Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. ZERO TRIPS LOCKED STATE (Requirement 2)
+  if (hasTrips === false) {
+    return <GroupChatLockedModal mode="no_trips" />;
+  }
+
+  // 4. MISSING TRIP ID FALLBACK
+  if (!tripId || tripId === "undefined") {
+    return (
+      <div className="min-vh-100 d-flex justify-content-center align-items-center text-light bg-black">
+        <div className="text-center">
+          <h1>💬 Select a Trip Chat</h1>
+          <Link to="/discover" className="btn btn-warning mt-3">
+            Browse Trips
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. NOT A MEMBER OF THE SELECTED TRIP LOCKED STATE (Requirement 3)
+  const isMemberOfSelectedTrip = userTrips.length > 0 && userTrips.some((t) => t._id.toString() === tripId.toString());
+  if (error === "TRIP_MEMBERSHIP_REQUIRED" || (hasTrips === true && !isMemberOfSelectedTrip)) {
+    return <GroupChatLockedModal mode="not_member" tripId={tripId} />;
+  }
 
   // ======================
   // LOADING STATE

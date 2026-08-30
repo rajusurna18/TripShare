@@ -11,6 +11,7 @@ import {
   transferOwnershipService,
   archiveTripService,
   inviteMemberService,
+  checkUserMembershipService,
 
 } from "./trip.service.js";
 
@@ -350,6 +351,22 @@ export const inviteMember = async (req, res) => {
     res.status(400).json({
       success: false,
       message: err.message,
+    });
+  }
+};
+
+// CHECK USER TRIP MEMBERSHIP
+export const checkUserMembership = async (req, res) => {
+  try {
+    const result = await checkUserMembershipService(req.user.id);
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Failed to check trip membership",
     });
   }
 };

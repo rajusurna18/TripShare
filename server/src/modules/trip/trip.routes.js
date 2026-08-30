@@ -12,6 +12,7 @@ import {
   transferOwnership,
   archiveTrip,
   inviteMember,
+  checkUserMembership,
 } from "./trip.controller.js";
 
 import { protect }
@@ -33,6 +34,12 @@ router.get(
   "/",
   protect,
   getTrips
+);
+
+router.get(
+  "/check-membership",
+  protect,
+  checkUserMembership
 );
 
 router.get(

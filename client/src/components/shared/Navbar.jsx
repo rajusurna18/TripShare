@@ -149,8 +149,10 @@ function Navbar() {
   // UNREAD COUNT
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const homePath = user ? "/dashboard" : "/";
+
   const navLinks = [
-    { name: "Home", path: "/", Icon: Home },
+    { name: "Home", path: homePath, Icon: Home },
     { name: "Discover", path: "/discover", Icon: Compass },
     { name: "Blogs", path: "/blogs", Icon: FileText },
     { name: "About", path: "/about", Icon: Info },

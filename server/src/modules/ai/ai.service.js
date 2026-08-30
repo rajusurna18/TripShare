@@ -1,19 +1,18 @@
 import genAI from "../../config/gemini.js";
 import AIConversation from "./ai.model.js";
+import { processTravelCommerceIntent } from "../travelCommerce/travelCommerce.service.js";
 
 // GEMINI MODELS WITH SYSTEM INSTRUCTIONS
 const chatModel = genAI.getGenerativeModel({
   model: "gemini-2.5-flash",
-  systemInstruction: `You are TripShare AI Buddy, an advanced travel assistant.
+  systemInstruction: `You are TripShare AI Buddy, an advanced travel & agentic commerce assistant.
 Answer clearly and professionally.
+When users specify travel intent with duration, destination, or budget (e.g. 5-day Goa trip for 3 under ₹15,000 each), provide a helpful natural language summary, outline key highlights, and present the structured agentic package option.
 Include:
-- travel tips
-- budget suggestions
-- hotels
-- transport ideas
-- food recommendations
-- safety tips
-Keep formatting clean and readable. Use Markdown headings and bullet points.`,
+- travel tips & budget suggestions
+- hotel & transport recommendations
+- clear cost breakdown and remaining safety buffer
+Keep formatting clean and readable using Markdown.`,
 });
 
 const itineraryModel = genAI.getGenerativeModel({
@@ -40,6 +39,27 @@ const callGeminiWithRetry = async (fn, retries = 3, delay = 1000) => {
       delay *= 2;
     }
   }
+};
+
+// HELPER TO DETECT AGENTIC TRAVEL COMMERCE INTENT
+const checkAndAttachTravelCommercePackage = async (question, userId, baseResponseText) => {
+  const qLower = question.toLowerCase();
+  const isCommerceIntent =
+    (qLower.includes("goa") || qLower.includes("trip") || qLower.includes("travel") || qLower.includes("plan") || qLower.includes("manali") || qLower.includes("kerala") || qLower.includes("hanoi") || qLower.includes("kyoto")) &&
+    (qLower.includes("under") || qLower.includes("budget") || qLower.includes("rs") || qLower.includes("₹") || qLower.includes("per person") || qLower.includes("each") || qLower.includes("people") || qLower.includes("travelers") || qLower.includes("persons"));
+
+  if (!isCommerceIntent) return baseResponseText;
+
+  try {
+    const tcResult = await processTravelCommerceIntent(userId, question);
+    if (tcResult && tcResult.agenticPackage) {
+      const packageTag = `\n\n<!--AGENTIC_COMMERCE_PACKAGE:${JSON.stringify(tcResult.agenticPackage)}-->`;
+      return baseResponseText + packageTag;
+    }
+  } catch (err) {
+    console.error("Failed to attach travel commerce package to AI response:", err.message);
+  }
+  return baseResponseText;
 };
 
 // ==============================
@@ -86,10 +106,13 @@ export const generateAIReplyService = async (question, userId, conversationId) =
   });
 
   // Call Gemini using retry wrapper
-  const textResponse = await callGeminiWithRetry(async () => {
+  let textResponse = await callGeminiWithRetry(async () => {
     const result = await chat.sendMessage(question);
     return result.response.text();
   });
+
+  // Attach agentic travel commerce package if intent detected
+  textResponse = await checkAndAttachTravelCommercePackage(question, userId, textResponse);
 
   // Append AI's reply to the db conversation
   conversation.messages.push({
@@ -165,17 +188,28 @@ export const generateAIReplyServiceStream = async (question, userId, conversatio
     }
   }
 
+  // Attach agentic travel commerce package if intent detected
+  const finalResponseText = await checkAndAttachTravelCommercePackage(question, userId, fullResponseText);
+
+  // If agentic package was attached, stream the extra package tag to frontend
+  if (finalResponseText.length > fullResponseText.length) {
+    const extraTag = finalResponseText.substring(fullResponseText.length);
+    if (onChunk) {
+      onChunk(extraTag);
+    }
+  }
+
   // Append AI's reply to the db conversation
   conversation.messages.push({
     role: "model",
-    content: fullResponseText,
+    content: finalResponseText,
     timestamp: new Date(),
   });
 
   await conversation.save();
 
   return {
-    reply: fullResponseText,
+    reply: finalResponseText,
     conversation,
   };
 };
